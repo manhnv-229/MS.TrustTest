@@ -90,6 +90,8 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
+                        // Swagger UI endpoints
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         // Admin only endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // Manager endpoints
