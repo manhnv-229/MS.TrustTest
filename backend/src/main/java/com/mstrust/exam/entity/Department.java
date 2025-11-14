@@ -77,12 +77,12 @@ public class Department {
     private LocalDateTime updatedAt;
 
     @CreatedBy
-    @Column(name = "created_by", length = 100)
-    private String createdBy;
+    @Column(name = "created_by")
+    private Long createdBy;
 
     @LastModifiedBy
-    @Column(name = "updated_by", length = 100)
-    private String updatedBy;
+    @Column(name = "updated_by")
+    private Long updatedBy;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

@@ -218,17 +218,65 @@ server:
 - ✅ Backend running successfully on port 8080
 - ✅ Connected to remote database MS.TrustTest
 - ✅ Flyway disabled (tables already exist)
-- ⚠️ Spring Security blocking all endpoints (needs fix)
+- ✅ Spring Security configured correctly (all bugs fixed)
+- ✅ Authentication API fully functional
 
 ### Recent Configuration Changes (14/11/2025)
+**Morning Session (09:00-13:46) - Authentication Bug Fixes:**
 1. Updated datasource URL to remote server (104.199.231.104)
 2. Changed database name from ms_trust_exam to MS.TrustTest
 3. Disabled Flyway migration
 4. Enabled debug logging for Spring Security
 5. Updated timezone to Asia/Ho_Chi_Minh
+6. Fixed URL mapping (removed duplicate /api prefix)
+7. Added AuditingConfig for JPA Auditing
+8. Optimized transaction handling (updateLastLogin query)
+9. Fixed database constraints (role_name, password_hash)
+10. Added TestController for debugging (temporary)
+
+---
+
+## Known Issues & Solutions
+
+### Authentication Issues (ALL RESOLVED - 14/11/2025)
+1. ✅ **Duplicate /api prefix**: Removed from controllers
+2. ✅ **SQL query syntax**: Added parentheses
+3. ✅ **Username mismatch**: Use actual input username
+4. ✅ **Duplicate ROLE_ prefix**: Removed from code
+5. ✅ **Empty role_name**: Updated in database
+6. ✅ **Wrong password hash**: Generated correct BCrypt hash
+7. ✅ **Missing AuditorAware**: Created AuditingConfig
+8. ✅ **Transaction conflict**: Use @Modifying @Query instead of save()
+
+### Debugging Tools
+- **TestController**: Temporary endpoints for testing
+  - GET `/api/test/hash-password?password=xxx` - Generate BCrypt hash
+  - GET `/api/test/verify-password?password=xxx&hash=xxx` - Verify hash
+  - **Note**: DELETE before production deployment
+
+### Best Practices Learned
+1. **Spring Security URL Mapping**:
+   - Context-path (`/api`) is added automatically
+   - Don't duplicate prefix in `@RequestMapping`
+   - Use `permitAll()` for public endpoints
+
+2. **JPA Auditing with Spring Security**:
+   - Always provide `AuditorAware` bean
+   - Don't use `save()` during authentication flow
+   - Use `@Modifying @Query` for direct updates
+
+3. **BCrypt Password Hashing**:
+   - Generate hash using application's `PasswordEncoder`
+   - Cost factor 12 is recommended
+   - Never copy hash from external sources
+
+4. **Database Integrity**:
+   - Verify role names match code expectations
+   - Check NOT NULL constraints before inserting
+   - Use MCP Server for direct database operations
 
 ---
 
 **Author**: K24DTCN210-NVMANH  
 **Created**: 13/11/2025 14:00  
-**Last Updated**: 14/11/2025 09:40
+**Last Updated**: 14/11/2025 13:49

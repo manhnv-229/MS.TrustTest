@@ -90,7 +90,6 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
-                        .requestMatchers("/test/**").permitAll() // Test endpoints - XÓA SAU KHI DEPLOY
                         // Admin only endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // Manager endpoints

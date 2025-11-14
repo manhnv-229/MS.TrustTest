@@ -1,6 +1,7 @@
 package com.mstrust.exam.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,49 +18,46 @@ import java.util.ArrayList;
 import java.util.List;
 
 /* ---------------------------------------------------
- * Entity mapping cho bảng classes trong database
- * Quản lý thông tin lớp hành chính
- * Tên class là ClassEntity vì Class là từ khóa Java
- * @author: K24DTCN210-NVMANH (13/11/2025 14:51)
+ * Entity mapping cho bảng subjects trong database
+ * Quản lý thông tin môn học
+ * @author: K24DTCN210-NVMANH (14/11/2025 13:58)
  * --------------------------------------------------- */
 @Entity
-@Table(name = "classes")
+@Table(name = "subjects")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClassEntity {
+public class Subject {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "class_code", nullable = false, unique = true, length = 20)
+    @Column(name = "code", nullable = false, unique = true, length = 20)
     @Size(max = 20)
-    private String classCode;
+    private String code;
 
-    @Column(name = "class_name", nullable = false, length = 100)
-    @Size(max = 100)
-    private String className;
+    @Column(name = "name", nullable = false, length = 255)
+    @Size(max = 255)
+    private String name;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "credits")
+    @Min(0)
+    @Builder.Default
+    private Integer credits = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Column(name = "academic_year", length = 20)
-    private String academicYear;
-
-    @Column(name = "homeroom_teacher", length = 100)
-    private String homeroomTeacher;
-
-    @Column(name = "is_active", nullable = false)
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Boolean isActive = true;
-
-    @OneToMany(mappedBy = "classEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<User> students = new ArrayList<>();
+    private List<SubjectClass> subjectClasses = new ArrayList<>();
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -84,20 +82,19 @@ public class ClassEntity {
     private Long version;
 
     /* ---------------------------------------------------
-     * Kiểm tra lớp có bị xóa mềm không
-     * @returns true nếu lớp đã bị xóa
-     * @author: K24DTCN210-NVMANH (13/11/2025 14:52)
+     * Kiểm tra môn học có bị xóa mềm không
+     * @returns true nếu môn học đã bị xóa
+     * @author: K24DTCN210-NVMANH (14/11/2025 13:58)
      * --------------------------------------------------- */
     public boolean isDeleted() {
         return deletedAt != null;
     }
 
     /* ---------------------------------------------------
-     * Đánh dấu lớp là đã xóa (soft delete)
-     * @author: K24DTCN210-NVMANH (13/11/2025 14:52)
+     * Đánh dấu môn học là đã xóa (soft delete)
+     * @author: K24DTCN210-NVMANH (14/11/2025 13:58)
      * --------------------------------------------------- */
     public void markAsDeleted() {
         this.deletedAt = LocalDateTime.now();
-        this.isActive = false;
     }
 }
