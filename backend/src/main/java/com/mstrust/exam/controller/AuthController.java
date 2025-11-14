@@ -24,7 +24,7 @@ import java.util.Map;
  * @author: K24DTCN210-NVMANH (13/11/2025 15:03)
  * --------------------------------------------------- */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class AuthController {
 

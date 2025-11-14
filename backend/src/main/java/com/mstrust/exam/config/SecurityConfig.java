@@ -88,14 +88,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/public/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/test/**").permitAll() // Test endpoints - XÓA SAU KHI DEPLOY
                         // Admin only endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         // Manager endpoints
-                        .requestMatchers("/api/manager/**").hasAnyRole("ADMIN", "DEPT_MANAGER", "CLASS_MANAGER")
+                        .requestMatchers("/manager/**").hasAnyRole("ADMIN", "DEPT_MANAGER", "CLASS_MANAGER")
                         // Teacher endpoints
-                        .requestMatchers("/api/teacher/**").hasAnyRole("ADMIN", "TEACHER")
+                        .requestMatchers("/teacher/**").hasAnyRole("ADMIN", "TEACHER")
                         // All authenticated users
                         .anyRequest().authenticated()
                 )

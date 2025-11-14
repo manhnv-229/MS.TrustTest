@@ -33,43 +33,51 @@
 ```yaml
 spring:
   application:
-    name: ms-trust-exam
+    name: ms-trust-exam-backend
   
   datasource:
-    url: jdbc:mysql://localhost:3306/ms_trust_exam?useSSL=false&serverTimezone=UTC
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:password}
+    url: jdbc:mysql://104.199.231.104:3306/MS.TrustTest?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+    username: nvmanh
+    password: '!M@nh1989'
     driver-class-name: com.mysql.cj.jdbc.Driver
-  
+    
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
-        format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
-  
+        format_sql: true
+        
   flyway:
-    enabled: true
-    locations: classpath:db/migration
+    enabled: false
     baseline-on-migrate: true
-
+    locations: classpath:db/migration
+    
 server:
   port: 8080
   servlet:
     context-path: /api
-
+    
 jwt:
-  secret: ${JWT_SECRET:your-secret-key-change-in-production}
-  expiration: 86400000  # 24 hours
+  secret: ms-trust-exam-secret-key-change-this-in-production-at-least-32-characters
+  expiration: 86400000
 
-monitoring:
-  screenshot:
-    interval: 60000  # 60 seconds
-    quality: 0.7     # JPEG quality
-    max-size: 5242880  # 5MB
+logging:
+  level:
+    com.mstrust.exam: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
 ```
+
+**Important Notes:**
+- **Database Host**: Remote server tại 104.199.231.104:3306
+- **Database Name**: MS.TrustTest (không phải ms_trust_exam)
+- **Flyway**: Disabled vì database đã có sẵn tables
+- **JPA ddl-auto**: validate - không tạo/sửa tables tự động
+- **Timezone**: Asia/Ho_Chi_Minh
+- **Debug logging**: Enabled cho development
 
 ### Client application.properties
 
@@ -118,13 +126,23 @@ jpackage --type msi --input target --name MS.TrustTest --main-jar client.jar
 
 ## Database Setup
 
+### Remote Database (Current Configuration)
+- **Host**: 104.199.231.104:3306
+- **Database**: MS.TrustTest
+- **Username**: nvmanh
+- **Password**: !M@nh1989
+- **Character Set**: utf8mb4
+- **Collation**: utf8mb4_unicode_ci
+- **Status**: ✅ Active and connected
+
+### Local Database Setup (For reference)
 ```sql
 -- Create database
-CREATE DATABASE ms_trust_exam CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE MS.TrustTest CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- Create user
-CREATE USER 'mstrust'@'localhost' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON ms_trust_exam.* TO 'mstrust'@'localhost';
+CREATE USER 'nvmanh'@'localhost' IDENTIFIED BY '!M@nh1989';
+GRANT ALL PRIVILEGES ON MS.TrustTest.* TO 'nvmanh'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
@@ -185,8 +203,32 @@ server:
 - Database Query: < 100ms (p95)
 - Concurrent Users: 500+
 
+## Environment Configuration
+
+### Development Environment (Current)
+- **Java Version**: 25.0.1
+- **Maven Version**: 3.9.11
+- **Spring Boot Version**: 3.5.7
+- **Database**: Remote MySQL 8.0 (104.199.231.104)
+- **Application Port**: 8080
+- **Context Path**: /api
+- **Base URL**: http://localhost:8080/api
+
+### Application Status
+- ✅ Backend running successfully on port 8080
+- ✅ Connected to remote database MS.TrustTest
+- ✅ Flyway disabled (tables already exist)
+- ⚠️ Spring Security blocking all endpoints (needs fix)
+
+### Recent Configuration Changes (14/11/2025)
+1. Updated datasource URL to remote server (104.199.231.104)
+2. Changed database name from ms_trust_exam to MS.TrustTest
+3. Disabled Flyway migration
+4. Enabled debug logging for Spring Security
+5. Updated timezone to Asia/Ho_Chi_Minh
+
 ---
 
 **Author**: K24DTCN210-NVMANH  
 **Created**: 13/11/2025 14:00  
-**Last Updated**: 13/11/2025 14:00
+**Last Updated**: 14/11/2025 09:40

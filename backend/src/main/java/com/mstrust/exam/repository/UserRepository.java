@@ -2,6 +2,7 @@ package com.mstrust.exam.repository;
 
 import com.mstrust.exam.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -47,7 +48,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @returns Optional chứa user nếu tìm thấy
      * @author: K24DTCN210-NVMANH (13/11/2025 14:53)
      * --------------------------------------------------- */
-    @Query("SELECT u FROM User u WHERE u.studentCode = :username OR u.email = :username OR u.phoneNumber = :username AND u.deletedAt IS NULL")
+    @Query("SELECT u FROM User u WHERE (u.studentCode = :username OR u.email = :username OR u.phoneNumber = :username) AND u.deletedAt IS NULL")
     Optional<User> findByUsername(@Param("username") String username);
 
     /* ---------------------------------------------------
@@ -82,4 +83,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * --------------------------------------------------- */
     @Query("SELECT u FROM User u WHERE u.studentCode = :studentCode AND u.deletedAt IS NULL AND u.isActive = true")
     Optional<User> findActiveByStudentCode(@Param("studentCode") String studentCode);
+
+    /* ---------------------------------------------------
+     * Update last login time và reset failed login attempts
+     * @param userId ID của user
+     * @author: K24DTCN210-NVMANH (14/11/2025 13:43)
+     * --------------------------------------------------- */
+    @Modifying
+    @Query("UPDATE User u SET u.lastLoginAt = CURRENT_TIMESTAMP, u.failedLoginAttempts = 0 WHERE u.id = :userId")
+    void updateLastLogin(@Param("userId") Long userId);
 }

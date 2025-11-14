@@ -2,57 +2,67 @@
 
 ## Current Work Focus
 
-**Status**: Đang trong giai đoạn lập kế hoạch và tạo tài liệu  
-**Phase**: Planning & Documentation  
-**Date**: 13/11/2025
+**Status**: Phase 2 Complete - Đang fix lỗi database connection  
+**Phase**: Phase 2 - Authentication & Authorization (COMPLETED)  
+**Date**: 14/11/2025
 
 ## Recent Activities
 
-### Completed
-1. ✅ Tạo cấu trúc thư mục dự án
-2. ✅ Tạo Memory Bank:
-   - projectbrief.md - Tổng quan dự án
-   - productContext.md - Bối cảnh sản phẩm và user personas
-   - systemPatterns.md - Kiến trúc và design patterns
-   - techContext.md - Stack công nghệ và cấu hình
-   - activeContext.md - Trạng thái hiện tại (đang tạo)
+### Completed Today (14/11/2025)
+1. ✅ Fix lỗi database connection:
+   - Cập nhật `application.yml` với thông tin kết nối đúng
+   - Host: `104.199.231.104:3306`
+   - Database: `MS.TrustTest`
+   - Username: `nvmanh`
+   - Password: `!M@nh1989`
+2. ✅ Tắt Flyway migration (database đã có sẵn tables)
+3. ✅ Chạy thành công Spring Boot application trên port 8080
+4. ✅ Xác nhận ứng dụng hoạt động với remote database
+
+### Completed (13/11/2025)
+1. ✅ Phase 1: Setup & Database Schema
+2. ✅ Phase 2: Authentication & Authorization (26 files)
+3. ✅ Tạo Memory Bank hoàn chỉnh
+4. ✅ Database schema với 16 tables
+5. ✅ MCP Server (ms-trust-test-server)
 
 ### In Progress
-- 🔄 Tạo progress.md
-- 🔄 Viết chi tiết 8 Phase vào docs/phases/
+- 🔄 Testing API endpoints với remote database
+- 🔄 Sẵn sàng bắt đầu Phase 3
 
 ## Next Steps
 
 ### Immediate (Hôm nay)
-1. Hoàn thành file `progress.md`
-2. Tạo chi tiết Phase 1: Setup & Database Schema
-3. Tạo chi tiết Phase 2: Authentication & Authorization
-4. Tạo chi tiết Phase 3: Organization Management
+1. Test các API endpoints:
+   - POST `/api/auth/login`
+   - POST `/api/auth/register`
+   - GET `/api/users`
+2. Verify JWT authentication hoạt động đúng
+3. Test với dữ liệu có sẵn trong database
 
 ### Short-term (Tuần này)
-1. Hoàn thiện tất cả 8 Phase documents
-2. Tạo database schema diagram
-3. Tạo API documentation skeleton
-4. Chuẩn bị .clinerules với project-specific patterns
+1. Bắt đầu Phase 3: Department & Class Management
+2. Tạo Department Service & Controller
+3. Tạo Class Service & Controller
+4. Implement student enrollment APIs
 
 ### Medium-term (2 tuần tới)
-1. Chờ cụ Mạnh review và approve kế hoạch
-2. Bắt đầu implementation Phase 1
-3. Setup project structure (Maven multi-module)
-4. Configure Spring Boot và JavaFX
+1. Complete Phase 3
+2. Start Phase 4: Subject & Course Management
+3. Begin writing unit tests
 
 ## Key Decisions Made
 
 ### Architecture
 - ✅ **Pattern**: 3-tier architecture (Client - Backend - Database)
-- ✅ **Backend**: Spring Boot 3.2.x với Spring Security + JWT
+- ✅ **Backend**: Spring Boot 3.5.7 với Spring Security + JWT
 - ✅ **Client**: JavaFX 21 với native installers
-- ✅ **Database**: MySQL 8.0.x với Flyway migration
+- ✅ **Database**: MySQL 8.0.x (Remote server tại 104.199.231.104)
 - ✅ **Real-time**: WebSocket cho monitoring alerts
 
 ### Technology Choices
-- ✅ **Java 17**: LTS version, stable và modern features
-- ✅ **Maven**: Build tool cho multi-module project
+- ✅ **Java 25**: Latest version với modern features
+- ✅ **Maven 3.9.11**: Build tool cho multi-module project
 - ✅ **JNA**: Để monitor processes trên client
 - ✅ **BCrypt**: Password hashing với cost factor 12
 - ✅ **JWT**: Stateless authentication, 24h expiration
@@ -61,6 +71,12 @@
 - ✅ **Multi-module**: Tách backend và client thành 2 modules riêng
 - ✅ **Documentation**: Tách riêng docs/ và memory-bank/
 - ✅ **Database scripts**: Centralized trong database/
+
+### Database Configuration (NEW)
+- ✅ **Remote Database**: 104.199.231.104:3306
+- ✅ **Database Name**: MS.TrustTest (không phải ms_trust_exam)
+- ✅ **Flyway**: Disabled vì database đã có sẵn tables
+- ✅ **JPA ddl-auto**: validate (không tạo/sửa tables)
 
 ## Pending Decisions
 
@@ -76,10 +92,16 @@
 
 ## Current Challenges
 
-### Documentation Phase
-- Đảm bảo tài liệu đủ chi tiết cho mỗi Phase
-- Balance giữa detail và flexibility
-- Tránh over-engineering ngay từ đầu
+### Recently Resolved ✅
+- ✅ **Database Connection Issues**: 
+  - Đã fix bằng cách cập nhật đúng thông tin remote database
+  - Tắt Flyway vì tables đã tồn tại
+  
+### Current Issues
+- ⚠️ **Spring Security Configuration**: 
+  - Tất cả endpoints đang trả về 403 Forbidden
+  - Cần kiểm tra và fix SecurityConfig để cho phép public endpoints
+  - Ảnh hưởng: Không thể test login API
 
 ### Anticipated Technical Challenges
 1. **Client Monitoring**: 
@@ -170,9 +192,23 @@
 
 ## Daily Standup Notes
 
+### 14/11/2025 (9:38 AM)
+- **Completed**: 
+  - ✅ Fixed database connection issues
+  - ✅ Application chạy thành công trên port 8080
+  - ✅ Kết nối thành công đến remote database
+- **Current Issue**: 
+  - Spring Security đang block tất cả requests (403 Forbidden)
+  - Cần fix SecurityConfig để allow public endpoints
+- **Today's Goal**: 
+  - Fix Security configuration
+  - Test login/register APIs
+  - Begin Phase 3 if time permits
+- **Blockers**: Security config cần được điều chỉnh
+
 ### 13/11/2025
-- **Completed**: Tạo Memory Bank structure
-- **Today's Goal**: Hoàn thành progress.md và bắt đầu Phase documents
+- **Completed**: Phase 1 & 2 implementation
+- **Today's Goal**: Documentation và testing
 - **Blockers**: None
 
 ---

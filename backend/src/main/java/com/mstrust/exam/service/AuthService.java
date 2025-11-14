@@ -75,10 +75,8 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
 
-        // Update last login time
-        user.setLastLoginAt(LocalDateTime.now());
-        user.setFailedLoginAttempts(0); // Reset failed attempts
-        userRepository.save(user);
+        // Update last login time và reset failed attempts (không dùng save() để tránh auditing conflict)
+        userRepository.updateLastLogin(user.getId());
 
         // Generate tokens
         String token = jwtTokenProvider.generateToken(user);
