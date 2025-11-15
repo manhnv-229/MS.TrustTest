@@ -58,27 +58,29 @@ public class DepartmentController {
 
     /* ---------------------------------------------------
      * Lấy danh sách các khoa với phân trang
-     * GET /api/departments/page?page=0&size=10&sort=departmentName,asc
+     * GET /api/departments/page?page=0&size=10&sortBy=departmentName&sortDir=asc
      * @param page Số trang (default: 0)
      * @param size Kích thước trang (default: 10)
-     * @param sort Trường sắp xếp (default: id,asc)
+     * @param sortBy Trường sắp xếp (default: id)
+     * @param sortDir Hướng sắp xếp (default: asc)
      * @returns Page chứa DepartmentDTO
      * @author: K24DTCN210-NVMANH (14/11/2025 14:11)
+     * EditBy: K24DTCN210-NVMANH (15/11/2025 10:21) - Sửa sort parameter cho Swagger
      * --------------------------------------------------- */
     @GetMapping("/page")
     @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER', 'CLASS_MANAGER', 'TEACHER')")
     public ResponseEntity<Page<DepartmentDTO>> getDepartmentsPage(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,asc") String[] sort) {
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
         
         // Xử lý sort parameter
-        String sortField = sort[0];
-        Sort.Direction sortDirection = sort.length > 1 && sort[1].equalsIgnoreCase("desc") 
+        Sort.Direction sortDirection = sortDir.equalsIgnoreCase("desc") 
                 ? Sort.Direction.DESC 
                 : Sort.Direction.ASC;
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortField));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
         Page<DepartmentDTO> departments = departmentService.getDepartmentsPage(pageable);
         
         return ResponseEntity.ok(departments);

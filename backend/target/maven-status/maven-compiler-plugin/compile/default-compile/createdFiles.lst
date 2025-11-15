@@ -12,6 +12,7 @@ com\mstrust\exam\entity\SubjectClassStudent$EnrollmentStatus.class
 com\mstrust\exam\dto\ChangePasswordRequest.class
 com\mstrust\exam\dto\RegisterRequest$RegisterRequestBuilder.class
 com\mstrust\exam\security\CustomUserDetailsService.class
+com\mstrust\exam\config\OpenApiConfig.class
 com\mstrust\exam\entity\Role$RoleBuilder.class
 com\mstrust\exam\repository\UserRepository.class
 com\mstrust\exam\exception\ResourceNotFoundException.class

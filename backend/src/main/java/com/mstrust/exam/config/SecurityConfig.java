@@ -90,8 +90,21 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
-                        // Swagger UI endpoints
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                        // Swagger UI endpoints - Cho phép truy cập không cần authentication
+                        .requestMatchers(
+                                "/api/swagger-ui/**",
+                                "/api/swagger-ui.html",
+                                "/api/v3/api-docs/**",
+                                "/api/v3/api-docs.yaml",
+                                "/api/swagger-resources/**",
+                                "/api/webjars/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
                         // Admin only endpoints
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         // Manager endpoints

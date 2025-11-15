@@ -24,6 +24,12 @@ server:
   port: 8080
   servlet:
     context-path: /api
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
     
 jwt:
   secret: ms-trust-exam-secret-key-change-this-in-production-at-least-32-characters
