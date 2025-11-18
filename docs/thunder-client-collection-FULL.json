@@ -1,0 +1,882 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "MS.TrustTest Phase 3 - COMPLETE",
+  "dateExported": "2025-11-15T10:05:00.000Z",
+  "version": "1.2",
+  "folders": [
+    {
+      "_id": "auth_folder",
+      "name": "1. Authentication (6 APIs)",
+      "containerId": "",
+      "created": "2025-11-15T10:05:00.000Z",
+      "sortNum": 10000
+    },
+    {
+      "_id": "dept_folder",
+      "name": "2. Department (9 APIs)",
+      "containerId": "",
+      "created": "2025-11-15T10:05:00.000Z",
+      "sortNum": 20000
+    },
+    {
+      "_id": "class_folder",
+      "name": "3. Class (14 APIs)",
+      "containerId": "",
+      "created": "2025-11-15T10:05:00.000Z",
+      "sortNum": 30000
+    },
+    {
+      "_id": "subject_folder",
+      "name": "4. Subject (9 APIs)",
+      "containerId": "",
+      "created": "2025-11-15T10:05:00.000Z",
+      "sortNum": 40000
+    },
+    {
+      "_id": "subjectclass_folder",
+      "name": "5. SubjectClass (15 APIs)",
+      "containerId": "",
+      "created": "2025-11-15T10:05:00.000Z",
+      "sortNum": 50000
+    },
+    {
+      "_id": "user_folder",
+      "name": "6. User Management (20 APIs)",
+      "containerId": "",
+      "created": "2025-11-15T10:05:00.000Z",
+      "sortNum": 60000
+    }
+  ],
+  "requests": [
+    {
+      "_id": "auth_01",
+      "colId": "phase3_complete",
+      "containerId": "auth_folder",
+      "name": "1.1. Login",
+      "url": "http://localhost:8080/api/auth/login",
+      "method": "POST",
+      "sortNum": 10100,
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"ADMIN\",\n  \"password\": \"Admin@123\"\n}"
+      }
+    },
+    {
+      "_id": "auth_02",
+      "colId": "phase3_complete",
+      "containerId": "auth_folder",
+      "name": "1.2. Register",
+      "url": "http://localhost:8080/api/auth/register",
+      "method": "POST",
+      "sortNum": 10200,
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"studentCode\": \"K24001\",\n  \"email\": \"student@test.com\",\n  \"password\": \"Pass@123\",\n  \"fullName\": \"Nguyen Van A\",\n  \"phoneNumber\": \"0901234567\"\n}"
+      }
+    },
+    {
+      "_id": "auth_03",
+      "colId": "phase3_complete",
+      "containerId": "auth_folder",
+      "name": "1.3. Get Current User",
+      "url": "http://localhost:8080/api/auth/me",
+      "method": "GET",
+      "sortNum": 10300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "auth_04",
+      "colId": "phase3_complete",
+      "containerId": "auth_folder",
+      "name": "1.4. Refresh Token",
+      "url": "http://localhost:8080/api/auth/refresh",
+      "method": "POST",
+      "sortNum": 10400,
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"token\": \"{{token}}\"\n}"
+      }
+    },
+    {
+      "_id": "auth_05",
+      "colId": "phase3_complete",
+      "containerId": "auth_folder",
+      "name": "1.5. Validate Token",
+      "url": "http://localhost:8080/api/auth/validate",
+      "method": "POST",
+      "sortNum": 10500,
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"token\": \"{{token}}\"\n}"
+      }
+    },
+    {
+      "_id": "auth_06",
+      "colId": "phase3_complete",
+      "containerId": "auth_folder",
+      "name": "1.6. Logout",
+      "url": "http://localhost:8080/api/auth/logout",
+      "method": "POST",
+      "sortNum": 10600,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "dept_01",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.1. Create Department",
+      "url": "http://localhost:8080/api/departments",
+      "method": "POST",
+      "sortNum": 20100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"departmentCode\": \"CNTT\",\n  \"departmentName\": \"Khoa Công Nghệ Thông Tin\",\n  \"description\": \"Khoa đào tạo về CNTT\"\n}"
+      }
+    },
+    {
+      "_id": "dept_02",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.2. Get All Departments",
+      "url": "http://localhost:8080/api/departments",
+      "method": "GET",
+      "sortNum": 20200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "dept_03",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.3. Get Departments Page",
+      "url": "http://localhost:8080/api/departments/page?page=0&size=10",
+      "method": "GET",
+      "sortNum": 20300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "dept_04",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.4. Get Department by ID",
+      "url": "http://localhost:8080/api/departments/1",
+      "method": "GET",
+      "sortNum": 20400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "dept_05",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.5. Get Department by Code",
+      "url": "http://localhost:8080/api/departments/code/CNTT",
+      "method": "GET",
+      "sortNum": 20500,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "dept_06",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.6. Update Department",
+      "url": "http://localhost:8080/api/departments/1",
+      "method": "PUT",
+      "sortNum": 20600,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"departmentName\": \"Khoa CNTT Updated\",\n  \"description\": \"Mô tả cập nhật\"\n}"
+      }
+    },
+    {
+      "_id": "dept_07",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.7. Delete Department",
+      "url": "http://localhost:8080/api/departments/999",
+      "method": "DELETE",
+      "sortNum": 20700,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "dept_08",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.8. Search Departments",
+      "url": "http://localhost:8080/api/departments/search?keyword=CNTT&page=0&size=10",
+      "method": "GET",
+      "sortNum": 20800,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "dept_09",
+      "colId": "phase3_complete",
+      "containerId": "dept_folder",
+      "name": "2.9. Get Active Departments",
+      "url": "http://localhost:8080/api/departments/active",
+      "method": "GET",
+      "sortNum": 20900,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_01",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.1. Create Class",
+      "url": "http://localhost:8080/api/classes",
+      "method": "POST",
+      "sortNum": 30100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"classCode\": \"DHTI15A1HN\",\n  \"className\": \"Lớp DHTI15A1HN\",\n  \"departmentId\": 1,\n  \"academicYear\": \"2024-2025\"\n}"
+      }
+    },
+    {
+      "_id": "class_02",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.2. Get All Classes",
+      "url": "http://localhost:8080/api/classes",
+      "method": "GET",
+      "sortNum": 30200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_03",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.3. Get Classes Page",
+      "url": "http://localhost:8080/api/classes/page?page=0&size=10",
+      "method": "GET",
+      "sortNum": 30300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_04",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.4. Get Class by ID",
+      "url": "http://localhost:8080/api/classes/1",
+      "method": "GET",
+      "sortNum": 30400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_05",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.5. Get Class by Code",
+      "url": "http://localhost:8080/api/classes/code/DHTI15A1HN",
+      "method": "GET",
+      "sortNum": 30500,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_06",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.6. Update Class",
+      "url": "http://localhost:8080/api/classes/1",
+      "method": "PUT",
+      "sortNum": 30600,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"className\": \"Lớp DHTI15A1HN Updated\"\n}"
+      }
+    },
+    {
+      "_id": "class_07",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.7. Delete Class",
+      "url": "http://localhost:8080/api/classes/999",
+      "method": "DELETE",
+      "sortNum": 30700,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_08",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.8. Search Classes",
+      "url": "http://localhost:8080/api/classes/search?keyword=DHTI&page=0&size=10",
+      "method": "GET",
+      "sortNum": 30800,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_09",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.9. Get Active Classes",
+      "url": "http://localhost:8080/api/classes/active",
+      "method": "GET",
+      "sortNum": 30900,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_10",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.10. Get Classes by Department",
+      "url": "http://localhost:8080/api/classes/department/1",
+      "method": "GET",
+      "sortNum": 31000,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_11",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.11. Get Classes by Academic Year",
+      "url": "http://localhost:8080/api/classes/academic-year/2024-2025",
+      "method": "GET",
+      "sortNum": 31100,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_12",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.12. Get Class Students",
+      "url": "http://localhost:8080/api/classes/1/students",
+      "method": "GET",
+      "sortNum": 31200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_13",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.13. Add Student to Class",
+      "url": "http://localhost:8080/api/classes/1/students/3",
+      "method": "POST",
+      "sortNum": 31300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "class_14",
+      "colId": "phase3_complete",
+      "containerId": "class_folder",
+      "name": "3.14. Remove Student from Class",
+      "url": "http://localhost:8080/api/classes/1/students/3",
+      "method": "DELETE",
+      "sortNum": 31400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "subject_01",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.1. Create Subject",
+      "url": "http://localhost:8080/api/subjects",
+      "method": "POST",
+      "sortNum": 40100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectCode\": \"PRJ301\",\n  \"subjectName\": \"Lập Trình Java\",\n  \"credits\": 3,\n  \"departmentId\": 1\n}"
+      }
+    },
+    {
+      "_id": "subject_02",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.2. Get All Subjects",
+      "url": "http://localhost:8080/api/subjects",
+      "method": "GET",
+      "sortNum": 40200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "subject_03",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.3. Get Subjects Page",
+      "url": "http://localhost:8080/api/subjects/page?page=0&size=10",
+      "method": "GET",
+      "sortNum": 40300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "subject_04",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.4. Get Subject by ID",
+      "url": "http://localhost:8080/api/subjects/1",
+      "method": "GET",
+      "sortNum": 40400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "subject_05",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.5. Get Subject by Code",
+      "url": "http://localhost:8080/api/subjects/code/PRJ301",
+      "method": "GET",
+      "sortNum": 40500,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "subject_06",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.6. Update Subject",
+      "url": "http://localhost:8080/api/subjects/1",
+      "method": "PUT",
+      "sortNum": 40600,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectName\": \"Lập Trình Java Updated\"\n}"
+      }
+    },
+    {
+      "_id": "subject_07",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.7. Delete Subject",
+      "url": "http://localhost:8080/api/subjects/999",
+      "method": "DELETE",
+      "sortNum": 40700,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "subject_08",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.8. Search Subjects",
+      "url": "http://localhost:8080/api/subjects/search?keyword=Java&page=0&size=10",
+      "method": "GET",
+      "sortNum": 40800,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "subject_09",
+      "colId": "phase3_complete",
+      "containerId": "subject_folder",
+      "name": "4.9. Get Subjects by Department",
+      "url": "http://localhost:8080/api/subjects/department/1",
+      "method": "GET",
+      "sortNum": 40900,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_01",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.1. Create SubjectClass",
+      "url": "http://localhost:8080/api/subject-classes",
+      "method": "POST",
+      "sortNum": 50100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"code\": \"PRJ301-2024-1\",\n  \"subjectId\": 1,\n  \"semester\": \"2024-2025-1\",\n  \"teacherId\": 2,\n  \"maxStudents\": 50\n}"
+      }
+    },
+    {
+      "_id": "sc_02",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.2. Get All SubjectClasses",
+      "url": "http://localhost:8080/api/subject-classes",
+      "method": "GET",
+      "sortNum": 50200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_03",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.3. Get SubjectClasses Page",
+      "url": "http://localhost:8080/api/subject-classes/page?page=0&size=10",
+      "method": "GET",
+      "sortNum": 50300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_04",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.4. Get SubjectClass by ID",
+      "url": "http://localhost:8080/api/subject-classes/1",
+      "method": "GET",
+      "sortNum": 50400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_05",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.5. Get SubjectClass by Code",
+      "url": "http://localhost:8080/api/subject-classes/code/PRJ301-2024-1",
+      "method": "GET",
+      "sortNum": 50500,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_06",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.6. Update SubjectClass",
+      "url": "http://localhost:8080/api/subject-classes/1",
+      "method": "PUT",
+      "sortNum": 50600,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"maxStudents\": 60\n}"
+      }
+    },
+    {
+      "_id": "sc_07",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.7. Delete SubjectClass",
+      "url": "http://localhost:8080/api/subject-classes/999",
+      "method": "DELETE",
+      "sortNum": 50700,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_08",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.8. Search SubjectClasses",
+      "url": "http://localhost:8080/api/subject-classes/search?keyword=PRJ&page=0&size=10",
+      "method": "GET",
+      "sortNum": 50800,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_09",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.9. Get by Subject",
+      "url": "http://localhost:8080/api/subject-classes/subject/1",
+      "method": "GET",
+      "sortNum": 50900,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_10",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.10. Get by Semester",
+      "url": "http://localhost:8080/api/subject-classes/semester/2024-2025-1",
+      "method": "GET",
+      "sortNum": 51000,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_11",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.11. Get by Teacher",
+      "url": "http://localhost:8080/api/subject-classes/teacher/2",
+      "method": "GET",
+      "sortNum": 51100,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_12",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.12. Get Students",
+      "url": "http://localhost:8080/api/subject-classes/1/students",
+      "method": "GET",
+      "sortNum": 51200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_13",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.13. Enroll Student",
+      "url": "http://localhost:8080/api/subject-classes/1/students/3",
+      "method": "POST",
+      "sortNum": 51300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_14",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.14. Unenroll Student",
+      "url": "http://localhost:8080/api/subject-classes/1/students/3",
+      "method": "DELETE",
+      "sortNum": 51400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "sc_15",
+      "colId": "phase3_complete",
+      "containerId": "subjectclass_folder",
+      "name": "5.15. Get Available Slots",
+      "url": "http://localhost:8080/api/subject-classes/1/available-slots",
+      "method": "GET",
+      "sortNum": 51500,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_01",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.1. Get All Users",
+      "url": "http://localhost:8080/api/users",
+      "method": "GET",
+      "sortNum": 60100,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_02",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.2. Get Users Page",
+      "url": "http://localhost:8080/api/users/page?page=0&size=10",
+      "method": "GET",
+      "sortNum": 60200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_03",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.3. Get User by ID",
+      "url": "http://localhost:8080/api/users/1",
+      "method": "GET",
+      "sortNum": 60300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_04",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.4. Get by Student Code",
+      "url": "http://localhost:8080/api/users/student-code/ADMIN",
+      "method": "GET",
+      "sortNum": 60400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_05",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.5. Update User",
+      "url": "http://localhost:8080/api/users/3",
+      "method": "PUT",
+      "sortNum": 60500,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"fullName\": \"Nguyen Van A Updated\"\n}"
+      }
+    },
+    {
+      "_id": "user_06",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.6. Delete User",
+      "url": "http://localhost:8080/api/users/999",
+      "method": "DELETE",
+      "sortNum": 60600,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_07",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.7. Change Password",
+      "url": "http://localhost:8080/api/users/1/password",
+      "method": "PUT",
+      "sortNum": 60700,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"currentPassword\": \"Admin@123\",\n  \"newPassword\": \"NewPass@123\"\n}"
+      }
+    },
+    {
+      "_id": "user_08",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.8. Toggle User Active",
+      "url": "http://localhost:8080/api/users/3/active",
+      "method": "PUT",
+      "sortNum": 60800,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_09",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.9. Assign Role",
+      "url": "http://localhost:8080/api/users/3/roles",
+      "method": "POST",
+      "sortNum": 60900,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"roleId\": 2\n}"
+      }
+    },
+    {
+      "_id": "user_10",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.10. Remove Role",
+      "url": "http://localhost:8080/api/users/3/roles/2",
+      "method": "DELETE",
+      "sortNum": 61000,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_11",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.11. Get by Role",
+      "url": "http://localhost:8080/api/users/role/STUDENT",
+      "method": "GET",
+      "sortNum": 61100,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_12",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.12. Assign Department",
+      "url": "http://localhost:8080/api/users/3/department/1",
+      "method": "PUT",
+      "sortNum": 61200,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_13",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.13. Assign Class",
+      "url": "http://localhost:8080/api/users/3/class/1",
+      "method": "PUT",
+      "sortNum": 61300,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_14",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.14. Get by Department",
+      "url": "http://localhost:8080/api/users/department/1",
+      "method": "GET",
+      "sortNum": 61400,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_15",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.15. Get by Class",
+      "url": "http://localhost:8080/api/users/class/1",
+      "method": "GET",
+      "sortNum": 61500,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_16",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.16. Search Users",
+      "url": "http://localhost:8080/api/users/search",
+      "method": "POST",
+      "sortNum": 61600,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"fullName\": \"Nguyen\",\n  \"status\": true\n}"
+      }
+    },
+    {
+      "_id": "user_17",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.17. Filter Users",
+      "url": "http://localhost:8080/api/users/filter?status=true&page=0&size=10",
+      "method": "GET",
+      "sortNum": 61700,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_18",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.18. Get Statistics",
+      "url": "http://localhost:8080/api/users/statistics",
+      "method": "GET",
+      "sortNum": 61800,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_19",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.19. Count by Role",
+      "url": "http://localhost:8080/api/users/count-by-role",
+      "method": "GET",
+      "sortNum": 61900,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    },
+    {
+      "_id": "user_20",
+      "colId": "phase3_complete",
+      "containerId": "user_folder",
+      "name": "6.20. Count by Department",
+      "url": "http://localhost:8080/api/users/count-by-department",
+      "method": "GET",
+      "sortNum": 62000,
+      "headers": [{"name": "Authorization", "value": "Bearer {{token}}"}]
+    }
+  ]
+}

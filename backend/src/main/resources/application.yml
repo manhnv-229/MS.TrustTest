@@ -30,6 +30,10 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    enabled: true
+  show-actuator: false
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
     
 jwt:
   secret: ms-trust-exam-secret-key-change-this-in-production-at-least-32-characters

@@ -92,4 +92,95 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying
     @Query("UPDATE User u SET u.lastLoginAt = CURRENT_TIMESTAMP, u.failedLoginAttempts = 0 WHERE u.id = :userId")
     void updateLastLogin(@Param("userId") Long userId);
+
+    /* ---------------------------------------------------
+     * Tìm users theo role name (không bao gồm deleted)
+     * @param roleName Tên role cần tìm
+     * @returns List các user có role đó
+     * @author NVMANH with Cline (15/11/2025 14:59)
+     * --------------------------------------------------- */
+    @Query("SELECT DISTINCT u FROM User u JOIN u.roles r WHERE r.roleName = :roleName AND u.deletedAt IS NULL")
+    java.util.List<User> findByRoleName(@Param("roleName") String roleName);
+
+    /* ---------------------------------------------------
+     * Tìm users theo department (không bao gồm deleted)
+     * @param departmentId ID của department
+     * @returns List các user trong department đó
+     * @author NVMANH with Cline (15/11/2025 14:59)
+     * --------------------------------------------------- */
+    @Query("SELECT u FROM User u WHERE u.department.id = :departmentId AND u.deletedAt IS NULL")
+    java.util.List<User> findByDepartmentId(@Param("departmentId") Long departmentId);
+
+    /* ---------------------------------------------------
+     * Tìm users theo class (không bao gồm deleted)
+     * @param classId ID của class
+     * @returns List các user trong class đó
+     * @author NVMANH with Cline (15/11/2025 14:59)
+     * --------------------------------------------------- */
+    @Query("SELECT u FROM User u WHERE u.classEntity.id = :classId AND u.deletedAt IS NULL")
+    java.util.List<User> findByClassId(@Param("classId") Long classId);
+
+    /* ---------------------------------------------------
+     * Tìm users theo active status (không bao gồm deleted)
+     * @param isActive Active status cần tìm
+     * @returns List các user có status tương ứng
+     * @author NVMANH with Cline (15/11/2025 14:59)
+     * --------------------------------------------------- */
+    @Query("SELECT u FROM User u WHERE u.isActive = :isActive AND u.deletedAt IS NULL")
+    java.util.List<User> findByIsActive(@Param("isActive") Boolean isActive);
+
+    /* ---------------------------------------------------
+     * Advanced search users với multiple criteria
+     * @param keyword Keyword search trong fullName, email, studentCode
+     * @param roleName Filter theo role name (nullable)
+     * @param departmentId Filter theo department (nullable)
+     * @param classId Filter theo class (nullable)
+     * @param isActive Filter theo active status (nullable)
+     * @param gender Filter theo gender (nullable)
+     * @returns List các user match criteria
+     * @author NVMANH with Cline (15/11/2025 15:00)
+     * --------------------------------------------------- */
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN u.roles r WHERE " +
+           "u.deletedAt IS NULL AND " +
+           "(:keyword IS NULL OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(u.studentCode) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:roleName IS NULL OR r.roleName = :roleName) AND " +
+           "(:departmentId IS NULL OR u.department.id = :departmentId) AND " +
+           "(:classId IS NULL OR u.classEntity.id = :classId) AND " +
+           "(:isActive IS NULL OR u.isActive = :isActive) AND " +
+           "(:gender IS NULL OR CAST(u.gender AS string) = :gender)")
+    java.util.List<User> searchUsers(
+            @Param("keyword") String keyword,
+            @Param("roleName") String roleName,
+            @Param("departmentId") Long departmentId,
+            @Param("classId") Long classId,
+            @Param("isActive") Boolean isActive,
+            @Param("gender") String gender
+    );
+
+    /* ---------------------------------------------------
+     * Đếm total users (không bao gồm deleted)
+     * @returns Số lượng users
+     * @author NVMANH with Cline (15/11/2025 15:00)
+     * --------------------------------------------------- */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL")
+    Long countActiveUsers();
+
+    /* ---------------------------------------------------
+     * Đếm users theo active status (không bao gồm deleted)
+     * @param isActive Active status
+     * @returns Số lượng users
+     * @author NVMANH with Cline (15/11/2025 15:00)
+     * --------------------------------------------------- */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.isActive = :isActive AND u.deletedAt IS NULL")
+    Long countByIsActive(@Param("isActive") Boolean isActive);
+
+    /* ---------------------------------------------------
+     * Đếm deleted users
+     * @returns Số lượng users đã bị xóa
+     * @author NVMANH with Cline (15/11/2025 15:00)
+     * --------------------------------------------------- */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NOT NULL")
+    Long countDeletedUsers();
 }

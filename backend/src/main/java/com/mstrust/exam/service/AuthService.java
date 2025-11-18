@@ -126,8 +126,8 @@ public class AuthService {
         user.setIsActive(true);
 
         // Assign default STUDENT role
-        Role studentRole = roleRepository.findByRoleName("STUDENT")
-                .orElseThrow(() -> new ResourceNotFoundException("Role", "roleName", "STUDENT"));
+        Role studentRole = roleRepository.findByRoleName("ROLE_STUDENT")
+                .orElseThrow(() -> new ResourceNotFoundException("Role", "roleName", "ROLE_STUDENT"));
         
         Set<Role> roles = new HashSet<>();
         roles.add(studentRole);

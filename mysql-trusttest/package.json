@@ -1,0 +1,26 @@
+{
+  "name": "mysql-trusttest",
+  "version": "1.0.0",
+  "description": "MCP server for MS.TrustTest MySQL database",
+  "type": "module",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "mysql",
+    "trusttest"
+  ],
+  "author": "NVMANH with Cline",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "mysql2": "^3.11.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "typescript": "^5.7.2"
+  }
+}

@@ -221,8 +221,29 @@ server:
 - ✅ Spring Security configured correctly (all bugs fixed)
 - ✅ Authentication API fully functional
 
-### Recent Configuration Changes (14/11/2025)
-**Morning Session (09:00-13:46) - Authentication Bug Fixes:**
+### Recent Configuration Changes
+
+**15/11/2025 - MCP Server Setup:**
+1. Created MCP Server mysql-trusttest
+   - Location: `G:\WORKS\GitHub\MS.TrustTest\mysql-trusttest\`
+   - Language: TypeScript + Node.js
+   - Dependencies: @modelcontextprotocol/sdk@1.0.4, mysql2@3.11.5
+   - Build tool: TypeScript compiler
+
+2. MCP Server Configuration:
+   - Database host: 104.199.231.104:3306
+   - Database name: MS.TrustTest
+   - Connection hardcoded in source
+   - Tools: execute_query, get_table_info, describe_database
+   - Resources: Tables, views, procedures listing
+
+3. Cline Integration:
+   - Config file: `cline_mcp_settings.json`
+   - Server path: `G:\WORKS\GitHub\MS.TrustTest\mysql-trusttest\build\index.js`
+   - Auto-approve: describe_database, get_table_info
+   - Status: Active and functional
+
+**14/11/2025 - Authentication Bug Fixes:**
 1. Updated datasource URL to remote server (104.199.231.104)
 2. Changed database name from ms_trust_exam to MS.TrustTest
 3. Disabled Flyway migration
@@ -279,4 +300,4 @@ server:
 
 **Author**: K24DTCN210-NVMANH  
 **Created**: 13/11/2025 14:00  
-**Last Updated**: 14/11/2025 13:49
+**Last Updated**: 15/11/2025 13:28

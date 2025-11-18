@@ -60,11 +60,11 @@ public class Department {
     @Builder.Default
     private Boolean isActive = true;
 
-    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "department", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private List<User> users = new ArrayList<>();
 
-    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "department", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private List<ClassEntity> classes = new ArrayList<>();
 

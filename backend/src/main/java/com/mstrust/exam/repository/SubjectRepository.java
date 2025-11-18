@@ -11,79 +11,89 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-/* ---------------------------------------------------
- * Repository interface cho Subject entity
- * Xử lý các thao tác database với bảng subjects
- * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
- * --------------------------------------------------- */
+/** ------------------------------------------
+ * Mục đích: Repository interface cho entity Subject
+ * Quản lý truy vấn cho bảng subjects
+ * @author NVMANH with Cline
+ * @created 15/11/2025 14:14
+ */
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
-    /* ---------------------------------------------------
-     * Tìm môn học theo mã môn học
+    /** ------------------------------------------
+     * Mục đích: Tìm subject theo mã môn học (chưa bị xóa)
      * @param code Mã môn học
-     * @returns Optional chứa Subject nếu tìm thấy
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
-    Optional<Subject> findByCode(String code);
+     * @return Optional chứa subject nếu tìm thấy
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
+    Optional<Subject> findBySubjectCodeAndDeletedAtIsNull(String subjectCode);
 
-    /* ---------------------------------------------------
-     * Tìm môn học theo mã và chưa bị xóa
-     * @param code Mã môn học
-     * @returns Optional chứa Subject nếu tìm thấy
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
-    Optional<Subject> findByCodeAndDeletedAtIsNull(String code);
+    /** ------------------------------------------
+     * Mục đích: Tìm subject theo ID (chưa bị xóa)
+     * @param id ID của subject
+     * @return Optional chứa subject nếu tìm thấy
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
+    Optional<Subject> findByIdAndDeletedAtIsNull(Long id);
 
-    /* ---------------------------------------------------
-     * Tìm tất cả môn học chưa bị xóa
-     * @returns Danh sách Subject
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
+    /** ------------------------------------------
+     * Mục đích: Kiểm tra mã môn học đã tồn tại chưa (chưa bị xóa)
+     * @param code Mã môn học cần kiểm tra
+     * @return true nếu đã tồn tại
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
+    boolean existsBySubjectCodeAndDeletedAtIsNull(String subjectCode);
+
+    /** ------------------------------------------
+     * Mục đích: Lấy danh sách tất cả subjects (chưa bị xóa)
+     * @return List các subject chưa bị xóa
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
     List<Subject> findByDeletedAtIsNull();
 
-    /* ---------------------------------------------------
-     * Tìm môn học theo Department và chưa bị xóa
-     * @param departmentId ID của Department
-     * @returns Danh sách Subject
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
-    List<Subject> findByDepartmentIdAndDeletedAtIsNull(Long departmentId);
-
-    /* ---------------------------------------------------
-     * Tìm môn học theo Department với phân trang
-     * @param departmentId ID của Department
+    /** ------------------------------------------
+     * Mục đích: Lấy danh sách subjects với phân trang (chưa bị xóa)
      * @param pageable Thông tin phân trang
-     * @returns Page chứa Subject
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
-    Page<Subject> findByDepartmentIdAndDeletedAtIsNull(Long departmentId, Pageable pageable);
-
-    /* ---------------------------------------------------
-     * Tìm môn học chưa xóa với phân trang
-     * @param pageable Thông tin phân trang
-     * @returns Page chứa Subject
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
+     * @return Page chứa các subject
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
     Page<Subject> findByDeletedAtIsNull(Pageable pageable);
 
-    /* ---------------------------------------------------
-     * Kiểm tra mã môn học đã tồn tại chưa (không tính môn đã xóa)
-     * @param code Mã môn học
-     * @returns true nếu đã tồn tại
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
-    boolean existsByCodeAndDeletedAtIsNull(String code);
+    /** ------------------------------------------
+     * Mục đích: Lấy danh sách subjects theo department (chưa bị xóa)
+     * @param departmentId ID của khoa
+     * @return List các subject thuộc khoa
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
+    @Query("SELECT s FROM Subject s WHERE s.department.id = :departmentId AND s.deletedAt IS NULL")
+    List<Subject> findByDepartmentId(@Param("departmentId") Long departmentId);
 
-    /* ---------------------------------------------------
-     * Tìm kiếm môn học theo tên hoặc mã (không phân biệt hoa thường)
+    /** ------------------------------------------
+     * Mục đích: Tìm kiếm subjects theo từ khóa (mã hoặc tên)
      * @param keyword Từ khóa tìm kiếm
      * @param pageable Thông tin phân trang
-     * @returns Page chứa Subject
-     * @author: K24DTCN210-NVMANH (14/11/2025 14:01)
-     * --------------------------------------------------- */
+     * @return Page chứa kết quả tìm kiếm
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
     @Query("SELECT s FROM Subject s WHERE s.deletedAt IS NULL AND " +
-           "(LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(s.code) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+           "(LOWER(s.subjectCode) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(s.subjectName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Subject> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    /** ------------------------------------------
+     * Mục đích: Đếm số lượng subject classes đang active cho một subject
+     * @param subjectId ID của subject
+     * @return Số lượng subject classes
+     * @author NVMANH with Cline
+     * @created 15/11/2025 14:14
+     */
+    @Query("SELECT COUNT(sc) FROM SubjectClass sc WHERE sc.subject.id = :subjectId AND sc.deletedAt IS NULL")
+    Long countActiveSubjectClassesBySubjectId(@Param("subjectId") Long subjectId);
 }

@@ -1,7 +1,10 @@
 package com.mstrust.exam.controller;
 
+import com.mstrust.exam.dto.AssignRoleRequest;
 import com.mstrust.exam.dto.ChangePasswordRequest;
 import com.mstrust.exam.dto.UserDTO;
+import com.mstrust.exam.dto.UserSearchCriteria;
+import com.mstrust.exam.dto.UserStatisticsDTO;
 import com.mstrust.exam.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,7 @@ import java.util.Map;
  * @author: K24DTCN210-NVMANH (13/11/2025 15:03)
  * --------------------------------------------------- */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class UserController {
 
@@ -144,17 +147,174 @@ public class UserController {
     }
 
     /* ---------------------------------------------------
-     * Activate/Deactivate user endpoint
+     * Toggle user active status endpoint
      * @param id User ID
-     * @param request Map chứa isActive flag
      * @returns ResponseEntity chứa UserDTO đã update
-     * @author: K24DTCN210-NVMANH (13/11/2025 15:03)
+     * @author: NVMANH with Cline (15/11/2025 17:18)
+     * Updated: Toggle without requiring request body
      * --------------------------------------------------- */
     @PutMapping("/{id}/active")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDTO> setUserActive(@PathVariable Long id, @RequestBody Map<String, Boolean> request) {
-        Boolean isActive = request.get("isActive");
-        UserDTO updatedUser = userService.setUserActive(id, isActive);
+    public ResponseEntity<UserDTO> toggleUserActive(@PathVariable Long id) {
+        UserDTO updatedUser = userService.toggleUserActive(id);
         return ResponseEntity.ok(updatedUser);
+    }
+
+    /* ---------------------------------------------------
+     * Assign role cho user endpoint
+     * @param id User ID
+     * @param request AssignRoleRequest chứa roleId
+     * @returns ResponseEntity chứa UserDTO đã được assign role
+     * @author NVMANH with Cline (15/11/2025 15:07)
+     * --------------------------------------------------- */
+    @PostMapping("/{id}/roles")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER')")
+    public ResponseEntity<UserDTO> assignRole(@PathVariable Long id, @Valid @RequestBody AssignRoleRequest request) {
+        UserDTO updatedUser = userService.assignRole(id, request.getRoleId());
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /* ---------------------------------------------------
+     * Remove role từ user endpoint
+     * @param id User ID
+     * @param roleId Role ID
+     * @returns ResponseEntity chứa UserDTO đã remove role
+     * @author NVMANH with Cline (15/11/2025 15:07)
+     * --------------------------------------------------- */
+    @DeleteMapping("/{id}/roles/{roleId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER')")
+    public ResponseEntity<UserDTO> removeRole(@PathVariable Long id, @PathVariable Long roleId) {
+        UserDTO updatedUser = userService.removeRole(id, roleId);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /* ---------------------------------------------------
+     * Get users by role endpoint
+     * @param roleName Tên role (STUDENT, TEACHER, ADMIN, etc.)
+     * @returns ResponseEntity chứa List UserDTO
+     * @author NVMANH with Cline (15/11/2025 15:08)
+     * --------------------------------------------------- */
+    @GetMapping("/role/{roleName}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER', 'CLASS_MANAGER')")
+    public ResponseEntity<List<UserDTO>> getUsersByRole(@PathVariable String roleName) {
+        List<UserDTO> users = userService.getUsersByRole(roleName);
+        return ResponseEntity.ok(users);
+    }
+
+    /* ---------------------------------------------------
+     * Assign user to department endpoint
+     * @param id User ID
+     * @param departmentId Department ID
+     * @returns ResponseEntity chứa UserDTO đã được assign
+     * @author NVMANH with Cline (15/11/2025 15:08)
+     * --------------------------------------------------- */
+    @PutMapping("/{id}/department/{departmentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER')")
+    public ResponseEntity<UserDTO> assignToDepartment(@PathVariable Long id, @PathVariable Long departmentId) {
+        UserDTO updatedUser = userService.assignToDepartment(id, departmentId);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /* ---------------------------------------------------
+     * Assign user to class endpoint
+     * @param id User ID
+     * @param classId Class ID
+     * @returns ResponseEntity chứa UserDTO đã được assign
+     * @author NVMANH with Cline (15/11/2025 15:08)
+     * --------------------------------------------------- */
+    @PutMapping("/{id}/class/{classId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLASS_MANAGER')")
+    public ResponseEntity<UserDTO> assignToClass(@PathVariable Long id, @PathVariable Long classId) {
+        UserDTO updatedUser = userService.assignToClass(id, classId);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    /* ---------------------------------------------------
+     * Get users by department endpoint
+     * @param departmentId Department ID
+     * @returns ResponseEntity chứa List UserDTO
+     * @author NVMANH with Cline (15/11/2025 15:09)
+     * --------------------------------------------------- */
+    @GetMapping("/department/{departmentId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER', 'TEACHER')")
+    public ResponseEntity<List<UserDTO>> getUsersByDepartment(@PathVariable Long departmentId) {
+        List<UserDTO> users = userService.getUsersByDepartment(departmentId);
+        return ResponseEntity.ok(users);
+    }
+
+    /* ---------------------------------------------------
+     * Get users by class endpoint
+     * @param classId Class ID
+     * @returns ResponseEntity chứa List UserDTO
+     * @author NVMANH with Cline (15/11/2025 15:09)
+     * --------------------------------------------------- */
+    @GetMapping("/class/{classId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLASS_MANAGER', 'TEACHER')")
+    public ResponseEntity<List<UserDTO>> getUsersByClass(@PathVariable Long classId) {
+        List<UserDTO> users = userService.getUsersByClass(classId);
+        return ResponseEntity.ok(users);
+    }
+
+    /* ---------------------------------------------------
+     * Advanced search users endpoint
+     * @param criteria UserSearchCriteria với các filter
+     * @returns ResponseEntity chứa List UserDTO
+     * @author NVMANH with Cline (15/11/2025 15:09)
+     * --------------------------------------------------- */
+    @PostMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER', 'CLASS_MANAGER')")
+    public ResponseEntity<List<UserDTO>> searchUsers(@RequestBody UserSearchCriteria criteria) {
+        List<UserDTO> users = userService.searchUsers(criteria);
+        return ResponseEntity.ok(users);
+    }
+
+    /* ---------------------------------------------------
+     * Filter users by status endpoint
+     * @param status Active status (ACTIVE hoặc INACTIVE)
+     * @returns ResponseEntity chứa List UserDTO
+     * @author NVMANH with Cline (15/11/2025 15:10)
+     * --------------------------------------------------- */
+    @GetMapping("/filter")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER')")
+    public ResponseEntity<List<UserDTO>> filterUsersByStatus(@RequestParam(name = "status") String status) {
+        Boolean isActive = status.equalsIgnoreCase("ACTIVE");
+        List<UserDTO> users = userService.filterUsersByStatus(isActive);
+        return ResponseEntity.ok(users);
+    }
+
+    /* ---------------------------------------------------
+     * Get user statistics endpoint
+     * @returns ResponseEntity chứa UserStatisticsDTO
+     * @author NVMANH with Cline (15/11/2025 15:10)
+     * --------------------------------------------------- */
+    @GetMapping("/statistics")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER')")
+    public ResponseEntity<UserStatisticsDTO> getUserStatistics() {
+        UserStatisticsDTO statistics = userService.getUserStatistics();
+        return ResponseEntity.ok(statistics);
+    }
+
+    /* ---------------------------------------------------
+     * Count users by role endpoint
+     * @returns ResponseEntity chứa Map với count by role
+     * @author NVMANH with Cline (15/11/2025 15:10)
+     * --------------------------------------------------- */
+    @GetMapping("/count-by-role")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER')")
+    public ResponseEntity<Map<String, Long>> countUsersByRole() {
+        UserStatisticsDTO statistics = userService.getUserStatistics();
+        return ResponseEntity.ok(statistics.getUsersByRole());
+    }
+
+    /* ---------------------------------------------------
+     * Count users by department endpoint
+     * @returns ResponseEntity chứa Map với count by department
+     * @author NVMANH with Cline (15/11/2025 15:11)
+     * --------------------------------------------------- */
+    @GetMapping("/count-by-department")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEPT_MANAGER')")
+    public ResponseEntity<Map<String, Long>> countUsersByDepartment() {
+        UserStatisticsDTO statistics = userService.getUserStatistics();
+        return ResponseEntity.ok(statistics.getUsersByDepartment());
     }
 }

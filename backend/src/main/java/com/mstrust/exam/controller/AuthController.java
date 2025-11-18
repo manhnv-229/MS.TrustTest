@@ -82,13 +82,15 @@ public class AuthController {
 
     /* ---------------------------------------------------
      * Refresh token endpoint
-     * @param request Map chứa refreshToken
+     * @param request Map chứa token hoặc refreshToken
      * @returns ResponseEntity chứa LoginResponse với token mới
-     * @author: K24DTCN210-NVMANH (13/11/2025 15:03)
+     * @author: NVMANH with Cline (15/11/2025 19:26)
+     * Updated: Accept both "token" and "refreshToken" params
      * --------------------------------------------------- */
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refreshToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
+        // Accept both "token" and "refreshToken" for flexibility
+        String refreshToken = request.getOrDefault("token", request.get("refreshToken"));
         LoginResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(response);
     }
