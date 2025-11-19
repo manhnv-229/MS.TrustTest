@@ -272,7 +272,7 @@ public class QuestionService {
     public List<QuestionDTO> getQuestionsBySubject(Long subjectId) {
         // Kiểm tra subject tồn tại
         subjectRepository.findByIdAndDeletedAtIsNull(subjectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy môn học với ID: " + subjectId));
+                .orElseThrow(() -> new BadRequestException("Invalid subject ID: " + subjectId));
 
         return questionRepository.findBySubjectIdAndDeletedAtIsNull(subjectId)
                 .stream()

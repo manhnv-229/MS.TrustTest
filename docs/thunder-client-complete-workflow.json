@@ -1,0 +1,500 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "MS.TrustTest - Complete Exam Workflow",
+  "dateExported": "2025-11-19T03:50:00.000Z",
+  "version": "1.0",
+  "folders": [
+    {
+      "_id": "step0_auth",
+      "name": "Step 0: Authentication",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 10000
+    },
+    {
+      "_id": "step1_department",
+      "name": "Step 1: Create Department",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 20000
+    },
+    {
+      "_id": "step2_subject",
+      "name": "Step 2: Create Subject",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 30000
+    },
+    {
+      "_id": "step3_class",
+      "name": "Step 3: Create Class & SubjectClass",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 40000
+    },
+    {
+      "_id": "step4_questions",
+      "name": "Step 4: Create Questions",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 50000
+    },
+    {
+      "_id": "step5_exam",
+      "name": "Step 5: Create & Manage Exam",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 60000
+    },
+    {
+      "_id": "step6_exam_questions",
+      "name": "Step 6: Add Questions to Exam",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 70000
+    },
+    {
+      "_id": "step7_publish",
+      "name": "Step 7: Publish Exam",
+      "containerId": "",
+      "created": "2025-11-19T03:50:00.000Z",
+      "sortNum": 80000
+    }
+  ],
+  "requests": [
+    {
+      "_id": "auth_01",
+      "colId": "complete_workflow",
+      "containerId": "step0_auth",
+      "name": "0.1. Login as Teacher",
+      "url": "http://localhost:8080/api/auth/login",
+      "method": "POST",
+      "sortNum": 10100,
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"teacher1@mstrust.edu.vn\",\n  \"password\": \"Teacher@123\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.token",
+          "action": "setto",
+          "value": "{{token}}"
+        }
+      ]
+    },
+    {
+      "_id": "dept_01",
+      "colId": "complete_workflow",
+      "containerId": "step1_department",
+      "name": "1.1. Create Department - Công Nghệ Thông Tin",
+      "url": "http://localhost:8080/api/departments",
+      "method": "POST",
+      "sortNum": 20100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"departmentName\": \"Khoa Công Nghệ Thông Tin\",\n  \"departmentCode\": \"CNTT\",\n  \"description\": \"Khoa đào tạo về lập trình và công nghệ\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{departmentId}}"
+        }
+      ]
+    },
+    {
+      "_id": "subject_01",
+      "colId": "complete_workflow",
+      "containerId": "step2_subject",
+      "name": "2.1. Create Subject - Lập Trình Java",
+      "url": "http://localhost:8080/api/subjects",
+      "method": "POST",
+      "sortNum": 30100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectCode\": \"PRJ301\",\n  \"subjectName\": \"Lập Trình Java Nâng Cao\",\n  \"credits\": 3,\n  \"description\": \"Môn học về Java Spring Boot\",\n  \"departmentId\": {{departmentId}}\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{subjectId}}"
+        }
+      ]
+    },
+    {
+      "_id": "class_01",
+      "colId": "complete_workflow",
+      "containerId": "step3_class",
+      "name": "3.1. Create Class - K24DTCN210",
+      "url": "http://localhost:8080/api/classes",
+      "method": "POST",
+      "sortNum": 40100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"className\": \"K24DTCN210\",\n  \"description\": \"Lớp Cao Đẳng Công Nghệ Năm 2024\",\n  \"departmentId\": {{departmentId}}\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{classId}}"
+        }
+      ]
+    },
+    {
+      "_id": "subjectclass_01",
+      "colId": "complete_workflow",
+      "containerId": "step3_class",
+      "name": "3.2. Create SubjectClass - PRJ301_K24DTCN210",
+      "url": "http://localhost:8080/api/subject-classes",
+      "method": "POST",
+      "sortNum": 40200,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectCode\": \"PRJ301_K24DTCN210_2025\",\n  \"subjectId\": {{subjectId}},\n  \"classId\": {{classId}},\n  \"semester\": \"Spring 2025\",\n  \"year\": 2025,\n  \"maxStudents\": 40\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{subjectClassId}}"
+        }
+      ]
+    },
+    {
+      "_id": "question_01",
+      "colId": "complete_workflow",
+      "containerId": "step4_questions",
+      "name": "4.1. Create Question 1 - Multiple Choice",
+      "url": "http://localhost:8080/api/questions",
+      "method": "POST",
+      "sortNum": 50100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectId\": {{subjectId}},\n  \"questionType\": \"MULTIPLE_CHOICE\",\n  \"difficulty\": \"EASY\",\n  \"questionText\": \"Spring Boot framework được xây dựng dựa trên framework nào?\",\n  \"options\": \"[\\\"A. Hibernate\\\", \\\"B. Spring Framework\\\", \\\"C. Struts\\\", \\\"D. JSF\\\"]\",\n  \"correctAnswer\": \"B\",\n  \"tags\": \"spring-boot,java,framework\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{questionId1}}"
+        }
+      ]
+    },
+    {
+      "_id": "question_02",
+      "colId": "complete_workflow",
+      "containerId": "step4_questions",
+      "name": "4.2. Create Question 2 - Multiple Choice",
+      "url": "http://localhost:8080/api/questions",
+      "method": "POST",
+      "sortNum": 50200,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectId\": {{subjectId}},\n  \"questionType\": \"MULTIPLE_CHOICE\",\n  \"difficulty\": \"MEDIUM\",\n  \"questionText\": \"Annotation nào được sử dụng để đánh dấu một class là REST Controller?\",\n  \"options\": \"[\\\"A. @Controller\\\", \\\"B. @Service\\\", \\\"C. @RestController\\\", \\\"D. @Component\\\"]\",\n  \"correctAnswer\": \"C\",\n  \"tags\": \"spring-boot,rest-api,annotation\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{questionId2}}"
+        }
+      ]
+    },
+    {
+      "_id": "question_03",
+      "colId": "complete_workflow",
+      "containerId": "step4_questions",
+      "name": "4.3. Create Question 3 - True/False",
+      "url": "http://localhost:8080/api/questions",
+      "method": "POST",
+      "sortNum": 50300,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectId\": {{subjectId}},\n  \"questionType\": \"TRUE_FALSE\",\n  \"difficulty\": \"EASY\",\n  \"questionText\": \"JPA là một phần của Java EE specification\",\n  \"correctAnswer\": \"true\",\n  \"tags\": \"jpa,java-ee\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{questionId3}}"
+        }
+      ]
+    },
+    {
+      "_id": "exam_01",
+      "colId": "complete_workflow",
+      "containerId": "step5_exam",
+      "name": "5.1. Create Exam - Kiểm Tra Giữa Kỳ",
+      "url": "http://localhost:8080/api/exams",
+      "method": "POST",
+      "sortNum": 60100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"title\": \"Kiểm Tra Giữa Kỳ - Lập Trình Java\",\n  \"description\": \"Bài kiểm tra kiến thức Java cơ bản và Spring Boot\",\n  \"subjectClassId\": {{subjectClassId}},\n  \"examPurpose\": \"MIDTERM\",\n  \"examFormat\": \"MULTIPLE_CHOICE_ONLY\",\n  \"startTime\": \"2025-12-01T09:00:00\",\n  \"endTime\": \"2025-12-01T11:00:00\",\n  \"durationMinutes\": 90,\n  \"passingScore\": 5.0,\n  \"totalScore\": 10.0,\n  \"randomizeQuestions\": true,\n  \"randomizeOptions\": true,\n  \"allowReviewAfterSubmit\": false,\n  \"showCorrectAnswers\": false,\n  \"allowCodeExecution\": false\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{examId}}"
+        }
+      ]
+    },
+    {
+      "_id": "exam_02",
+      "colId": "complete_workflow",
+      "containerId": "step5_exam",
+      "name": "5.2. Get Exam Details",
+      "url": "http://localhost:8080/api/exams/{{examId}}",
+      "method": "GET",
+      "sortNum": 60200,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "examq_01",
+      "colId": "complete_workflow",
+      "containerId": "step6_exam_questions",
+      "name": "6.1. Add Question 1 to Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 70100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{questionId1}},\n  \"questionOrder\": 1,\n  \"points\": 3.0\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "examq_02",
+      "colId": "complete_workflow",
+      "containerId": "step6_exam_questions",
+      "name": "6.2. Add Question 2 to Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 70200,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{questionId2}},\n  \"questionOrder\": 2,\n  \"points\": 4.0\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "examq_03",
+      "colId": "complete_workflow",
+      "containerId": "step6_exam_questions",
+      "name": "6.3. Add Question 3 to Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 70300,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{questionId3}},\n  \"questionOrder\": 3,\n  \"points\": 3.0\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "examq_04",
+      "colId": "complete_workflow",
+      "containerId": "step6_exam_questions",
+      "name": "6.4. Get All Questions in Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "GET",
+      "sortNum": 70400,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "examq_05",
+      "colId": "complete_workflow",
+      "containerId": "step6_exam_questions",
+      "name": "6.5. Update Question Score",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions/{{questionId1}}",
+      "method": "PUT",
+      "sortNum": 70500,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"points\": 3.5\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "examq_06",
+      "colId": "complete_workflow",
+      "containerId": "step6_exam_questions",
+      "name": "6.6. Reorder Questions",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions/reorder",
+      "method": "PUT",
+      "sortNum": 70600,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questions\": [\n    {\"questionId\": {{questionId3}}, \"newOrder\": 1},\n    {\"questionId\": {{questionId1}}, \"newOrder\": 2},\n    {\"questionId\": {{questionId2}}, \"newOrder\": 3}\n  ]\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "publish_01",
+      "colId": "complete_workflow",
+      "containerId": "step7_publish",
+      "name": "7.1. Publish Exam (SUCCESS)",
+      "url": "http://localhost:8080/api/exams/{{examId}}/publish",
+      "method": "POST",
+      "sortNum": 80100,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "publish_02",
+      "colId": "complete_workflow",
+      "containerId": "step7_publish",
+      "name": "7.2. Get Published Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}",
+      "method": "GET",
+      "sortNum": 80200,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "publish_03",
+      "colId": "complete_workflow",
+      "containerId": "step7_publish",
+      "name": "7.3. Unpublish Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/unpublish",
+      "method": "POST",
+      "sortNum": 80300,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "publish_04",
+      "colId": "complete_workflow",
+      "containerId": "step7_publish",
+      "name": "7.4. Publish Again",
+      "url": "http://localhost:8080/api/exams/{{examId}}/publish",
+      "method": "POST",
+      "sortNum": 80400,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    }
+  ]
+}

@@ -48,7 +48,7 @@ public interface ExamQuestionRepository extends JpaRepository<ExamQuestion, Long
     
     // Count how many PUBLISHED exams use this question
     @Query("SELECT COUNT(eq) FROM ExamQuestion eq WHERE eq.question.id = :questionId " +
-           "AND eq.exam.publicationStatus = 'PUBLISHED' AND eq.exam.deletedAt IS NULL")
+           "AND eq.exam.isPublished = true AND eq.exam.deletedAt IS NULL")
     Long countPublishedExamsByQuestionId(@Param("questionId") Long questionId);
     
     // Delete all questions from an exam

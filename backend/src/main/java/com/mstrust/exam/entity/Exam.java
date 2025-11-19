@@ -78,17 +78,6 @@ public class Exam {
     @Column(name = "total_score", precision = 5, scale = 2)
     private BigDecimal totalScore = BigDecimal.valueOf(100.00);
     
-    // Monitoring & Anti-cheat settings
-    @Enumerated(EnumType.STRING)
-    @Column(name = "monitoring_level")
-    private MonitoringLevel monitoringLevel = MonitoringLevel.MEDIUM;
-    
-    @Column(name = "screenshot_interval_seconds")
-    private Integer screenshotIntervalSeconds = 60;
-    
-    @Column(name = "allow_tab_switch")
-    private Boolean allowTabSwitch = false;
-    
     // Exam behavior settings
     @Column(name = "randomize_questions")
     private Boolean randomizeQuestions = false;

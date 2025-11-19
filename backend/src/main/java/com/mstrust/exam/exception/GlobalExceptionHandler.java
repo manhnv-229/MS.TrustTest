@@ -1,7 +1,9 @@
 package com.mstrust.exam.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
@@ -123,6 +125,47 @@ public class GlobalExceptionHandler {
         response.put("timestamp", LocalDateTime.now());
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /* ---------------------------------------------------
+     * Xử lý lỗi invalid enum value (JSON parse error)
+     * @param ex HttpMessageNotReadableException
+     * @returns ResponseEntity với HTTP 400 Bad Request
+     * @author: K24DTCN210-NVMANH (19/11/2025 09:54)
+     * --------------------------------------------------- */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        String message = "Invalid request format";
+        
+        // Check if it's an enum parsing error
+        if (ex.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException ife = (InvalidFormatException) ex.getCause();
+            if (ife.getTargetType() != null && ife.getTargetType().isEnum()) {
+                String fieldName = ife.getPath().get(0).getFieldName();
+                String invalidValue = ife.getValue().toString();
+                Class<?> enumClass = ife.getTargetType();
+                
+                // Get valid enum values
+                Object[] enumConstants = enumClass.getEnumConstants();
+                StringBuilder validValues = new StringBuilder();
+                for (int i = 0; i < enumConstants.length; i++) {
+                    validValues.append(enumConstants[i].toString());
+                    if (i < enumConstants.length - 1) {
+                        validValues.append(", ");
+                    }
+                }
+                
+                message = String.format("Invalid value '%s' for field '%s'. Valid values are: %s", 
+                    invalidValue, fieldName, validValues.toString());
+            }
+        }
+        
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                message,
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     /* ---------------------------------------------------

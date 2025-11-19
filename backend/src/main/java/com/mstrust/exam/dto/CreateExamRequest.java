@@ -2,59 +2,48 @@ package com.mstrust.exam.dto;
 
 import com.mstrust.exam.entity.ExamFormat;
 import com.mstrust.exam.entity.ExamPurpose;
-import com.mstrust.exam.entity.MonitoringLevel;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** ------------------------------------------
- * Mục đích: DTO cho request tạo mới Exam
- * 
+/* ---------------------------------------------------
+ * DTO cho request tạo Exam mới
  * Validation:
+ * - title: required, min 3, max 200
  * - subjectClassId: required
- * - title: required, 5-200 chars
- * - startTime: required, must be future
- * - endTime: required, must be after startTime
- * - durationMinutes: required, 15-240 minutes
- * - totalScore: required, > 0
- * - passingScore: required, >= 0, <= totalScore
- * 
- * Business Rules:
- * - start_time phải là thời điểm tương lai
- * - end_time > start_time
- * - duration_minutes: min 15, max 240
- * - passing_score không được lớn hơn total_score
- * 
- * @author NVMANH with Cline
- * @created 18/11/2025 18:32
- */
+ * - examPurpose, examFormat: required
+ * - startTime < endTime
+ * - durationMinutes > 0
+ * - passingScore <= totalScore
+ * @author: K24DTCN210-NVMANH (19/11/2025 08:36)
+ * --------------------------------------------------- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateExamRequest {
     
+    @NotBlank(message = "Title is required")
+    @Size(min = 3, max = 200, message = "Title must be between 3 and 200 characters")
+    private String title;
+    
+    @Size(max = 2000, message = "Description must not exceed 2000 characters")
+    private String description;
+    
     @NotNull(message = "Subject class ID is required")
     private Long subjectClassId;
     
-    @NotBlank(message = "Title is required")
-    @Size(min = 5, max = 200, message = "Title must be between 5 and 200 characters")
-    private String title;
+    @NotNull(message = "Exam purpose is required")
+    private ExamPurpose examPurpose;
     
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
-    private String description;
+    @NotNull(message = "Exam format is required")
+    private ExamFormat examFormat;
     
-    @NotNull(message = "Purpose is required")
-    private ExamPurpose purpose;
-    
-    @NotNull(message = "Format is required")
-    private ExamFormat format;
-    
-    // Time settings
     @NotNull(message = "Start time is required")
     @Future(message = "Start time must be in the future")
     private LocalDateTime startTime;
@@ -63,46 +52,27 @@ public class CreateExamRequest {
     private LocalDateTime endTime;
     
     @NotNull(message = "Duration is required")
-    @Min(value = 15, message = "Duration must be at least 15 minutes")
-    @Max(value = 240, message = "Duration must not exceed 240 minutes")
+    @Positive(message = "Duration must be positive")
+    @Max(value = 480, message = "Duration must not exceed 480 minutes (8 hours)")
     private Integer durationMinutes;
     
-    // Scoring settings
-    @NotNull(message = "Total score is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Total score must be greater than 0")
-    private Double totalScore;
+    @DecimalMin(value = "0.00", message = "Passing score must be >= 0")
+    @DecimalMax(value = "100.00", message = "Passing score must be <= 100")
+    private BigDecimal passingScore = BigDecimal.valueOf(50.00);
     
-    @NotNull(message = "Passing score is required")
-    @DecimalMin(value = "0.0", message = "Passing score must be at least 0")
-    private Double passingScore;
+    @DecimalMin(value = "0.00", message = "Total score must be >= 0")
+    @DecimalMax(value = "100.00", message = "Total score must be <= 100")
+    private BigDecimal totalScore = BigDecimal.valueOf(100.00);
     
-    private Boolean showResultsImmediately = false;
+    // Exam behavior settings (optional, có defaults)
+    private Boolean randomizeQuestions = false;
+    private Boolean randomizeOptions = false;
+    private Boolean allowReviewAfterSubmit = true;
     private Boolean showCorrectAnswers = false;
     
-    // Attempt settings
-    @Min(value = 1, message = "Max attempts must be at least 1")
-    @Max(value = 10, message = "Max attempts must not exceed 10")
-    private Integer maxAttempts = 1;
+    // Coding exam specific (optional)
+    private Boolean allowCodeExecution = false;
     
-    @Min(value = 0, message = "Attempt delay must be at least 0")
-    private Integer attemptDelay = 0; // minutes
-    
-    // Question settings
-    private Boolean shuffleQuestions = false;
-    private Boolean shuffleAnswers = false;
-    private Boolean allowReview = true;
-    private Boolean allowSkip = true;
-    
-    // Monitoring settings
-    @NotNull(message = "Monitoring level is required")
-    private MonitoringLevel monitoringLevel = MonitoringLevel.MEDIUM;
-    
-    private Boolean requireWebcam = true;
-    private Boolean requireScreenShare = false;
-    private Boolean detectTabSwitch = true;
-    private Boolean detectCopyPaste = true;
-    
-    @Min(value = 0, message = "Max tab switches must be at least 0")
-    @Max(value = 50, message = "Max tab switches must not exceed 50")
-    private Integer maxTabSwitches = 3;
+    @Size(max = 50, message = "Programming language name must not exceed 50 characters")
+    private String programmingLanguage;
 }

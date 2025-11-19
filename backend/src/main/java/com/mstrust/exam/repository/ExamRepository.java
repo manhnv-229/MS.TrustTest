@@ -51,7 +51,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     Page<Exam> findByIsPublishedAndDeletedAtIsNull(Boolean isPublished, Pageable pageable);
     
     // Filter by created by (teacher)
-    Page<Exam> findByCreatedByIdAndDeletedAtIsNull(Long createdById, Pageable pageable);
+    Page<Exam> findByCreatedByAndDeletedAtIsNull(Long createdBy, Pageable pageable);
     
     // Find exams in time range
     @Query("SELECT e FROM Exam e WHERE e.deletedAt IS NULL " +
@@ -103,7 +103,7 @@ public interface ExamRepository extends JpaRepository<Exam, Long> {
     long countBySubjectClassIdAndDeletedAtIsNull(Long subjectClassId);
     
     // Count by creator
-    long countByCreatedByIdAndDeletedAtIsNull(Long createdById);
+    long countByCreatedByAndDeletedAtIsNull(Long createdBy);
     
     // Count published exams
     long countByIsPublishedAndDeletedAtIsNull(Boolean isPublished);

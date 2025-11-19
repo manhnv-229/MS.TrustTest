@@ -19,14 +19,10 @@ public class CreateSubjectClassRequest {
     
     /** ------------------------------------------
      * Mã lớp học phần (unique, required)
-     * Format: MATH101-2023-2024-1
+     * Có thể nhập tự do, miễn là không trùng
      */
     @NotBlank(message = "Mã lớp học phần không được để trống")
     @Size(max = 20, message = "Mã lớp học phần không được vượt quá 20 ký tự")
-    @Pattern(
-        regexp = "^[A-Z0-9]+-\\d{4}-\\d{4}-[123]$",
-        message = "Mã lớp học phần phải theo format: CODE-YYYY-YYYY-N (ví dụ: MATH101-2023-2024-1)"
-    )
     private String code;
     
     /** ------------------------------------------

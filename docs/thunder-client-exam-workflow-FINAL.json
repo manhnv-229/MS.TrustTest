@@ -1,0 +1,408 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "MS.TrustTest - Exam Complete Workflow FINAL",
+  "dateExported": "2025-11-19T04:38:00.000Z",
+  "version": "1.3",
+  "folders": [
+    {
+      "_id": "auth",
+      "name": "1. Authentication",
+      "containerId": "",
+      "created": "2025-11-19T04:38:00.000Z",
+      "sortNum": 10000
+    },
+    {
+      "_id": "setup",
+      "name": "2. Create SubjectClass",
+      "containerId": "",
+      "created": "2025-11-19T04:38:00.000Z",
+      "sortNum": 20000
+    },
+    {
+      "_id": "questions",
+      "name": "3. Create Questions (QuestionBank)",
+      "containerId": "",
+      "created": "2025-11-19T04:38:00.000Z",
+      "sortNum": 30000
+    },
+    {
+      "_id": "exam",
+      "name": "4. Create Exam",
+      "containerId": "",
+      "created": "2025-11-19T04:38:00.000Z",
+      "sortNum": 40000
+    },
+    {
+      "_id": "exam_questions",
+      "name": "5. Manage Exam-Questions",
+      "containerId": "",
+      "created": "2025-11-19T04:38:00.000Z",
+      "sortNum": 50000
+    },
+    {
+      "_id": "publish",
+      "name": "6. Publish Exam",
+      "containerId": "",
+      "created": "2025-11-19T04:38:00.000Z",
+      "sortNum": 60000
+    }
+  ],
+  "requests": [
+    {
+      "_id": "req_login",
+      "colId": "exam_final",
+      "containerId": "auth",
+      "name": "1.1. Login Teacher",
+      "url": "http://localhost:8080/api/auth/login",
+      "method": "POST",
+      "sortNum": 10100,
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"teacher1@mstrust.edu.vn\",\n  \"password\": \"Teacher@123\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.token",
+          "action": "setto",
+          "value": "{{token}}"
+        }
+      ]
+    },
+    {
+      "_id": "req_subjectclass",
+      "colId": "exam_final",
+      "containerId": "setup",
+      "name": "2.1. Create SubjectClass",
+      "url": "http://localhost:8080/api/subject-classes",
+      "method": "POST",
+      "sortNum": 20100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"code\": \"CS101_DHTI15A1HN_1\",\n  \"subjectId\": 1,\n  \"classId\": 2,\n  \"teacherId\": 6,\n  \"semester\": \"2024-2025-1\",\n  \"year\": 2025,\n  \"maxStudents\": 40\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{subjectClassId}}"
+        }
+      ]
+    },
+    {
+      "_id": "req_q1",
+      "colId": "exam_final",
+      "containerId": "questions",
+      "name": "3.1. Create QuestionBank 1",
+      "url": "http://localhost:8080/api/question-banks",
+      "method": "POST",
+      "sortNum": 30100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectId\": 1,\n  \"questionType\": \"MULTIPLE_CHOICE\",\n  \"difficulty\": \"EASY\",\n  \"questionText\": \"Biến trong Java được khai báo bằng từ khóa nào?\",\n  \"options\": \"[\\\"A. var\\\", \\\"B. int/String/...\\\", \\\"C. variable\\\", \\\"D. let\\\"]\",\n  \"correctAnswer\": \"B\",\n  \"tags\": \"java,basic,variable\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{questionId1}}"
+        }
+      ]
+    },
+    {
+      "_id": "req_q2",
+      "colId": "exam_final",
+      "containerId": "questions",
+      "name": "3.2. Create QuestionBank 2",
+      "url": "http://localhost:8080/api/question-banks",
+      "method": "POST",
+      "sortNum": 30200,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectId\": 1,\n  \"questionType\": \"MULTIPLE_CHOICE\",\n  \"difficulty\": \"MEDIUM\",\n  \"questionText\": \"Từ khóa nào dùng để kế thừa class trong Java?\",\n  \"options\": \"[\\\"A. implements\\\", \\\"B. extends\\\", \\\"C. inherits\\\", \\\"D. super\\\"]\",\n  \"correctAnswer\": \"B\",\n  \"tags\": \"java,oop,inheritance\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{questionId2}}"
+        }
+      ]
+    },
+    {
+      "_id": "req_q3",
+      "colId": "exam_final",
+      "containerId": "questions",
+      "name": "3.3. Create QuestionBank 3",
+      "url": "http://localhost:8080/api/question-banks",
+      "method": "POST",
+      "sortNum": 30300,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"subjectId\": 1,\n  \"questionType\": \"TRUE_FALSE\",\n  \"difficulty\": \"EASY\",\n  \"questionText\": \"Java là ngôn ngữ lập trình hướng đối tượng\",\n  \"correctAnswer\": \"true\",\n  \"tags\": \"java,oop\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{questionId3}}"
+        }
+      ]
+    },
+    {
+      "_id": "req_exam_create",
+      "colId": "exam_final",
+      "containerId": "exam",
+      "name": "4.1. Create Exam",
+      "url": "http://localhost:8080/api/exams",
+      "method": "POST",
+      "sortNum": 40100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"title\": \"Kiểm Tra Cuối Kỳ - Lập Trình Java\",\n  \"description\": \"Bài thi kiểm tra kiến thức Java cơ bản\",\n  \"subjectClassId\": {{subjectClassId}},\n  \"examPurpose\": \"FINAL\",\n  \"examFormat\": \"MULTIPLE_CHOICE_ONLY\",\n  \"startTime\": \"2025-12-20T14:00:00\",\n  \"endTime\": \"2025-12-20T16:00:00\",\n  \"durationMinutes\": 90,\n  \"passingScore\": 5.0,\n  \"totalScore\": 10.0,\n  \"randomizeQuestions\": true,\n  \"randomizeOptions\": true,\n  \"allowReviewAfterSubmit\": false,\n  \"showCorrectAnswers\": false,\n  \"allowCodeExecution\": false\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.id",
+          "action": "setto",
+          "value": "{{examId}}"
+        }
+      ]
+    },
+    {
+      "_id": "req_exam_get",
+      "colId": "exam_final",
+      "containerId": "exam",
+      "name": "4.2. Get Exam Details",
+      "url": "http://localhost:8080/api/exams/{{examId}}",
+      "method": "GET",
+      "sortNum": 40200,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_add_q1",
+      "colId": "exam_final",
+      "containerId": "exam_questions",
+      "name": "5.1. Add Question 1 to Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 50100,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{questionId1}},\n  \"questionOrder\": 1,\n  \"points\": 3.0\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_add_q2",
+      "colId": "exam_final",
+      "containerId": "exam_questions",
+      "name": "5.2. Add Question 2 to Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 50200,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{questionId2}},\n  \"questionOrder\": 2,\n  \"points\": 4.0\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_add_q3",
+      "colId": "exam_final",
+      "containerId": "exam_questions",
+      "name": "5.3. Add Question 3 to Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 50300,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{questionId3}},\n  \"questionOrder\": 3,\n  \"points\": 3.0\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_get_questions",
+      "colId": "exam_final",
+      "containerId": "exam_questions",
+      "name": "5.4. Get All Questions in Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions",
+      "method": "GET",
+      "sortNum": 50400,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_update_score",
+      "colId": "exam_final",
+      "containerId": "exam_questions",
+      "name": "5.5. Update Question Score",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions/{{questionId1}}",
+      "method": "PUT",
+      "sortNum": 50500,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"points\": 3.5\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_reorder",
+      "colId": "exam_final",
+      "containerId": "exam_questions",
+      "name": "5.6. Reorder Questions",
+      "url": "http://localhost:8080/api/exams/{{examId}}/questions/reorder",
+      "method": "PUT",
+      "sortNum": 50600,
+      "headers": [
+        {"name": "Content-Type", "value": "application/json"},
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questions\": [\n    {\"questionId\": {{questionId3}}, \"newOrder\": 1},\n    {\"questionId\": {{questionId1}}, \"newOrder\": 2},\n    {\"questionId\": {{questionId2}}, \"newOrder\": 3}\n  ]\n}",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_publish",
+      "colId": "exam_final",
+      "containerId": "publish",
+      "name": "6.1. Publish Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/publish",
+      "method": "POST",
+      "sortNum": 60100,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_get_published",
+      "colId": "exam_final",
+      "containerId": "publish",
+      "name": "6.2. Get Published Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}",
+      "method": "GET",
+      "sortNum": 60200,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_unpublish",
+      "colId": "exam_final",
+      "containerId": "publish",
+      "name": "6.3. Unpublish Exam",
+      "url": "http://localhost:8080/api/exams/{{examId}}/unpublish",
+      "method": "POST",
+      "sortNum": 60300,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    },
+    {
+      "_id": "req_republish",
+      "colId": "exam_final",
+      "containerId": "publish",
+      "name": "6.4. Publish Again",
+      "url": "http://localhost:8080/api/exams/{{examId}}/publish",
+      "method": "POST",
+      "sortNum": 60400,
+      "headers": [
+        {"name": "Authorization", "value": "Bearer {{token}}"}
+      ],
+      "body": {
+        "type": "json",
+        "raw": "",
+        "form": []
+      },
+      "tests": []
+    }
+  ]
+}

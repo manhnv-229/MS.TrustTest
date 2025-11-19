@@ -2,25 +2,15 @@ package com.mstrust.exam.dto;
 
 import com.mstrust.exam.entity.Difficulty;
 import com.mstrust.exam.entity.QuestionType;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /** ------------------------------------------
- * Mục đích: DTO cho request cập nhật Question
- * 
- * Validation:
- * - questionType: required
- * - questionText: required
- * - Các fields khác tùy thuộc vào questionType
- * 
- * Note: Tương tự CreateQuestionRequest nhưng dùng cho update
- * 
+ * Mục đích: DTO cho việc cập nhật câu hỏi (Phase 3)
  * @author NVMANH with Cline
- * @created 18/11/2025 18:30
+ * @created 18/11/2025 18:26
  */
 @Data
 @Builder
@@ -28,42 +18,36 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateQuestionRequest {
     
-    private Long subjectId; // Optional - có thể update question không thuộc subject nào
-    
-    @NotNull(message = "Question type is required")
+    private Long subjectId;
     private QuestionType questionType;
-    
-    private Difficulty difficulty; // Default: MEDIUM
-    
-    private String tags; // JSON string: ["tag1", "tag2"]
-    
-    @NotBlank(message = "Question text is required")
+    private Difficulty difficulty;
+    private String tags;
     private String questionText;
     
-    // MULTIPLE_CHOICE / MULTIPLE_SELECT fields
-    private String options; // JSON string: ["Option A", "Option B", "Option C", "Option D"]
-    private String correctAnswer; // "A" or "A,C" for multiple select
+    // Multiple Choice / Multiple Select / True-False Fields
+    private String options;
+    private String correctAnswer;
     
-    // ESSAY / SHORT_ANSWER fields
+    // Essay Fields
     private Integer maxWords;
     private Integer minWords;
     private String gradingCriteria;
     
-    // CODING fields
+    // Coding Fields
     private String programmingLanguage;
     private String starterCode;
-    private String testCases; // JSON string
+    private String testCases;
     private Integer timeLimitSeconds;
     private Integer memoryLimitMb;
     
-    // FILL_IN_BLANK fields
-    private String blankPositions; // JSON string
+    // Fill in Blank Fields
+    private String blankPositions;
     
-    // MATCHING fields
-    private String leftItems; // JSON string
-    private String rightItems; // JSON string
-    private String correctMatches; // JSON string
+    // Matching Fields
+    private String leftItems;
+    private String rightItems;
+    private String correctMatches;
     
-    // Common
-    private String attachments; // JSON string: [{"name": "file1.pdf", "url": "..."}]
+    // Attachments
+    private String attachments;
 }
