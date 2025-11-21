@@ -70,6 +70,7 @@ public class CustomUserDetailsService implements UserDetailsService {
      * @returns UserDetails object
      * @throws UsernameNotFoundException nếu không tìm thấy user
      * @author: K24DTCN210-NVMANH (13/11/2025 14:54)
+     * EditBy: K24DTCN210-NVMANH (20/11/2025 09:27) - Fix username to use userId instead of email
      * --------------------------------------------------- */
     @Transactional
     public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
@@ -81,7 +82,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .collect(Collectors.toSet());
 
         return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
+                user.getId().toString(), // Dùng userId thay vì email
                 user.getPasswordHash(),
                 user.getIsActive(),
                 true,

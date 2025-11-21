@@ -1,0 +1,447 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Phase 5 - Exam Taking & Grading",
+  "collectionId": "phase5-complete",
+  "dateExported": "2025-11-20T06:44:00.000Z",
+  "version": "1.3",
+  "folders": [
+    {
+      "id": "folder-auth",
+      "name": "00. Authentication",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step1",
+      "name": "Phase 5 - Step 1: Student Exam Taking",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step1-1",
+      "name": "Step 1.1: Get Available Exams",
+      "containerId": "folder-phase5-step1",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step1-2",
+      "name": "Step 1.2: Start Exam",
+      "containerId": "folder-phase5-step1",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step1-3",
+      "name": "Step 1.3: Answer Questions",
+      "containerId": "folder-phase5-step1",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step1-4",
+      "name": "Step 1.4: Submit & Review",
+      "containerId": "folder-phase5-step1",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step2",
+      "name": "Phase 5 - Step 2: Teacher Grading",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step2-1",
+      "name": "Step 2.1: List Submissions",
+      "containerId": "folder-phase5-step2",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step2-2",
+      "name": "Step 2.2: View & Grade Answers",
+      "containerId": "folder-phase5-step2",
+      "requests": []
+    },
+    {
+      "id": "folder-phase5-step2-3",
+      "name": "Step 2.3: Finalize Grading",
+      "containerId": "folder-phase5-step2",
+      "requests": []
+    }
+  ],
+  "requests": [
+    {
+      "id": "req-login-student",
+      "name": "Login as Student",
+      "url": "http://localhost:8080/api/auth/login",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"student@test.com\",\n  \"password\": \"password123\"\n}"
+      },
+      "folderId": "folder-auth",
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.token",
+          "action": "setto",
+          "value": "student_token"
+        }
+      ]
+    },
+    {
+      "id": "req-login-teacher",
+      "name": "Login as Teacher",
+      "url": "http://localhost:8080/api/auth/login",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"teacher1@mstrust.edu.vn\",\n  \"password\": \"Teacher@123\"\n}"
+      },
+      "folderId": "folder-auth",
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.token",
+          "action": "setto",
+          "value": "teacher_token"
+        }
+      ]
+    },
+    {
+      "id": "req-get-available-exams",
+      "name": "1. Get Available Exams",
+      "url": "http://localhost:8080/api/exam-taking/available",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step1-1",
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.content[0].id",
+          "action": "setto",
+          "value": "exam_id"
+        }
+      ]
+    },
+    {
+      "id": "req-check-eligibility",
+      "name": "2. Check Exam Eligibility",
+      "url": "http://localhost:8080/api/exam-taking/check-eligibility/{{exam_id}}",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step1-2",
+      "tests": []
+    },
+    {
+      "id": "req-start-exam",
+      "name": "3. Start Exam",
+      "url": "http://localhost:8080/api/exam-taking/start/{{exam_id}}",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step1-2",
+      "tests": [
+        {
+          "type": "set-env-var",
+          "custom": "json.submissionId",
+          "action": "setto",
+          "value": "submission_id"
+        }
+      ]
+    },
+    {
+      "id": "req-get-questions",
+      "name": "4. Get Exam Questions",
+      "url": "http://localhost:8080/api/exam-taking/questions/{{submission_id}}",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step1-3",
+      "tests": []
+    },
+    {
+      "id": "req-save-answer-q1",
+      "name": "5a. Answer Q1 (Multiple Choice)",
+      "url": "http://localhost:8080/api/exam-taking/save-answer/{{submission_id}}",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": 1,\n  \"answer\": \"A\",\n  \"isAutoSave\": false\n}"
+      },
+      "folderId": "folder-phase5-step1-3",
+      "tests": []
+    },
+    {
+      "id": "req-save-answer-q2",
+      "name": "5b. Answer Q2 (Multiple Choice)",
+      "url": "http://localhost:8080/api/exam-taking/save-answer/{{submission_id}}",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": 2,\n  \"answer\": \"B\",\n  \"isAutoSave\": false\n}"
+      },
+      "folderId": "folder-phase5-step1-3",
+      "tests": []
+    },
+    {
+      "id": "req-save-answer-essay",
+      "name": "5c. Answer Q3 (Essay)",
+      "url": "http://localhost:8080/api/exam-taking/save-answer/{{submission_id}}",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": 3,\n  \"answerText\": \"Đây là câu trả lời tự luận của em. Spring Boot là một framework mạnh mẽ giúp phát triển ứng dụng Java nhanh chóng. Nó cung cấp auto-configuration, embedded server và nhiều tính năng hữu ích khác.\",\n  \"isAutoSave\": false\n}"
+      },
+      "folderId": "folder-phase5-step1-3",
+      "tests": []
+    },
+    {
+      "id": "req-submit-exam",
+      "name": "6. Submit Exam",
+      "url": "http://localhost:8080/api/exam-taking/submit/{{submission_id}}",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step1-4",
+      "tests": []
+    },
+    {
+      "id": "req-get-result",
+      "name": "7. View Exam Result",
+      "url": "http://localhost:8080/api/exam-taking/result/{{submission_id}}",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step1-4",
+      "tests": []
+    },
+    {
+      "id": "req-grading-list-all",
+      "name": "1. List All Submissions",
+      "url": "http://localhost:8080/api/grading/submissions?page=0&size=10&sortBy=submittedAt&sortOrder=desc",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step2-1",
+      "tests": []
+    },
+    {
+      "id": "req-grading-list-by-exam",
+      "name": "2. Filter by Exam ID",
+      "url": "http://localhost:8080/api/grading/submissions?examId={{exam_id}}&page=0&size=10&sortBy=submittedAt&sortOrder=desc",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step2-1",
+      "tests": []
+    },
+    {
+      "id": "req-grading-list-submitted",
+      "name": "3. Filter by SUBMITTED Status",
+      "url": "http://localhost:8080/api/grading/submissions?status=SUBMITTED&page=0&size=10&sortBy=submittedAt&sortOrder=desc",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step2-1",
+      "tests": []
+    },
+    {
+      "id": "req-grading-list-exam-submitted",
+      "name": "4. Filter by Exam + SUBMITTED",
+      "url": "http://localhost:8080/api/grading/submissions?examId={{exam_id}}&status=SUBMITTED&page=0&size=10&sortBy=submittedAt&sortOrder=desc",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step2-1",
+      "tests": []
+    },
+    {
+      "id": "req-grading-detail",
+      "name": "5. View Submission Detail",
+      "url": "http://localhost:8080/api/grading/submissions/{{submission_id}}/detail",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step2-2",
+      "tests": []
+    },
+    {
+      "id": "req-grade-answer-essay",
+      "name": "6a. Grade Essay (8.5/10)",
+      "url": "http://localhost:8080/api/grading/grade-answer",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": 3,\n  \"pointsEarned\": 8.5,\n  \"isCorrect\": true,\n  \"feedback\": \"Câu trả lời tốt! Em đã nắm được các khái niệm cơ bản về Spring Boot. Tuy nhiên cần bổ sung thêm về dependency injection và IoC container.\"\n}"
+      },
+      "folderId": "folder-phase5-step2-2",
+      "tests": []
+    },
+    {
+      "id": "req-grade-answer-partial",
+      "name": "6b. Grade Partial (5/10)",
+      "url": "http://localhost:8080/api/grading/grade-answer",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": 4,\n  \"pointsEarned\": 5.0,\n  \"isCorrect\": false,\n  \"feedback\": \"Câu trả lời chưa đầy đủ. Cần giải thích rõ hơn về cơ chế hoạt động.\"\n}"
+      },
+      "folderId": "folder-phase5-step2-2",
+      "tests": []
+    },
+    {
+      "id": "req-grade-answer-zero",
+      "name": "6c. Grade Zero (0/10)",
+      "url": "http://localhost:8080/api/grading/grade-answer",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": 5,\n  \"pointsEarned\": 0,\n  \"isCorrect\": false,\n  \"feedback\": \"Câu trả lời sai hoàn toàn. Em cần ôn lại kiến thức về chủ đề này.\"\n}"
+      },
+      "folderId": "folder-phase5-step2-2",
+      "tests": []
+    },
+    {
+      "id": "req-finalize-grading",
+      "name": "7. Finalize Grading",
+      "url": "http://localhost:8080/api/grading/finalize/{{submission_id}}",
+      "method": "POST",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step2-3",
+      "tests": []
+    },
+    {
+      "id": "req-grading-verify-graded",
+      "name": "8. Verify GRADED Status",
+      "url": "http://localhost:8080/api/grading/submissions/{{submission_id}}/detail",
+      "method": "GET",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacher_token}}"
+        }
+      ],
+      "folderId": "folder-phase5-step2-3",
+      "tests": []
+    }
+  ],
+  "ref": "phase5-complete"
+}

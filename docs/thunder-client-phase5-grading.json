@@ -1,0 +1,779 @@
+{
+  "clientName": "Thunder Client",
+  "collectionName": "Phase 5 - Grading API (Complete)",
+  "collectionId": "phase5-grading",
+  "dateExported": "2025-11-20T19:32:00.000Z",
+  "version": "1.3",
+  "folders": [
+    {
+      "_id": "setup_exam",
+      "name": "0. Setup - Add Questions to Exam (3 requests)",
+      "containerId": "",
+      "created": "2025-11-20T19:32:00.000Z",
+      "sortNum": 5000,
+      "description": "Thêm câu hỏi 5, 6, 7 vào exam 4 để fix data inconsistency"
+    },
+    {
+      "_id": "grading_list",
+      "name": "1. List Submissions (4 requests)",
+      "containerId": "",
+      "created": "2025-11-20T16:03:00.000Z",
+      "sortNum": 10000
+    },
+    {
+      "_id": "grading_detail",
+      "name": "2. Get Submission Detail (3 requests)",
+      "containerId": "",
+      "created": "2025-11-20T16:03:00.000Z",
+      "sortNum": 20000
+    },
+    {
+      "_id": "grade_answer",
+      "name": "3. Grade Answer (6 requests)",
+      "containerId": "",
+      "created": "2025-11-20T16:03:00.000Z",
+      "sortNum": 30000
+    },
+    {
+      "_id": "finalize_grading",
+      "name": "4. Finalize Grading (4 requests)",
+      "containerId": "",
+      "created": "2025-11-20T16:03:00.000Z",
+      "sortNum": 40000
+    }
+  ],
+  "requests": [
+    {
+      "_id": "req_add_question_5",
+      "colId": "phase5-grading",
+      "containerId": "setup_exam",
+      "name": "0.1. Add Question 5 to Exam 4",
+      "url": "{{baseUrl}}/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 5100,
+      "created": "2025-11-20T19:32:00.000Z",
+      "modified": "2025-11-20T19:32:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": 5,\n  \"questionOrder\": 1,\n  \"points\": 10.0\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.questionId",
+          "action": "equal",
+          "expected": "5"
+        }
+      ]
+    },
+    {
+      "_id": "req_add_question_6",
+      "colId": "phase5-grading",
+      "containerId": "setup_exam",
+      "name": "0.2. Add Question 6 to Exam 4",
+      "url": "{{baseUrl}}/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 5200,
+      "created": "2025-11-20T19:32:00.000Z",
+      "modified": "2025-11-20T19:32:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": 6,\n  \"questionOrder\": 2,\n  \"points\": 10.0\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.questionId",
+          "action": "equal",
+          "expected": "6"
+        }
+      ]
+    },
+    {
+      "_id": "req_add_question_7",
+      "colId": "phase5-grading",
+      "containerId": "setup_exam",
+      "name": "0.3. Add Question 7 to Exam 4",
+      "url": "{{baseUrl}}/exams/{{examId}}/questions",
+      "method": "POST",
+      "sortNum": 5300,
+      "created": "2025-11-20T19:32:00.000Z",
+      "modified": "2025-11-20T19:32:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": 7,\n  \"questionOrder\": 3,\n  \"points\": 10.0\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.questionId",
+          "action": "equal",
+          "expected": "7"
+        }
+      ]
+    },
+    {
+      "_id": "req_list_all",
+      "colId": "phase5-grading",
+      "containerId": "grading_list",
+      "name": "1.1. List All Submissions (No Filter)",
+      "url": "{{baseUrl}}/grading/submissions",
+      "method": "GET",
+      "sortNum": 10100,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.content",
+          "action": "istype array"
+        }
+      ]
+    },
+    {
+      "_id": "req_list_by_exam",
+      "colId": "phase5-grading",
+      "containerId": "grading_list",
+      "name": "1.2. List Submissions By Exam ID",
+      "url": "{{baseUrl}}/grading/submissions?examId={{examId}}",
+      "method": "GET",
+      "sortNum": 10200,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [
+        {
+          "name": "examId",
+          "value": "{{examId}}",
+          "isPath": false
+        }
+      ],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.content[0].examId",
+          "action": "equal",
+          "expected": "4"
+        }
+      ]
+    },
+    {
+      "_id": "req_list_by_status",
+      "colId": "phase5-grading",
+      "containerId": "grading_list",
+      "name": "1.3. List Submissions By Status (SUBMITTED)",
+      "url": "{{baseUrl}}/grading/submissions?status=SUBMITTED",
+      "method": "GET",
+      "sortNum": 10300,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [
+        {
+          "name": "status",
+          "value": "SUBMITTED",
+          "isPath": false
+        }
+      ],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.content[*].status",
+          "action": "contains",
+          "expected": "SUBMITTED"
+        }
+      ]
+    },
+    {
+      "_id": "req_list_paginated",
+      "colId": "phase5-grading",
+      "containerId": "grading_list",
+      "name": "1.4. List Submissions With Pagination",
+      "url": "{{baseUrl}}/grading/submissions?page=0&size=5&sortBy=submittedAt&sortOrder=desc",
+      "method": "GET",
+      "sortNum": 10400,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [
+        {
+          "name": "page",
+          "value": "0",
+          "isPath": false
+        },
+        {
+          "name": "size",
+          "value": "5",
+          "isPath": false
+        },
+        {
+          "name": "sortBy",
+          "value": "submittedAt",
+          "isPath": false
+        },
+        {
+          "name": "sortOrder",
+          "value": "desc",
+          "isPath": false
+        }
+      ],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.pageable.pageSize",
+          "action": "equal",
+          "expected": "5"
+        }
+      ]
+    },
+    {
+      "_id": "req_detail_valid",
+      "colId": "phase5-grading",
+      "containerId": "grading_detail",
+      "name": "2.1. Get Submission Detail (Valid - Submission ID 3)",
+      "url": "{{baseUrl}}/grading/submissions/{{submissionId}}/detail",
+      "method": "GET",
+      "sortNum": 20100,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.submissionId",
+          "action": "equal",
+          "expected": "3"
+        },
+        {
+          "type": "json-query",
+          "value": "$.examId",
+          "action": "equal",
+          "expected": "4"
+        }
+      ]
+    },
+    {
+      "_id": "req_detail_invalid",
+      "colId": "phase5-grading",
+      "containerId": "grading_detail",
+      "name": "2.2. Get Submission Detail (Invalid ID - Should 404)",
+      "url": "{{baseUrl}}/grading/submissions/99999/detail",
+      "method": "GET",
+      "sortNum": 20200,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "404"
+        }
+      ]
+    },
+    {
+      "_id": "req_detail_no_permission",
+      "colId": "phase5-grading",
+      "containerId": "grading_detail",
+      "name": "2.3. Get Submission Detail (No Permission - Student Token)",
+      "url": "{{baseUrl}}/grading/submissions/{{submissionId}}/detail",
+      "method": "GET",
+      "sortNum": 20300,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "403"
+        }
+      ]
+    },
+    {
+      "_id": "req_grade_before_setup",
+      "colId": "phase5-grading",
+      "containerId": "grade_answer",
+      "name": "3.1. Grade Answer BEFORE Setup (Should 400 - Data Inconsistency)",
+      "url": "{{baseUrl}}/grading/grade-answer",
+      "method": "POST",
+      "sortNum": 30050,
+      "created": "2025-11-20T19:32:00.000Z",
+      "modified": "2025-11-20T19:32:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": {{answerId}},\n  \"pointsEarned\": 8.5,\n  \"teacherFeedback\": \"Test trước khi add question vào exam\",\n  \"isCorrect\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "400"
+        },
+        {
+          "type": "json-query",
+          "value": "$.message",
+          "action": "contains",
+          "expected": "Không thể chấm điểm"
+        }
+      ]
+    },
+    {
+      "_id": "req_grade_answer_valid",
+      "colId": "phase5-grading",
+      "containerId": "grade_answer",
+      "name": "3.2. Grade Answer AFTER Setup (Valid - Answer ID 5)",
+      "url": "{{baseUrl}}/grading/grade-answer",
+      "method": "POST",
+      "sortNum": 30100,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T19:32:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": {{answerId}},\n  \"pointsEarned\": 8.5,\n  \"teacherFeedback\": \"Câu trả lời tốt, giải thích rõ ràng\",\n  \"isCorrect\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.answer.pointsEarned",
+          "action": "equal",
+          "expected": "8.5"
+        },
+        {
+          "type": "json-query",
+          "value": "$.answer.isCorrect",
+          "action": "equal",
+          "expected": "true"
+        }
+      ]
+    },
+    {
+      "_id": "req_grade_answer_zero",
+      "colId": "phase5-grading",
+      "containerId": "grade_answer",
+      "name": "3.3. Grade Answer (Zero Points - Incorrect)",
+      "url": "{{baseUrl}}/grading/grade-answer",
+      "method": "POST",
+      "sortNum": 30200,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": 6,\n  \"pointsEarned\": 0,\n  \"teacherFeedback\": \"Câu trả lời chưa đầy đủ\",\n  \"isCorrect\": false\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.answer.pointsEarned",
+          "action": "equal",
+          "expected": "0"
+        },
+        {
+          "type": "json-query",
+          "value": "$.answer.isCorrect",
+          "action": "equal",
+          "expected": "false"
+        }
+      ]
+    },
+    {
+      "_id": "req_grade_answer_exceed",
+      "colId": "phase5-grading",
+      "containerId": "grade_answer",
+      "name": "3.4. Grade Answer (Points > Max - Should Fail)",
+      "url": "{{baseUrl}}/grading/grade-answer",
+      "method": "POST",
+      "sortNum": 30300,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": 7,\n  \"pointsEarned\": 999,\n  \"teacherFeedback\": \"Vượt quá điểm tối đa\",\n  \"isCorrect\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "req_grade_answer_negative",
+      "colId": "phase5-grading",
+      "containerId": "grade_answer",
+      "name": "3.5. Grade Answer (Negative Points - Should Fail)",
+      "url": "{{baseUrl}}/grading/grade-answer",
+      "method": "POST",
+      "sortNum": 30400,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": {{answerId}},\n  \"pointsEarned\": -5,\n  \"teacherFeedback\": \"Điểm âm không hợp lệ\",\n  \"isCorrect\": false\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "req_grade_answer_no_permission",
+      "colId": "phase5-grading",
+      "containerId": "grade_answer",
+      "name": "3.6. Grade Answer (No Permission - Student Token)",
+      "url": "{{baseUrl}}/grading/grade-answer",
+      "method": "POST",
+      "sortNum": 30500,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"answerId\": {{answerId}},\n  \"pointsEarned\": 5,\n  \"teacherFeedback\": \"Test no permission\",\n  \"isCorrect\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "403"
+        }
+      ]
+    },
+    {
+      "_id": "req_finalize_valid",
+      "colId": "phase5-grading",
+      "containerId": "finalize_grading",
+      "name": "4.1. Finalize Grading (Valid - All Graded)",
+      "url": "{{baseUrl}}/grading/finalize/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 40100,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "value": "$.status",
+          "action": "equal",
+          "expected": "GRADED"
+        },
+        {
+          "type": "json-query",
+          "value": "$.totalScore",
+          "action": "istype number"
+        }
+      ]
+    },
+    {
+      "_id": "req_finalize_ungraded",
+      "colId": "phase5-grading",
+      "containerId": "finalize_grading",
+      "name": "4.2. Finalize Grading (Has Ungraded - Should Fail)",
+      "url": "{{baseUrl}}/grading/finalize/{{ungradedSubmissionId}}",
+      "method": "POST",
+      "sortNum": 40200,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "req_finalize_invalid_id",
+      "colId": "phase5-grading",
+      "containerId": "finalize_grading",
+      "name": "4.3. Finalize Grading (Invalid Submission ID - Should 404)",
+      "url": "{{baseUrl}}/grading/finalize/99999",
+      "method": "POST",
+      "sortNum": 40300,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "404"
+        }
+      ]
+    },
+    {
+      "_id": "req_finalize_no_permission",
+      "colId": "phase5-grading",
+      "containerId": "finalize_grading",
+      "name": "4.4. Finalize Grading (No Permission - Student Token)",
+      "url": "{{baseUrl}}/grading/finalize/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 40400,
+      "created": "2025-11-20T16:03:00.000Z",
+      "modified": "2025-11-20T16:03:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "value": "403"
+        }
+      ]
+    }
+  ],
+  "ref": "phase5-grading-env",
+  "settings": {
+    "options": {
+      "baseUrl": "http://localhost:8080/api"
+    }
+  },
+  "environments": [
+    {
+      "_id": "phase5-grading-env",
+      "name": "Phase 5 - Grading Environment",
+      "default": true,
+      "global": false,
+      "data": [
+        {
+          "name": "baseUrl",
+          "value": "http://localhost:8080/api"
+        },
+        {
+          "name": "teacherToken",
+          "value": "YOUR_TEACHER_JWT_TOKEN_HERE"
+        },
+        {
+          "name": "studentToken",
+          "value": "YOUR_STUDENT_JWT_TOKEN_HERE"
+        },
+        {
+          "name": "examId",
+          "value": "4"
+        },
+        {
+          "name": "submissionId",
+          "value": "3"
+        },
+        {
+          "name": "answerId",
+          "value": "5"
+        },
+        {
+          "name": "ungradedSubmissionId",
+          "value": "5"
+        }
+      ]
+    }
+  ]
+}

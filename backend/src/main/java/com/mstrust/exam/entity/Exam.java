@@ -101,6 +101,21 @@ public class Exam {
     // Publication status
     @Column(name = "is_published")
     private Boolean isPublished = false;
+
+    /* ---------------------------------------------------
+     * Retake Policy (Phase 5)
+     * --------------------------------------------------- */
+    @Column(name = "max_attempts")
+    private Integer maxAttempts = 1;  // 0 = unlimited
+
+    /* ---------------------------------------------------
+     * Results Display Settings (Phase 5)
+     * --------------------------------------------------- */
+    @Column(name = "show_results_after_submit")
+    private Boolean showResultsAfterSubmit = false;
+
+    @Column(name = "show_score_only")
+    private Boolean showScoreOnly = false;
     
     // Version for optimistic locking
     @Version

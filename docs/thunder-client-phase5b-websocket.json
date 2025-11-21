@@ -1,0 +1,193 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "Phase 5B - WebSocket & Enhanced APIs",
+  "dateExported": "2025-11-21T02:19:00.000Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "_id": "enhanced-exam-apis",
+      "name": "Enhanced Exam APIs",
+      "containerId": "",
+      "created": "2025-11-21T02:19:00.000Z",
+      "sortNum": 10000
+    }
+  ],
+  "requests": [
+    {
+      "_id": "student-start-exam",
+      "colId": "phase5b-websocket",
+      "containerId": "enhanced-exam-apis",
+      "name": "Student Start Exam (Setup)",
+      "url": "{{baseUrl}}/exam-taking/start/1",
+      "method": "POST",
+      "sortNum": 5000,
+      "created": "2025-11-21T02:19:00.000Z",
+      "modified": "2025-11-21T02:19:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "set-env-var",
+          "custom": "json.submissionId",
+          "action": "equal",
+          "value": "testSubmissionId"
+        }
+      ]
+    },
+    {
+      "_id": "pause-exam",
+      "colId": "phase5b-websocket",
+      "containerId": "enhanced-exam-apis",
+      "name": "Pause Exam",
+      "url": "{{baseUrl}}/exam-sessions/1/pause",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2025-11-21T02:19:00.000Z",
+      "modified": "2025-11-21T02:19:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"submissionId\": 1,\n  \"reason\": \"Technical issue - student laptop crashed\",\n  \"pauseDurationMinutes\": 10\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "custom": "json.success",
+          "action": "equal",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "_id": "resume-exam",
+      "colId": "phase5b-websocket",
+      "containerId": "enhanced-exam-apis",
+      "name": "Resume Exam",
+      "url": "{{baseUrl}}/exam-sessions/1/resume",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2025-11-21T02:19:00.000Z",
+      "modified": "2025-11-21T02:19:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"submissionId\": 1,\n  \"additionalMinutes\": 5\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "custom": "json.success",
+          "action": "equal",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "_id": "get-active-sessions",
+      "colId": "phase5b-websocket",
+      "containerId": "enhanced-exam-apis",
+      "name": "Get Active Sessions",
+      "url": "{{baseUrl}}/exam-sessions/active",
+      "method": "GET",
+      "sortNum": 30000,
+      "created": "2025-11-21T02:19:00.000Z",
+      "modified": "2025-11-21T02:19:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "content-type",
+          "custom": "",
+          "action": "contains",
+          "value": "application/json"
+        }
+      ]
+    },
+    {
+      "_id": "get-teacher-live-view",
+      "colId": "phase5b-websocket",
+      "containerId": "enhanced-exam-apis",
+      "name": "Get Teacher Live View",
+      "url": "{{baseUrl}}/exam-sessions/live/1",
+      "method": "GET",
+      "sortNum": 40000,
+      "created": "2025-11-21T02:19:00.000Z",
+      "modified": "2025-11-21T02:19:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{teacherToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "custom": "json.examId",
+          "action": "equal",
+          "value": "1"
+        },
+        {
+          "type": "json-query",
+          "custom": "json.sessions",
+          "action": "istype",
+          "value": "array"
+        }
+      ]
+    }
+  ]
+}

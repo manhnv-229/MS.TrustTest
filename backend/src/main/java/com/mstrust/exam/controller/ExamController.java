@@ -266,13 +266,22 @@ public class ExamController {
     
     /* ---------------------------------------------------
      * Helper: Lấy ID của user hiện tại từ Security Context
+     * JWT token có thể lưu userId trong "sub" claim
      * @author: K24DTCN210-NVMANH (19/11/2025 08:39)
+     * EditBy: K24DTCN210-NVMANH (20/11/2025 20:56) - Fix user not found error
      * --------------------------------------------------- */
     private Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        return user.getId();
+        String subject = authentication.getName();
+        
+        // Try parse as Long first (if JWT has userId in "sub")
+        try {
+            return Long.parseLong(subject);
+        } catch (NumberFormatException e) {
+            // If not a number, it's email - fallback to query by email
+            User user = userRepository.findByEmail(subject)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + subject));
+            return user.getId();
+        }
     }
 }
