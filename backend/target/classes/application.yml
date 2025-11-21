@@ -44,3 +44,11 @@ logging:
     com.mstrust.exam: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
+
+# FTP Configuration for Screenshot Storage
+ftp:
+  server: 153.92.11.239
+  port: 21
+  username: u341775345.admin
+  password: '!M@nh1989'
+  base-path: /screenshots

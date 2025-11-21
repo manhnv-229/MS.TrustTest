@@ -42,12 +42,20 @@ public class MonitoringWebSocketController {
     @Scheduled(fixedRate = 5000) // Chạy mỗi 5 giây
     public void syncExamTimers() {
         try {
-            // Lấy tất cả active submissions
+            // Lấy tất cả active submissions với eager fetch exam
             List<ExamSubmission> activeSubmissions = examSubmissionRepository
                     .findByStatus(com.mstrust.exam.entity.SubmissionStatus.IN_PROGRESS);
             
             for (ExamSubmission submission : activeSubmissions) {
-                Exam exam = submission.getExam();
+                // Safely get exam - skip if exam not loaded
+                if (submission.getExam() == null) {
+                    continue;
+                }
+                Exam exam = examRepository.findById(submission.getExam().getId())
+                        .orElse(null);
+                if (exam == null) {
+                    continue;
+                }
                 LocalDateTime now = LocalDateTime.now();
                 
                 // Convert Timestamp to LocalDateTime
@@ -107,7 +115,9 @@ public class MonitoringWebSocketController {
             
             if (!submissions.isEmpty()) {
                 ExamSubmission submission = submissions.get(0);
-                Exam exam = submission.getExam();
+                // Fetch exam explicitly to avoid lazy loading
+                Exam exam = examRepository.findById(examId)
+                        .orElseThrow(() -> new RuntimeException("Exam not found"));
                 LocalDateTime now = LocalDateTime.now();
                 
                 // Convert Timestamp to LocalDateTime
