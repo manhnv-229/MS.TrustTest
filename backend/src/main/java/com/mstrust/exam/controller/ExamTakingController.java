@@ -1,7 +1,9 @@
 package com.mstrust.exam.controller;
 
 import com.mstrust.exam.dto.*;
+import com.mstrust.exam.dto.grading.StudentResultDTO;
 import com.mstrust.exam.service.ExamTakingService;
+import com.mstrust.exam.service.GradingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +18,7 @@ import java.util.Map;
  * Base path: /exam-taking (URL cuối: /api/exam-taking)
  * @author: K24DTCN210-NVMANH (19/11/2025 15:32)
  * EditBy: K24DTCN210-NVMANH (20/11/2025 09:18) - Fix context-path violation
+ * EditBy: K24DTCN210-NVMANH (21/11/2025 14:50) - Add graded result endpoint
  * --------------------------------------------------- */
 @RestController
 @RequestMapping("/exam-taking")
@@ -23,6 +26,7 @@ import java.util.Map;
 public class ExamTakingController {
     
     private final ExamTakingService examTakingService;
+    private final GradingService gradingService;
     
     /* ---------------------------------------------------
      * GET /exam-taking/available
@@ -139,6 +143,23 @@ public class ExamTakingController {
             Authentication auth) {
         Long studentId = getCurrentUserId(auth);
         ExamResultDTO result = examTakingService.getResult(submissionId, studentId);
+        return ResponseEntity.ok(result);
+    }
+    
+    /* ---------------------------------------------------
+     * GET /exam-taking/graded-result/{submissionId}
+     * Xem kết quả bài thi đã được chấm điểm
+     * @param submissionId ID của submission
+     * @returns StudentResultDTO với điểm số và feedback chi tiết
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:50)
+     * --------------------------------------------------- */
+    @GetMapping("/graded-result/{submissionId}")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<StudentResultDTO> getGradedResult(
+            @PathVariable Long submissionId,
+            Authentication auth) {
+        Long studentId = getCurrentUserId(auth);
+        StudentResultDTO result = gradingService.getStudentResult(submissionId, studentId);
         return ResponseEntity.ok(result);
     }
     

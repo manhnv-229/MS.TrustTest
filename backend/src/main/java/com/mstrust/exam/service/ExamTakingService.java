@@ -288,9 +288,20 @@ public class ExamTakingService {
             throw new BadRequestException("Time expired. Exam has been auto-submitted");
         }
         
-        QuestionBank question = examQuestionRepository.findById(request.getQuestionId())
-            .map(ExamQuestion::getQuestion)
-            .orElseThrow(() -> new ResourceNotFoundException("Question not found"));
+        // Find ExamQuestion first to validate question belongs to this exam
+        ExamQuestion examQuestion = examQuestionRepository
+            .findByExamIdAndQuestionId(submission.getExam().getId(), request.getQuestionId())
+            .orElseThrow(() -> new ResourceNotFoundException("Question not found in this exam"));
+        
+        QuestionBank question = examQuestion.getQuestion();
+        
+        // Debug log
+        log.info("ExamQuestion found: id={}, examId={}, questionId={}", 
+            examQuestion.getId(), examQuestion.getExam().getId(), examQuestion.getQuestion() != null ? examQuestion.getQuestion().getId() : "NULL");
+        
+        if (question == null) {
+            throw new ResourceNotFoundException("Question relationship is null - lazy loading issue");
+        }
         
         // Find or create answer
         StudentAnswer answer = answerRepository

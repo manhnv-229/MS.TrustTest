@@ -28,8 +28,9 @@ public interface ExamQuestionRepository extends JpaRepository<ExamQuestion, Long
     @Query("SELECT eq FROM ExamQuestion eq WHERE eq.exam.id = :examId ORDER BY eq.questionOrder")
     List<ExamQuestion> findByExamIdOrderByQuestionOrder(@Param("examId") Long examId);
     
-    // Find specific exam-question relationship
-    Optional<ExamQuestion> findByExamIdAndQuestionId(Long examId, Long questionId);
+    // Find specific exam-question relationship (with question loaded)
+    @Query("SELECT eq FROM ExamQuestion eq JOIN FETCH eq.question WHERE eq.exam.id = :examId AND eq.question.id = :questionId")
+    Optional<ExamQuestion> findByExamIdAndQuestionId(@Param("examId") Long examId, @Param("questionId") Long questionId);
     
     // Check if question exists in exam
     boolean existsByExamIdAndQuestionId(Long examId, Long questionId);

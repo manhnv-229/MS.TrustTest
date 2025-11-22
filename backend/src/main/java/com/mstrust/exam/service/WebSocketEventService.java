@@ -34,8 +34,8 @@ public class WebSocketEventService {
             message.setTimestamp(LocalDateTime.now());
             String destination = String.format("/topic/exam/%d/timer", message.getExamId());
             messagingTemplate.convertAndSend(destination, message);
-            log.debug("Sent timer sync for exam {} - remaining: {}s", 
-                message.getExamId(), message.getRemainingSeconds());
+            // log.debug("Sent timer sync for exam {} - remaining: {}s", 
+            //     message.getExamId(), message.getRemainingSeconds());
         } catch (Exception e) {
             log.error("Error sending timer sync for exam {}: {}", 
                 message.getExamId(), e.getMessage());
@@ -53,9 +53,9 @@ public class WebSocketEventService {
             message.setTimestamp(LocalDateTime.now());
             String destination = String.format("/topic/exam/%d/progress", message.getExamId());
             messagingTemplate.convertAndSend(destination, message);
-            log.debug("Sent progress update for student {} in exam {} - {}%", 
-                message.getStudentId(), message.getExamId(), 
-                message.getCompletionPercentage());
+            // log.debug("Sent progress update for student {} in exam {} - {}%", 
+            //     message.getStudentId(), message.getExamId(), 
+            //     message.getCompletionPercentage());
         } catch (Exception e) {
             log.error("Error sending progress update for exam {}: {}", 
                 message.getExamId(), e.getMessage());
@@ -74,8 +74,8 @@ public class WebSocketEventService {
             String destination = String.format("/topic/exam/%d/connections", 
                 message.getExamId());
             messagingTemplate.convertAndSend(destination, message);
-            log.debug("Sent connection status for student {} in exam {} - {}", 
-                message.getStudentId(), message.getExamId(), message.getStatus());
+            // log.debug("Sent connection status for student {} in exam {} - {}", 
+            //     message.getStudentId(), message.getExamId(), message.getStatus());
         } catch (Exception e) {
             log.error("Error sending connection status for exam {}: {}", 
                 message.getExamId(), e.getMessage());
@@ -93,7 +93,7 @@ public class WebSocketEventService {
         try {
             String destination = String.format("/user/%d/queue/alerts", userId);
             messagingTemplate.convertAndSend(destination, message);
-            log.debug("Sent alert to user {}: {}", userId, message);
+            // log.debug("Sent alert to user {}: {}", userId, message);
         } catch (Exception e) {
             log.error("Error sending alert to user {}: {}", userId, e.getMessage());
         }
@@ -108,7 +108,7 @@ public class WebSocketEventService {
     public void broadcastSystemMessage(String message) {
         try {
             messagingTemplate.convertAndSend("/topic/system", message);
-            log.info("Broadcasted system message: {}", message);
+            // log.info("Broadcasted system message: {}", message);
         } catch (Exception e) {
             log.error("Error broadcasting system message: {}", e.getMessage());
         }

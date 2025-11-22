@@ -30,7 +30,7 @@ public class ExamQuestion {
     @JoinColumn(name = "exam_id", nullable = false)
     private Exam exam;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "question_id", nullable = false)
     private QuestionBank question;
     

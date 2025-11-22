@@ -1,134 +1,176 @@
 package com.mstrust.exam.controller;
 
-import com.mstrust.exam.dto.*;
+import com.mstrust.exam.dto.grading.*;
+import com.mstrust.exam.entity.ExamSubmission;
+import com.mstrust.exam.entity.StudentAnswer;
 import com.mstrust.exam.entity.SubmissionStatus;
+import com.mstrust.exam.entity.User;
+import com.mstrust.exam.repository.UserRepository;
 import com.mstrust.exam.service.GradingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 /* ---------------------------------------------------
- * Controller xử lý các API endpoints cho grading (chấm điểm)
- * Base path: /grading (KHÔNG có /api vì đã config trong application.yml)
- * @author: K24DTCN210-NVMANH (20/11/2025 11:21)
+ * Controller xử lý các API chấm điểm bài thi
+ * Endpoints: /api/grading/**
+ * @author: K24DTCN210-NVMANH (21/11/2025 14:28)
  * --------------------------------------------------- */
 @RestController
 @RequestMapping("/grading")
 @RequiredArgsConstructor
+@Slf4j
 public class GradingController {
-
+    
     private final GradingService gradingService;
-
+    private final UserRepository userRepository;
+    
     /* ---------------------------------------------------
-     * Lấy danh sách submissions với filter và pagination
-     * GET /api/grading/submissions
-     * @param examId ID của exam cần lọc (optional)
-     * @param status Trạng thái cần lọc (optional)
-     * @param page Số trang (default: 0)
-     * @param size Kích thước trang (default: 20)
-     * @param sortBy Trường cần sort (default: submittedAt)
-     * @param sortOrder Thứ tự sort (default: desc)
-     * @param auth Authentication object
-     * @returns Page danh sách submissions
-     * @author: K24DTCN210-NVMANH (20/11/2025 11:21)
+     * Lấy danh sách bài nộp cần chấm cho giáo viên
+     * GET /api/grading/submissions?status=SUBMITTED&examId=1
+     * @param status Trạng thái bài nộp (tùy chọn)
+     * @param examId ID đề thi (tùy chọn)
+     * @returns Danh sách bài nộp cần chấm
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:30)
      * --------------------------------------------------- */
     @GetMapping("/submissions")
-    @PreAuthorize("hasAnyRole('TEACHER', 'DEPT_MANAGER', 'ADMIN')")
-    public ResponseEntity<Page<SubmissionListItemDTO>> getSubmissions(
-            @RequestParam(required = false) Long examId,
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<List<GradingSubmissionListDTO>> getSubmissionsForGrading(
             @RequestParam(required = false) SubmissionStatus status,
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(defaultValue = "submittedAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortOrder,
+            @RequestParam(required = false) Long examId,
             Authentication auth) {
-
-        // Get teacher ID from authentication
-        Long teacherId = Long.parseLong(auth.getName());
-
-        // Get submissions
-        Page<SubmissionListItemDTO> submissions = gradingService.getSubmissions(
-                examId, status, page, size, sortBy, sortOrder, teacherId
-        );
-
+        
+        Long teacherId = getCurrentUserId(auth);
+        log.info("GET /api/grading/submissions - teacherId: {}, status: {}, examId: {}", 
+                teacherId, status, examId);
+        
+        List<GradingSubmissionListDTO> submissions = gradingService.getSubmissionsForGrading(
+                teacherId, status, examId);
+        
+        log.info("Found {} submissions for grading", submissions.size());
         return ResponseEntity.ok(submissions);
     }
-
+    
     /* ---------------------------------------------------
-     * Lấy chi tiết submission để chấm điểm
-     * GET /api/grading/submissions/{submissionId}/detail
-     * @param submissionId ID của submission
-     * @param auth Authentication object
-     * @returns Chi tiết submission với tất cả answers
-     * @author: K24DTCN210-NVMANH (20/11/2025 11:21)
+     * Lấy chi tiết bài nộp để chấm điểm
+     * GET /api/grading/submissions/{id}
+     * @param id ID của bài nộp
+     * @returns Chi tiết bài nộp với tất cả câu trả lời
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:32)
      * --------------------------------------------------- */
-    @GetMapping("/submissions/{submissionId}/detail")
-    @PreAuthorize("hasAnyRole('TEACHER', 'DEPT_MANAGER', 'ADMIN')")
-    public ResponseEntity<SubmissionGradingDetailDTO> getSubmissionDetail(
-            @PathVariable Long submissionId,
+    @GetMapping("/submissions/{id}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<GradingDetailDTO> getSubmissionDetail(
+            @PathVariable Long id,
             Authentication auth) {
-
-        // Get teacher ID from authentication
-        Long teacherId = Long.parseLong(auth.getName());
-
-        // Get submission detail
-        SubmissionGradingDetailDTO detail = gradingService.getSubmissionDetail(
-                submissionId, teacherId
-        );
-
+        Long teacherId = getCurrentUserId(auth);
+        log.info("GET /api/grading/submissions/{} - teacherId: {}", id, teacherId);
+        
+        GradingDetailDTO detail = gradingService.getSubmissionDetail(id, teacherId);
+        
+        log.info("Retrieved submission detail - submissionId: {}, totalQuestions: {}", 
+                id, detail.getTotalQuestions());
         return ResponseEntity.ok(detail);
     }
-
+    
     /* ---------------------------------------------------
-     * Chấm điểm cho một câu trả lời
-     * POST /api/grading/grade-answer
-     * @param request Thông tin chấm điểm
-     * @param auth Authentication object
-     * @returns Kết quả chấm điểm
-     * @author: K24DTCN210-NVMANH (20/11/2025 11:21)
+     * Chấm điểm một câu trả lời
+     * POST /api/grading/answers/{answerId}/grade
+     * @param answerId ID của câu trả lời
+     * @param request Request chứa điểm và feedback
+     * @returns StudentAnswer đã được cập nhật
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:34)
      * --------------------------------------------------- */
-    @PostMapping("/grade-answer")
-    @PreAuthorize("hasAnyRole('TEACHER', 'DEPT_MANAGER', 'ADMIN')")
-    public ResponseEntity<Map<String, Object>> gradeAnswer(
+    @PostMapping("/answers/{answerId}/grade")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<StudentAnswer> gradeAnswer(
+            @PathVariable Long answerId,
             @Valid @RequestBody GradeAnswerRequest request,
             Authentication auth) {
-
-        // Get teacher ID from authentication
-        Long teacherId = Long.parseLong(auth.getName());
-
-        // Grade answer
-        Map<String, Object> result = gradingService.gradeAnswer(request, teacherId);
-
-        return ResponseEntity.ok(result);
+        
+        Long teacherId = getCurrentUserId(auth);
+        log.info("POST /api/grading/answers/{}/grade - teacherId: {}, score: {}", 
+                answerId, teacherId, request.getScore());
+        
+        StudentAnswer answer = gradingService.gradeAnswer(answerId, request, teacherId);
+        
+        log.info("Answer graded successfully - answerId: {}, score: {}/{}", 
+                answerId, answer.getPointsEarned(), answer.getMaxPoints());
+        return ResponseEntity.ok(answer);
     }
-
+    
     /* ---------------------------------------------------
-     * Hoàn tất quá trình chấm điểm (finalize)
-     * POST /api/grading/finalize/{submissionId}
-     * @param submissionId ID của submission
-     * @param auth Authentication object
-     * @returns Kết quả cuối cùng của bài thi
-     * @author: K24DTCN210-NVMANH (20/11/2025 11:21)
+     * Hoàn tất việc chấm điểm - tính tổng điểm và chuyển status sang GRADED
+     * POST /api/grading/submissions/{id}/finalize
+     * @param id ID của bài nộp
+     * @param request Request chứa nhận xét chung
+     * @returns ExamSubmission đã hoàn tất chấm điểm
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:36)
      * --------------------------------------------------- */
-    @PostMapping("/finalize/{submissionId}")
-    @PreAuthorize("hasAnyRole('TEACHER', 'DEPT_MANAGER', 'ADMIN')")
-    public ResponseEntity<ExamResultDTO> finalizeGrading(
-            @PathVariable Long submissionId,
+    @PostMapping("/submissions/{id}/finalize")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<ExamSubmission> finalizeGrading(
+            @PathVariable Long id,
+            @Valid @RequestBody FinalizeGradingRequest request,
             Authentication auth) {
-
-        // Get teacher ID from authentication
-        Long teacherId = Long.parseLong(auth.getName());
-
-        // Finalize grading
-        ExamResultDTO result = gradingService.finalizeGrading(submissionId, teacherId);
-
-        return ResponseEntity.ok(result);
+        
+        Long teacherId = getCurrentUserId(auth);
+        log.info("POST /api/grading/submissions/{}/finalize - teacherId: {}", id, teacherId);
+        
+        ExamSubmission submission = gradingService.finalizeGrading(id, request, teacherId);
+        
+        log.info("Grading finalized successfully - submissionId: {}, totalScore: {}/{}, status: {}", 
+                id, submission.getTotalScore(), submission.getMaxScore(), submission.getStatus());
+        return ResponseEntity.ok(submission);
+    }
+    
+    /* ---------------------------------------------------
+     * Lấy thống kê chấm điểm cho một đề thi
+     * GET /api/grading/stats/{examId}
+     * @param examId ID của đề thi
+     * @returns Map chứa các thống kê
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:38)
+     * --------------------------------------------------- */
+    @GetMapping("/stats/{examId}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ResponseEntity<Map<String, Object>> getGradingStats(
+            @PathVariable Long examId,
+            Authentication auth) {
+        Long teacherId = getCurrentUserId(auth);
+        log.info("GET /api/grading/stats/{} - teacherId: {}", examId, teacherId);
+        
+        Map<String, Object> stats = gradingService.getGradingStats(examId, teacherId);
+        
+        log.info("Retrieved grading stats - examId: {}, totalSubmissions: {}, graded: {}", 
+                examId, stats.get("totalSubmissions"), stats.get("graded"));
+        return ResponseEntity.ok(stats);
+    }
+    
+    /* ---------------------------------------------------
+     * Lấy ID của user hiện tại từ Authentication
+     * JWT token có sub field chứa userId, auth.getName() trả về sub
+     * @param auth Authentication object
+     * @returns userId
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:42)
+     * EditBy: K24DTCN210-NVMANH (21/11/2025 15:56) - Fix lỗi: auth.getName() trả về userId chứ không phải email
+     * --------------------------------------------------- */
+    private Long getCurrentUserId(Authentication auth) {
+        // auth.getName() trả về giá trị của "sub" field trong JWT = userId (as String)
+        String userIdStr = auth.getName();
+        try {
+            return Long.parseLong(userIdStr);
+        } catch (NumberFormatException e) {
+            log.error("Cannot parse userId from token: {}", userIdStr);
+            throw new RuntimeException("Invalid user ID in token");
+        }
     }
 }

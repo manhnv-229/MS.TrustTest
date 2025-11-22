@@ -1,3 +1,4 @@
+com\mstrust\exam\dto\exam\ExamDTO.class
 com\mstrust\exam\dto\StudentInfoDTO$StudentInfoDTOBuilder.class
 com\mstrust\exam\dto\ExamDTO$ExamDTOBuilder.class
 com\mstrust\exam\entity\ExamSubmission.class
@@ -22,6 +23,8 @@ com\mstrust\exam\entity\QuestionBank.class
 com\mstrust\exam\dto\AvailableExamDTO.class
 com\mstrust\exam\dto\TeacherLiveViewDTO.class
 com\mstrust\exam\dto\ActiveSessionDTO.class
+com\mstrust\exam\dto\grading\GradingDetailDTO.class
+com\mstrust\exam\dto\grading\AnswerResultDTO.class
 com\mstrust\exam\entity\Department$DepartmentBuilder.class
 com\mstrust\exam\entity\ExamStatus.class
 com\mstrust\exam\service\QuestionBankService.class
@@ -35,6 +38,7 @@ com\mstrust\exam\dto\websocket\StudentProgressMessage.class
 com\mstrust\exam\entity\ExamSubmission$ExamSubmissionBuilder.class
 com\mstrust\exam\service\UserService.class
 com\mstrust\exam\dto\CreateQuestionBankRequest.class
+com\mstrust\exam\dto\grading\FinalizeGradingRequest$FinalizeGradingRequestBuilder.class
 com\mstrust\exam\dto\monitoring\ActivityLogRequest$ActivityEntry$ActivityEntryBuilder.class
 com\mstrust\exam\dto\QuestionForStudentDTO.class
 com\mstrust\exam\service\SubjectClassService.class
@@ -50,6 +54,7 @@ com\mstrust\exam\service\ExamService.class
 com\mstrust\exam\entity\ExamFormat.class
 com\mstrust\exam\controller\ExamSessionController.class
 com\mstrust\exam\repository\ExamQuestionRepository.class
+com\mstrust\exam\dto\grading\GradingSubmissionListDTO$GradingSubmissionListDTOBuilder.class
 com\mstrust\exam\dto\UpdateExamRequest.class
 com\mstrust\exam\service\ScreenshotService.class
 com\mstrust\exam\entity\Question.class
@@ -57,6 +62,7 @@ com\mstrust\exam\dto\SubmitAnswerRequest$SubmitAnswerRequestBuilder.class
 com\mstrust\exam\dto\GradeAnswerRequest.class
 com\mstrust\exam\dto\ClassDTO$ClassDTOBuilder.class
 com\mstrust\exam\entity\Screenshot$ScreenshotBuilder.class
+com\mstrust\exam\dto\grading\AnswerForGradingDTO$AnswerForGradingDTOBuilder.class
 com\mstrust\exam\dto\PauseExamRequest.class
 com\mstrust\exam\dto\StartExamResponse.class
 com\mstrust\exam\dto\CreateExamRequest.class
@@ -64,10 +70,12 @@ com\mstrust\exam\dto\websocket\ConnectionStatusMessage.class
 com\mstrust\exam\dto\AnswerForGradingDTO$AnswerForGradingDTOBuilder.class
 com\mstrust\exam\security\CustomUserDetailsService.class
 com\mstrust\exam\dto\CreateClassRequest.class
+com\mstrust\exam\dto\user\UserDTO.class
 com\mstrust\exam\controller\ExamTakingController.class
 com\mstrust\exam\controller\MonitoringController.class
 com\mstrust\exam\controller\QuestionBankController.class
 com\mstrust\exam\dto\CreateQuestionRequest$CreateQuestionRequestBuilder.class
+com\mstrust\exam\dto\grading\AnswerResultDTO$AnswerResultDTOBuilder.class
 com\mstrust\exam\dto\CreateSubjectClassRequest.class
 com\mstrust\exam\exception\GlobalExceptionHandler$ErrorResponse.class
 com\mstrust\exam\security\JwtAuthenticationFilter.class
@@ -77,6 +85,7 @@ com\mstrust\exam\dto\UpdateExamQuestionRequest$UpdateExamQuestionRequestBuilder.
 com\mstrust\exam\entity\Subject$SubjectBuilder.class
 com\mstrust\exam\service\ActivityLogService.class
 com\mstrust\exam\entity\SubjectClass$SubjectClassBuilder.class
+com\mstrust\exam\dto\grading\GradingSubmissionListDTO.class
 com\mstrust\exam\dto\DepartmentDTO.class
 com\mstrust\exam\config\WebSocketConfig.class
 com\mstrust\exam\dto\ChangePasswordRequest$ChangePasswordRequestBuilder.class
@@ -126,6 +135,7 @@ com\mstrust\exam\dto\monitoring\ActivityLogRequest$ActivityEntry.class
 com\mstrust\exam\entity\MonitoringLevel.class
 com\mstrust\exam\controller\ExamSessionWebSocketController.class
 com\mstrust\exam\controller\SubjectClassController.class
+com\mstrust\exam\dto\grading\GradingDetailDTO$GradingDetailDTOBuilder.class
 com\mstrust\exam\dto\CreateDepartmentRequest$CreateDepartmentRequestBuilder.class
 com\mstrust\exam\dto\monitoring\ActivityLogDTO$ActivityLogDTOBuilder.class
 com\mstrust\exam\dto\QuestionDTO.class
@@ -134,6 +144,7 @@ com\mstrust\exam\dto\ChangePasswordRequest.class
 com\mstrust\exam\dto\StudentInfoDTO.class
 com\mstrust\exam\service\FtpStorageService.class
 com\mstrust\exam\dto\PauseExamRequest$PauseExamRequestBuilder.class
+com\mstrust\exam\dto\user\UserDTO$UserDTOBuilder.class
 com\mstrust\exam\dto\UpdateQuestionRequest.class
 com\mstrust\exam\dto\CreateClassRequest$CreateClassRequestBuilder.class
 com\mstrust\exam\repository\QuestionRepository.class
@@ -160,6 +171,7 @@ com\mstrust\exam\dto\ExamDTO.class
 com\mstrust\exam\entity\QuestionBank$QuestionBankBuilder.class
 com\mstrust\exam\exception\InvalidCredentialsException.class
 com\mstrust\exam\security\JwtTokenProvider.class
+com\mstrust\exam\dto\grading\StudentResultDTO.class
 com\mstrust\exam\entity\StudentAnswer.class
 com\mstrust\exam\entity\Screenshot.class
 com\mstrust\exam\entity\ClassEntity.class
@@ -174,6 +186,7 @@ com\mstrust\exam\dto\UserStatisticsDTO.class
 com\mstrust\exam\service\QuestionBankService$1.class
 com\mstrust\exam\controller\ClassController.class
 com\mstrust\exam\dto\AvailableExamDTO$AvailableExamDTOBuilder.class
+com\mstrust\exam\dto\grading\AnswerForGradingDTO.class
 com\mstrust\exam\repository\ClassRepository.class
 com\mstrust\exam\repository\ScreenshotRepository.class
 com\mstrust\exam\entity\ExamQuestion.class
@@ -199,20 +212,24 @@ com\mstrust\exam\exception\ResourceNotFoundException.class
 com\mstrust\exam\dto\SubmissionListItemDTO.class
 com\mstrust\exam\dto\SubmitForReviewRequest$SubmitForReviewRequestBuilder.class
 com\mstrust\exam\dto\SubmissionGradingDetailDTO$SubmissionGradingDetailDTOBuilder.class
+com\mstrust\exam\dto\exam\ExamDTO$ExamDTOBuilder.class
 com\mstrust\exam\entity\ClassEntity$ClassEntityBuilder.class
 com\mstrust\exam\dto\ExamWithQuestionsDTO.class
 com\mstrust\exam\exception\DuplicateResourceException.class
 com\mstrust\exam\dto\monitoring\ScreenshotUploadRequest$ScreenshotUploadRequestBuilder.class
+com\mstrust\exam\dto\grading\FinalizeGradingRequest.class
 com\mstrust\exam\dto\UpdateSubjectClassRequest$UpdateSubjectClassRequestBuilder.class
 com\mstrust\exam\dto\UpdateExamQuestionRequest.class
 com\mstrust\exam\service\QuestionService.class
 com\mstrust\exam\controller\DepartmentController.class
 com\mstrust\exam\dto\ExamSummaryDTO.class
 com\mstrust\exam\repository\ExamSubmissionRepository.class
+com\mstrust\exam\dto\grading\StudentResultDTO$StudentResultDTOBuilder.class
 com\mstrust\exam\entity\ActivityLog.class
 com\mstrust\exam\dto\StartExamResponse$StartExamResponseBuilder.class
 com\mstrust\exam\entity\SubjectClassStudent$SubjectClassStudentBuilder.class
 com\mstrust\exam\service\GradingService.class
+com\mstrust\exam\dto\grading\GradeAnswerRequest$GradeAnswerRequestBuilder.class
 com\mstrust\exam\dto\UpdateDepartmentRequest.class
 com\mstrust\exam\dto\AddQuestionToExamRequest$AddQuestionToExamRequestBuilder.class
 com\mstrust\exam\dto\UpdateQuestionBankRequest$UpdateQuestionBankRequestBuilder.class
@@ -230,6 +247,7 @@ com\mstrust\exam\dto\LoginRequest.class
 com\mstrust\exam\dto\monitoring\AlertCreateRequest.class
 com\mstrust\exam\dto\ReorderQuestionsRequest$QuestionOrder.class
 com\mstrust\exam\dto\SubjectClassStudentDTO.class
+com\mstrust\exam\dto\grading\GradeAnswerRequest.class
 com\mstrust\exam\dto\monitoring\ActivityLogRequest.class
 com\mstrust\exam\service\QuestionService$1.class
 com\mstrust\exam\dto\ExamQuestionDTO$ExamQuestionDTOBuilder.class

@@ -152,7 +152,7 @@ public class MonitoringWebSocketController {
                         .build();
                 
                 webSocketEventService.sendTimerSync(message);
-                log.info("Force synced timer for exam {}", examId);
+                // log.info("Force synced timer for exam {}", examId);
             }
             
         } catch (Exception e) {

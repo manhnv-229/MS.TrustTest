@@ -232,4 +232,31 @@ public interface ExamSubmissionRepository extends JpaRepository<ExamSubmission, 
      * --------------------------------------------------- */
     @Query("SELECT s FROM ExamSubmission s WHERE s.status = :status ORDER BY s.submittedAt DESC")
     List<ExamSubmission> findByStatus(@Param("status") SubmissionStatus status);
+
+    /* ---------------------------------------------------
+     * Lấy submissions theo status và teacherId (cho grading)
+     * @param status Trạng thái cần lọc
+     * @param teacherId ID của giáo viên
+     * @returns List submissions của các lớp giáo viên dạy
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:25)
+     * --------------------------------------------------- */
+    @Query("SELECT s FROM ExamSubmission s " +
+           "WHERE s.status = :status " +
+           "AND s.exam.subjectClass.teacher.id = :teacherId " +
+           "ORDER BY s.submittedAt DESC")
+    List<ExamSubmission> findByStatusAndTeacherId(
+        @Param("status") SubmissionStatus status,
+        @Param("teacherId") Long teacherId
+    );
+
+    /* ---------------------------------------------------
+     * Lấy tất cả submissions của các lớp giáo viên dạy (cho grading)
+     * @param teacherId ID của giáo viên
+     * @returns List submissions của các lớp giáo viên dạy
+     * @author: K24DTCN210-NVMANH (21/11/2025 14:26)
+     * --------------------------------------------------- */
+    @Query("SELECT s FROM ExamSubmission s " +
+           "WHERE s.exam.subjectClass.teacher.id = :teacherId " +
+           "ORDER BY s.submittedAt DESC")
+    List<ExamSubmission> findByTeacherId(@Param("teacherId") Long teacherId);
 }
