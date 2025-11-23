@@ -1,0 +1,361 @@
+/* ========================================
+ * Exam Common Stylesheet - Phase 8
+ * Styles chung cho tất cả exam screens
+ * @author: K24DTCN210-NVMANH (23/11/2025 12:04)
+ * ======================================== */
+
+/* === ROOT COLORS === */
+.root {
+    /* Primary Colors */
+    -fx-primary: #2196F3;
+    -fx-primary-dark: #1976D2;
+    -fx-primary-light: #BBDEFB;
+    
+    /* Status Colors */
+    -fx-success: #4CAF50;
+    -fx-warning: #FF9800;
+    -fx-danger: #F44336;
+    -fx-info: #2196F3;
+    
+    /* Neutral Colors */
+    -fx-background: #F5F5F5;
+    -fx-surface: #FFFFFF;
+    -fx-border: #E0E0E0;
+    
+    /* Text Colors */
+    -fx-text-primary: #212121;
+    -fx-text-secondary: #757575;
+    -fx-text-disabled: #BDBDBD;
+}
+
+/* === PAGE TITLE === */
+.page-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* === SECTIONS === */
+.header-section {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 0 0 1 0;
+}
+
+.footer-section {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* === FILTERS === */
+.filter-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* === BUTTONS === */
+.button {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: -fx-primary-dark;
+}
+
+.button:pressed {
+    -fx-background-color: derive(-fx-primary-dark, -10%);
+}
+
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-primary;
+    -fx-border-color: -fx-primary;
+    -fx-border-width: 2;
+    -fx-border-radius: 4;
+}
+
+.secondary-button:hover {
+    -fx-background-color: -fx-primary-light;
+}
+
+.danger-button {
+    -fx-background-color: -fx-danger;
+}
+
+.danger-button:hover {
+    -fx-background-color: derive(-fx-danger, -10%);
+}
+
+.success-button {
+    -fx-background-color: -fx-success;
+}
+
+.success-button:hover {
+    -fx-background-color: derive(-fx-success, -10%);
+}
+
+/* === EXAM CARD === */
+.exam-card {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 4, 0, 0, 2);
+}
+
+.exam-card:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 4);
+    -fx-cursor: hand;
+}
+
+.exam-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.exam-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.exam-info-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.exam-info-value {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* === STATUS BADGES === */
+.status-badge {
+    -fx-padding: 4 12;
+    -fx-background-radius: 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.status-upcoming {
+    -fx-background-color: -fx-info;
+    -fx-text-fill: white;
+}
+
+.status-ongoing {
+    -fx-background-color: -fx-success;
+    -fx-text-fill: white;
+}
+
+.status-ended {
+    -fx-background-color: -fx-text-disabled;
+    -fx-text-fill: white;
+}
+
+/* === EMPTY STATE === */
+.empty-state-text {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.empty-state-subtext {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* === COMBO BOX === */
+.combo-box {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.combo-box:focused {
+    -fx-border-color: -fx-primary;
+    -fx-border-width: 2;
+}
+
+/* === SCROLL PANE === */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: -fx-background;
+}
+
+.scroll-pane .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: -fx-text-disabled;
+    -fx-background-radius: 4;
+}
+
+.scroll-pane .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -fx-text-secondary;
+}
+
+/* === TIMER COLORS === */
+.timer-green {
+    -fx-text-fill: -fx-success;
+}
+
+.timer-yellow {
+    -fx-text-fill: -fx-warning;
+}
+
+.timer-red {
+    -fx-text-fill: -fx-danger;
+    -fx-font-weight: bold;
+}
+
+/* === QUESTION PALETTE === */
+.question-button {
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-background-radius: 4;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.question-unanswered {
+    -fx-background-color: white;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 2;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.question-answered {
+    -fx-background-color: -fx-success;
+    -fx-text-fill: white;
+}
+
+.question-marked {
+    -fx-background-color: -fx-warning;
+    -fx-text-fill: white;
+}
+
+.question-current {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(33,150,243,0.4), 8, 0, 0, 0);
+}
+
+/* === LABELS === */
+.label {
+    -fx-text-fill: -fx-text-primary;
+}
+
+.label-secondary {
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* === PROGRESS BAR === */
+.progress-bar {
+    -fx-background-color: -fx-border;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: -fx-primary;
+    -fx-background-radius: 4;
+}
+
+/* === TEXT FIELD === */
+.text-field {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 8;
+}
+
+.text-field:focused {
+    -fx-border-color: -fx-primary;
+    -fx-border-width: 2;
+}
+
+/* === TEXT AREA === */
+.text-area {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.text-area:focused {
+    -fx-border-color: -fx-primary;
+    -fx-border-width: 2;
+}
+
+.text-area .content {
+    -fx-background-color: -fx-surface;
+}
+
+/* === RADIO BUTTON === */
+.radio-button {
+    -fx-font-size: 14px;
+}
+
+.radio-button .radio {
+    -fx-border-color: -fx-border;
+    -fx-border-width: 2;
+}
+
+.radio-button:selected .radio .dot {
+    -fx-background-color: -fx-primary;
+}
+
+/* === CHECK BOX === */
+.check-box {
+    -fx-font-size: 14px;
+}
+
+.check-box .box {
+    -fx-border-color: -fx-border;
+    -fx-border-width: 2;
+    -fx-background-color: -fx-surface;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -fx-primary;
+    -fx-border-color: -fx-primary;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+/* === ALERT / DIALOG === */
+.alert {
+    -fx-background-color: -fx-surface;
+}
+
+.alert .header-panel {
+    -fx-background-color: -fx-primary;
+}
+
+.alert .header-panel .label {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}

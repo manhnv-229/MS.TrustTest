@@ -1,6 +1,7 @@
 module com.mstrust.client {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.web;
     requires com.github.kwhat.jnativehook;
     requires com.sun.jna;
     requires com.sun.jna.platform;
@@ -9,9 +10,12 @@ module com.mstrust.client {
     requires java.net.http;
     requires java.desktop;
     requires org.slf4j;
+    requires org.fxmisc.richtext;
     
     opens com.mstrust.client to javafx.fxml;
     opens com.mstrust.client.dto to com.google.gson;
+    opens com.mstrust.client.exam.controller to javafx.fxml;
+    opens com.mstrust.client.exam.dto to com.google.gson;
     
     exports com.mstrust.client;
     exports com.mstrust.client.monitoring;
@@ -19,4 +23,10 @@ module com.mstrust.client {
     exports com.mstrust.client.config;
     exports com.mstrust.client.dto;
     exports com.mstrust.client.util;
+    exports com.mstrust.client.exam.controller;
+    exports com.mstrust.client.exam.component;
+    exports com.mstrust.client.exam.dto;
+    exports com.mstrust.client.exam.model;
+    exports com.mstrust.client.exam.api;
+    exports com.mstrust.client.exam.util;
 }
