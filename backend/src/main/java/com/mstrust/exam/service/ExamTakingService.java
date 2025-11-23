@@ -314,7 +314,8 @@ public class ExamTakingService {
         // Set basic info
         if (isNewAnswer) {
             answer.setSubmission(submission);
-            answer.setQuestion(question);
+            answer.setQuestionId(request.getQuestionId());  // Fix: Set questionId directly for insertable=false mapping
+            answer.setQuestion(question);  // Keep for JPA reference
             answer.setFirstSavedAt(now);
             answer.setSavedCount(0);
         }
@@ -349,7 +350,9 @@ public class ExamTakingService {
         
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
-        result.put("message", request.getIsAutoSave() ? "Answer auto-saved" : "Answer saved");
+        // Handle null isAutoSave - default to false (manual save)
+        boolean isAutoSave = request.getIsAutoSave() != null && request.getIsAutoSave();
+        result.put("message", isAutoSave ? "Answer auto-saved" : "Answer saved");
         result.put("isGraded", answer.getIsCorrect() != null);
         result.put("pointsEarned", answer.getPointsEarned());
         

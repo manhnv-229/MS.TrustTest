@@ -39,7 +39,7 @@ public class MonitoringWebSocketController {
      * Tự động chạy background để đồng bộ timer
      * @author: K24DTCN210-NVMANH (21/11/2025 01:51)
      * --------------------------------------------------- */
-    @Scheduled(fixedRate = 5000) // Chạy mỗi 5 giây
+    @Scheduled(fixedRate = 500000) // Chạy mỗi 5 giây
     public void syncExamTimers() {
         try {
             // Lấy tất cả active submissions với eager fetch exam
