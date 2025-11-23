@@ -31,14 +31,18 @@ public class ExamTakingController {
     /* ---------------------------------------------------
      * GET /exam-taking/available
      * Lấy danh sách exams mà student có thể làm
+     * @param subjectCode Mã môn học để filter (optional)
      * @returns List<AvailableExamDTO>
      * @author: K24DTCN210-NVMANH (19/11/2025 15:32)
+     * EditBy: K24DTCN210-NVMANH (23/11/2025 16:45) - Add subjectCode filter parameter
      * --------------------------------------------------- */
     @GetMapping("/available")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<AvailableExamDTO>> getAvailableExams(Authentication auth) {
+    public ResponseEntity<List<AvailableExamDTO>> getAvailableExams(
+            @RequestParam(required = false) String subjectCode,
+            Authentication auth) {
         Long studentId = getCurrentUserId(auth);
-        List<AvailableExamDTO> exams = examTakingService.getAvailableExams(studentId);
+        List<AvailableExamDTO> exams = examTakingService.getAvailableExams(studentId, subjectCode);
         return ResponseEntity.ok(exams);
     }
     

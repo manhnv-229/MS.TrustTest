@@ -1,0 +1,899 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "Phase 8 - Exam Taking APIs - Full Test Suite",
+  "dateExported": "2025-11-23T15:10:00.000Z",
+  "version": "1.1",
+  "folders": [
+    {
+      "_id": "auth-folder",
+      "name": "1. Authentication",
+      "containerId": "",
+      "created": "2025-11-23T15:10:00.000Z",
+      "sortNum": 10000
+    },
+    {
+      "_id": "exam-list-folder",
+      "name": "2. Exam List APIs",
+      "containerId": "",
+      "created": "2025-11-23T15:10:00.000Z",
+      "sortNum": 20000
+    },
+    {
+      "_id": "exam-taking-folder",
+      "name": "3. Exam Taking APIs",
+      "containerId": "",
+      "created": "2025-11-23T15:10:00.000Z",
+      "sortNum": 30000
+    },
+    {
+      "_id": "error-cases-folder",
+      "name": "4. Error Cases",
+      "containerId": "",
+      "created": "2025-11-23T15:10:00.000Z",
+      "sortNum": 40000
+    },
+    {
+      "_id": "edge-cases-folder",
+      "name": "5. Edge Cases",
+      "containerId": "",
+      "created": "2025-11-23T15:10:00.000Z",
+      "sortNum": 50000
+    }
+  ],
+  "requests": [
+    {
+      "_id": "login-student",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "auth-folder",
+      "name": "✅ Login Student (Get Token)",
+      "url": "{{baseUrl}}/api/auth/login",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"student@test.com\",\n  \"password\": \"Teacher@123\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "custom": "json.token",
+          "action": "istype",
+          "value": "string"
+        }
+      ]
+    },
+    {
+      "_id": "login-student2",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "auth-folder",
+      "name": "✅ Login Student 2",
+      "url": "{{baseUrl}}/api/auth/login",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"student2@test.com\",\n  \"password\": \"Teacher@123\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "login-teacher",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "auth-folder",
+      "name": "✅ Login Teacher",
+      "url": "{{baseUrl}}/api/auth/login",
+      "method": "POST",
+      "sortNum": 30000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"teacher1@mstrust.edu.vn\",\n  \"password\": \"Teacher@123\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "get-available-exams-success",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-list-folder",
+      "name": "✅ Get Available Exams - Success",
+      "url": "{{baseUrl}}/api/exam-taking/available",
+      "method": "GET",
+      "sortNum": 100000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "custom": "json",
+          "action": "istype",
+          "value": "array"
+        }
+      ]
+    },
+    {
+      "_id": "get-available-exams-empty",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-list-folder",
+      "name": "✅ Get Available Exams - Empty List",
+      "url": "{{baseUrl}}/api/exam-taking/available",
+      "method": "GET",
+      "sortNum": 110000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student2Token}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "get-available-exams-filter-subject",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-list-folder",
+      "name": "✅ Filter by Subject Code",
+      "url": "{{baseUrl}}/api/exam-taking/available?subjectCode=PRO192",
+      "method": "GET",
+      "sortNum": 120000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [
+        {
+          "name": "subjectCode",
+          "value": "PRO192",
+          "isPath": false
+        }
+      ],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "start-exam-success",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-taking-folder",
+      "name": "✅ Start Exam - Success",
+      "url": "{{baseUrl}}/api/exam-taking/start/{{examId}}",
+      "method": "POST",
+      "sortNum": 200000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        },
+        {
+          "type": "json-query",
+          "custom": "json.submissionId",
+          "action": "istype",
+          "value": "number"
+        },
+        {
+          "type": "json-query",
+          "custom": "json.questions",
+          "action": "istype",
+          "value": "array"
+        }
+      ]
+    },
+    {
+      "_id": "save-answer-multiple-choice",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-taking-folder",
+      "name": "✅ Save Answer - Multiple Choice",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 210000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"A\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "save-answer-essay",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-taking-folder",
+      "name": "✅ Save Answer - Essay",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 220000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{essayQuestionId}},\n  \"answerText\": \"This is my detailed essay answer explaining the concept thoroughly...\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "save-answer-marked-review",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-taking-folder",
+      "name": "✅ Save Answer - Marked for Review",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 230000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"B\",\n  \"isMarkedForReview\": true\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "save-answer-update",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-taking-folder",
+      "name": "✅ Save Answer - Update Existing",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 240000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"C\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "submit-exam-success",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-taking-folder",
+      "name": "✅ Submit Exam - Success",
+      "url": "{{baseUrl}}/api/exam-taking/submit/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 250000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "get-result",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "exam-taking-folder",
+      "name": "✅ Get Exam Result",
+      "url": "{{baseUrl}}/api/exam-taking/result/{{submissionId}}",
+      "method": "GET",
+      "sortNum": 260000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "error-no-token",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ No Authorization Token",
+      "url": "{{baseUrl}}/api/exam-taking/available",
+      "method": "GET",
+      "sortNum": 300000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "401"
+        }
+      ]
+    },
+    {
+      "_id": "error-invalid-token",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Invalid Token",
+      "url": "{{baseUrl}}/api/exam-taking/available",
+      "method": "GET",
+      "sortNum": 310000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer invalid_token_here"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "401"
+        }
+      ]
+    },
+    {
+      "_id": "error-exam-not-found",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Start Exam - Not Found",
+      "url": "{{baseUrl}}/api/exam-taking/start/99999",
+      "method": "POST",
+      "sortNum": 320000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "404"
+        }
+      ]
+    },
+    {
+      "_id": "error-exam-not-started",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Start Exam - Not Yet Started",
+      "url": "{{baseUrl}}/api/exam-taking/start/{{futureExamId}}",
+      "method": "POST",
+      "sortNum": 330000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "error-exam-ended",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Start Exam - Already Ended",
+      "url": "{{baseUrl}}/api/exam-taking/start/{{pastExamId}}",
+      "method": "POST",
+      "sortNum": 340000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "error-already-submitted",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Start Exam - Already Submitted",
+      "url": "{{baseUrl}}/api/exam-taking/start/{{examId}}",
+      "method": "POST",
+      "sortNum": 350000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "error-wrong-student",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Save Answer - Wrong Student",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 360000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{student2Token}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"A\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "403"
+        }
+      ]
+    },
+    {
+      "_id": "error-invalid-question",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Save Answer - Invalid Question ID",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 370000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": 99999,\n  \"answerText\": \"A\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "error-empty-answer",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Save Answer - Empty Text",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 380000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"\"\n}",
+        "form": []
+      },
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "error-submit-already-submitted",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "error-cases-folder",
+      "name": "❌ Submit - Already Submitted",
+      "url": "{{baseUrl}}/api/exam-taking/submit/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 390000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "res-code",
+          "custom": "",
+          "action": "equal",
+          "value": "400"
+        }
+      ]
+    },
+    {
+      "_id": "edge-null-answer",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "edge-cases-folder",
+      "name": "⚠️ Save with Null Answer",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 400000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": null,\n  \"isMarkedForReview\": true\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "edge-very-long-answer",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "edge-cases-folder",
+      "name": "⚠️ Save Very Long Answer (5000 chars)",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 410000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...(repeat to 5000 chars)\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "edge-special-characters",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "edge-cases-folder",
+      "name": "⚠️ Save with Special Characters",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 420000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"<script>alert('XSS')</script> & < > \\\" ' Tiếng Việt có dấu\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "edge-rapid-save",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "edge-cases-folder",
+      "name": "⚠️ Rapid Save (Concurrency Test)",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 430000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"Answer {{$timestamp}}\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "edge-submit-no-answers",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "edge-cases-folder",
+      "name": "⚠️ Submit with Zero Answers",
+      "url": "{{baseUrl}}/api/exam-taking/submit/{{emptySubmissionId}}",
+      "method": "POST",
+      "sortNum": 440000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        }
+      ],
+      "params": []
+    },
+    {
+      "_id": "edge-unicode-answer",
+      "colId": "phase8-exam-taking-full",
+      "containerId": "edge-cases-folder",
+      "name": "⚠️ Save Unicode/Emoji Answer",
+      "url": "{{baseUrl}}/api/exam-taking/save-answer/{{submissionId}}",
+      "method": "POST",
+      "sortNum": 450000,
+      "created": "2025-11-23T15:10:00.000Z",
+      "modified": "2025-11-23T15:10:00.000Z",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{studentToken}}"
+        },
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"questionId\": {{mcQuestionId}},\n  \"answerText\": \"Câu trả lời 😀 🎉 ✅ với emoji và ký tự đặc biệt 中文 日本語\"\n}",
+        "form": []
+      }
+    }
+  ]
+}

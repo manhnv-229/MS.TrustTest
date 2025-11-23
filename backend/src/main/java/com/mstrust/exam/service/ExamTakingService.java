@@ -35,29 +35,59 @@ public class ExamTakingService {
     private final StudentAnswerRepository answerRepository;
     private final ExamQuestionRepository examQuestionRepository;
     private final SubjectClassRepository subjectClassRepository;
+    private final SubjectClassStudentRepository subjectClassStudentRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     
     /* ---------------------------------------------------
      * Lấy danh sách exams student có thể làm
      * @param studentId ID của student
+     * @param subjectCode Mã môn học để filter (optional)
      * @returns List AvailableExamDTO
      * @author: K24DTCN210-NVMANH (19/11/2025 15:30)
+     * EditBy: K24DTCN210-NVMANH (23/11/2025 15:17) - Added class filter for security
+     * EditBy: K24DTCN210-NVMANH (23/11/2025 16:47) - Add subjectCode parameter
      * --------------------------------------------------- */
-    public List<AvailableExamDTO> getAvailableExams(Long studentId) {
+    public List<AvailableExamDTO> getAvailableExams(Long studentId, String subjectCode) {
         User student = userRepository.findById(studentId)
             .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
         
-        // Lấy tất cả exams PUBLISHED/ONGOING
-        List<Exam> allExams = examRepository.findAll().stream()
+        // ✅ Lấy danh sách classes mà student đã enroll
+        List<SubjectClassStudent> enrolledClasses = subjectClassStudentRepository
+            .findEnrolledClassesByStudentId(studentId);
+        
+        // Tạo Set classIds để filter nhanh
+        Set<Long> enrolledClassIds = enrolledClasses.stream()
+            .map(scs -> scs.getSubjectClass().getId())
+            .collect(Collectors.toSet());
+        
+        // ✅ Chỉ lấy exams thuộc classes mà student đã enroll
+        List<Exam> eligibleExams = examRepository.findAll().stream()
             .filter(exam -> {
+                // Check status
                 ExamStatus status = exam.getCurrentStatus();
-                return status == ExamStatus.PUBLISHED || status == ExamStatus.ONGOING;
+                if (status != ExamStatus.PUBLISHED && status != ExamStatus.ONGOING) {
+                    return false;
+                }
+                
+                // ✅ Check student có thuộc class này không
+                Long examClassId = exam.getSubjectClass().getId();
+                if (!enrolledClassIds.contains(examClassId)) {
+                    return false;
+                }
+                
+                // ✅ Filter by subjectCode if provided
+                if (subjectCode != null && !subjectCode.trim().isEmpty()) {
+                    String examSubjectCode = exam.getSubjectClass().getSubject().getSubjectCode();
+                    return examSubjectCode.equals(subjectCode);
+                }
+                
+                return true;
             })
             .collect(Collectors.toList());
         
         // Map to DTO với eligibility check
-        return allExams.stream()
+        return eligibleExams.stream()
             .map(exam -> mapToAvailableExamDTO(exam, studentId))
             .collect(Collectors.toList());
     }
