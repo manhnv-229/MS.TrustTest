@@ -10,12 +10,16 @@ module com.mstrust.client {
     requires java.net.http;
     requires java.desktop;
     requires org.slf4j;
-    requires org.fxmisc.richtext;
+    
+    // Phase 8.4: Auto-Save Services - Required for automatic modules
+    requires okhttp3;  // OkHttp HTTP client
+    requires org.fxmisc.richtext;  // RichTextFX code editor
     
     opens com.mstrust.client to javafx.fxml;
     opens com.mstrust.client.dto to com.google.gson;
     opens com.mstrust.client.exam.controller to javafx.fxml;
     opens com.mstrust.client.exam.dto to com.google.gson;
+    opens com.mstrust.client.exam.service to com.google.gson;  // Phase 8.4: For QueuedAnswer JSON
     
     exports com.mstrust.client;
     exports com.mstrust.client.monitoring;
@@ -29,4 +33,5 @@ module com.mstrust.client {
     exports com.mstrust.client.exam.model;
     exports com.mstrust.client.exam.api;
     exports com.mstrust.client.exam.util;
+    exports com.mstrust.client.exam.service;
 }

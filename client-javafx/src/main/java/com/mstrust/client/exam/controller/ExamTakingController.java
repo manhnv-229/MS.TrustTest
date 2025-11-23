@@ -8,6 +8,9 @@ import com.mstrust.client.exam.dto.QuestionDTO;
 import com.mstrust.client.exam.dto.SaveAnswerRequest;
 import com.mstrust.client.exam.dto.StartExamResponse;
 import com.mstrust.client.exam.model.ExamSession;
+import com.mstrust.client.exam.service.AutoSaveService;
+import com.mstrust.client.exam.service.NetworkMonitor;
+import com.mstrust.client.exam.service.ConnectionRecoveryService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -30,6 +33,7 @@ import java.util.Optional;
  * - Handle save answer (manual + auto)
  * - Handle submit exam
  * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
+ * EditBy: K24DTCN210-NVMANH (23/11/2025 18:00) - Phase 8.4: Integrated AutoSaveService + NetworkMonitor
  * --------------------------------------------------- */
 public class ExamTakingController {
 
@@ -53,11 +57,14 @@ public class ExamTakingController {
     private ExamSession examSession;
     private ExamApiClient apiClient;
     
+    // Phase 8.4: Auto-Save Services
+    private AutoSaveService autoSaveService;
+    private NetworkMonitor networkMonitor;
+    private ConnectionRecoveryService recoveryService;
+    
     // State tracking
     private Map<Long, String> answersCache; // questionId -> answer
     private Map<Long, Boolean> markedForReview; // questionId -> marked
-    private boolean isAutoSaveEnabled = true;
-    private Thread autoSaveThread;
 
     /* ---------------------------------------------------
      * Constructor
@@ -74,6 +81,7 @@ public class ExamTakingController {
      * @param examId ID của đề thi
      * @param authToken Bearer token
      * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
+     * EditBy: K24DTCN210-NVMANH (23/11/2025 18:00) - Phase 8.4: Added initializeAutoSaveServices()
      * --------------------------------------------------- */
     public void initializeExam(Long examId, String authToken) {
         this.apiClient = new ExamApiClient(authToken);
@@ -101,8 +109,8 @@ public class ExamTakingController {
                 Platform.runLater(() -> {
                     try {
                         initializeComponents(response);
+                        initializeAutoSaveServices(); // Phase 8.4: NEW
                         displayCurrentQuestion();
-                        startAutoSave(response.getAutoSaveIntervalSeconds());
                         hideLoading();
                     } catch (Exception e) {
                         showError("Lỗi khởi tạo UI", e.getMessage());
@@ -155,6 +163,30 @@ public class ExamTakingController {
         
         // 5. Setup button states
         updateNavigationButtons();
+    }
+
+    /* ---------------------------------------------------
+     * Initialize Auto-Save Services (Phase 8.4)
+     * - AutoSaveService: Periodic saves every 30s + debounced 3s
+     * - NetworkMonitor: Health check every 10s
+     * - ConnectionRecoveryService: Auto reconnect on disconnect
+     * @author: K24DTCN210-NVMANH (23/11/2025 18:00)
+     * EditBy: K24DTCN210-NVMANH (23/11/2025 18:15) - Fixed constructor calls
+     * --------------------------------------------------- */
+    private void initializeAutoSaveServices() {
+        // 1. Initialize AutoSaveService
+        autoSaveService = new AutoSaveService(apiClient);
+        autoSaveService.start(examSession);
+        
+        // 2. Initialize NetworkMonitor
+        networkMonitor = new NetworkMonitor();
+        networkMonitor.start();
+        
+        // 3. Initialize ConnectionRecoveryService
+        recoveryService = new ConnectionRecoveryService(autoSaveService);
+        networkMonitor.addListener(recoveryService);
+        
+        System.out.println("[Phase 8.4] Auto-save services initialized successfully");
     }
 
     /* ---------------------------------------------------
@@ -340,6 +372,7 @@ public class ExamTakingController {
     /* ---------------------------------------------------
      * Submit exam to backend
      * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
+     * EditBy: K24DTCN210-NVMANH (23/11/2025 18:00) - Phase 8.4: Stop services on submit
      * --------------------------------------------------- */
     private void submitExam() {
         submitButton.setDisable(true);
@@ -350,8 +383,16 @@ public class ExamTakingController {
                 apiClient.submitExam(examSession.getSubmissionId());
                 
                 Platform.runLater(() -> {
-                    stopAutoSave();
-                    timerComponent.stop();
+                    // Phase 8.4: Stop all services
+                    if (autoSaveService != null) {
+                        autoSaveService.stop();
+                    }
+                    if (networkMonitor != null) {
+                        networkMonitor.stop();
+                    }
+                    if (timerComponent != null) {
+                        timerComponent.stop();
+                    }
                     
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Nộp bài thành công");
@@ -398,51 +439,6 @@ public class ExamTakingController {
     }
 
     /* ---------------------------------------------------
-     * Start auto-save thread
-     * @param intervalSeconds Interval in seconds (e.g., 30)
-     * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
-     * --------------------------------------------------- */
-    private void startAutoSave(Integer intervalSeconds) {
-        if (intervalSeconds == null || intervalSeconds <= 0) {
-            intervalSeconds = 30; // Default 30 seconds
-        }
-        
-        final int interval = intervalSeconds * 1000; // Convert to milliseconds
-        
-        autoSaveThread = new Thread(() -> {
-            while (isAutoSaveEnabled && !Thread.currentThread().isInterrupted()) {
-                try {
-                    Thread.sleep(interval);
-                    
-                    Platform.runLater(() -> {
-                        if (isAutoSaveEnabled) {
-                            saveCurrentAnswer();
-                        }
-                    });
-                    
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        });
-        
-        autoSaveThread.setDaemon(true);
-        autoSaveThread.start();
-    }
-
-    /* ---------------------------------------------------
-     * Stop auto-save thread
-     * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
-     * --------------------------------------------------- */
-    private void stopAutoSave() {
-        isAutoSaveEnabled = false;
-        if (autoSaveThread != null && autoSaveThread.isAlive()) {
-            autoSaveThread.interrupt();
-        }
-    }
-
-    /* ---------------------------------------------------
      * Get current student name (mock - replace with actual logic)
      * @returns Student name
      * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
@@ -486,11 +482,18 @@ public class ExamTakingController {
     }
 
     /* ---------------------------------------------------
-     * Cleanup khi controller destroyed
+     * Cleanup khi controller destroyed (Phase 8.4: Updated)
      * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
+     * EditBy: K24DTCN210-NVMANH (23/11/2025 18:00) - Phase 8.4: Added service cleanup
      * --------------------------------------------------- */
     public void shutdown() {
-        stopAutoSave();
+        // Phase 8.4: Stop all services
+        if (autoSaveService != null) {
+            autoSaveService.stop();
+        }
+        if (networkMonitor != null) {
+            networkMonitor.stop();
+        }
         if (timerComponent != null) {
             timerComponent.stop();
         }
