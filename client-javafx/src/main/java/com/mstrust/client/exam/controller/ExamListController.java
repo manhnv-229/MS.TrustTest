@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -46,6 +47,10 @@ public class ExamListController {
     @FXML private VBox emptyStateBox;
     @FXML private Label examCountLabel;
     @FXML private Label lastRefreshLabel;
+    
+    // Phase 8.6: Loading overlay components
+    @FXML private StackPane loadingOverlay;
+    @FXML private Label loadingMessage;
 
     /* ---------------------------------------------------
      * Initialize - được gọi sau khi FXML loaded
@@ -95,10 +100,14 @@ public class ExamListController {
     /* ---------------------------------------------------
      * Load danh sách đề thi từ backend
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 11:03) - Phase 8.6: Use loading overlay
      * --------------------------------------------------- */
     private void loadExams() {
         // Disable refresh button
         refreshButton.setDisable(true);
+        
+        // Show loading overlay
+        showLoading("Đang tải danh sách đề thi...");
         
         // Load in background thread
         new Thread(() -> {
@@ -112,11 +121,13 @@ public class ExamListController {
                     displayExams();
                     updateLastRefreshTime();
                     refreshButton.setDisable(false);
+                    hideLoading();
                 });
                 
             } catch (Exception e) {
                 logger.error("Failed to load exams", e);
                 Platform.runLater(() -> {
+                    hideLoading();
                     showError("Không thể tải danh sách đề thi", e.getMessage());
                     refreshButton.setDisable(false);
                 });
@@ -340,14 +351,11 @@ public class ExamListController {
      * EditBy: K24DTCN210-NVMANH (23/11/2025 14:20) - Implement navigation to ExamTakingController
      * EditBy: K24DTCN210-NVMANH (24/11/2025 09:14) - Phase 8.6: Pass Stage to ExamTakingController
      * EditBy: K24DTCN210-NVMANH (24/11/2025 11:51) - Validate API before loading UI
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 11:03) - Phase 8.6: Use loading overlay instead of Alert
      * --------------------------------------------------- */
     private void startExamSession(ExamInfoDTO exam) {
-        // Show loading indicator
-        Alert loadingAlert = new Alert(Alert.AlertType.INFORMATION);
-        loadingAlert.setTitle("Đang xử lý");
-        loadingAlert.setHeaderText("Đang khởi tạo bài thi...");
-        loadingAlert.setContentText("Vui lòng chờ trong giây lát");
-        loadingAlert.show();
+        // Show loading overlay
+        showLoading("Đang khởi tạo bài thi...");
         
         // Call API in background thread
         new Thread(() -> {
@@ -359,7 +367,7 @@ public class ExamListController {
                 
                 // 2. If successful, navigate to exam screen on JavaFX thread
                 Platform.runLater(() -> {
-                    loadingAlert.close();
+                    hideLoading();
                     navigateToExamScreen(exam, response);
                 });
                 
@@ -367,7 +375,7 @@ public class ExamListController {
                 // Handle specific exam start errors
                 logger.error("ExamStartException: {}", e.getMessage());
                 Platform.runLater(() -> {
-                    loadingAlert.close();
+                    hideLoading();
                     handleExamStartError(e, exam);
                 });
                 
@@ -375,7 +383,7 @@ public class ExamListController {
                 // Handle network errors
                 logger.error("Network error during exam start", e);
                 Platform.runLater(() -> {
-                    loadingAlert.close();
+                    hideLoading();
                     showError("Lỗi kết nối", 
                         "Không thể kết nối đến server. Vui lòng kiểm tra mạng và thử lại.");
                 });
@@ -383,7 +391,7 @@ public class ExamListController {
                 // Handle unexpected errors
                 logger.error("Unexpected error during exam start", e);
                 Platform.runLater(() -> {
-                    loadingAlert.close();
+                    hideLoading();
                     showError("Lỗi", 
                         "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
                 });
@@ -545,6 +553,35 @@ public class ExamListController {
             DateTimeFormatter.ofPattern("HH:mm:ss")
         );
         lastRefreshLabel.setText("Cập nhật lần cuối: " + time);
+    }
+
+    /* ---------------------------------------------------
+     * Show loading overlay với message (Phase 8.6)
+     * @param message Loading message
+     * @author: K24DTCN210-NVMANH (25/11/2025 11:03)
+     * --------------------------------------------------- */
+    private void showLoading(String message) {
+        if (loadingOverlay != null) {
+            Platform.runLater(() -> {
+                if (loadingMessage != null) {
+                    loadingMessage.setText(message);
+                }
+                loadingOverlay.setVisible(true);
+                loadingOverlay.toFront();
+            });
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Hide loading overlay (Phase 8.6)
+     * @author: K24DTCN210-NVMANH (25/11/2025 11:03)
+     * --------------------------------------------------- */
+    private void hideLoading() {
+        if (loadingOverlay != null) {
+            Platform.runLater(() -> {
+                loadingOverlay.setVisible(false);
+            });
+        }
     }
 
     /* ---------------------------------------------------

@@ -27,6 +27,7 @@ com\mstrust\client\exam\api\ExamApiClient$2.class
 com\mstrust\client\monitoring\MonitoringCoordinator.class
 com\mstrust\client\ExamMonitoringApplication$1.class
 com\mstrust\client\exam\dto\SaveAnswerRequest$SaveAnswerRequestBuilder.class
+com\mstrust\client\exam\controller\ExamTakingController$1.class
 com\mstrust\client\exam\dto\StartExamResponse$StartExamResponseBuilder.class
 com\mstrust\client\dto\ActivityType.class
 com\mstrust\client\exam\dto\SaveAnswerRequest.class
@@ -51,6 +52,7 @@ com\mstrust\client\ExamMonitoringApplication.class
 com\mstrust\client\exam\service\NetworkMonitor.class
 com\mstrust\client\exam\dto\StartExamResponse.class
 com\mstrust\client\util\WindowDetector.class
+com\mstrust\client\exam\util\WindowCenterHelper.class
 com\mstrust\client\util\ProcessDetector.class
 com\mstrust\client\exam\service\ConnectionRecoveryService.class
 com\mstrust\client\exam\service\KeyboardBlocker.class

@@ -10,11 +10,14 @@
   Author: K24DTCN210-NVMANH (23/11/2025 12:22)
 -->
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.mstrust.client.exam.controller.ExamTakingController"
-            stylesheets="@../css/exam-common.css"
-            styleClass="exam-taking-root">
+<!-- Root StackPane để chứa BorderPane + Loading Overlay -->
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.mstrust.client.exam.controller.ExamTakingController"
+           stylesheets="@../css/exam-common.css">
+    
+    <!-- Main Content: BorderPane -->
+    <BorderPane fx:id="mainContent" styleClass="exam-taking-root">
     
     <!-- TOP: Header với Timer và Student Info -->
     <top>
@@ -190,4 +193,14 @@
         </VBox>
     </bottom>
     
-</BorderPane>
+    </BorderPane>
+    
+    <!-- Loading Overlay (Hidden by default) -->
+    <StackPane fx:id="loadingOverlay" visible="false" styleClass="loading-overlay">
+        <VBox alignment="CENTER" spacing="20">
+            <ProgressIndicator fx:id="loadingSpinner" styleClass="loading-spinner"/>
+            <Label fx:id="loadingMessage" text="Đang tải..." styleClass="loading-message"/>
+        </VBox>
+    </StackPane>
+    
+</StackPane>

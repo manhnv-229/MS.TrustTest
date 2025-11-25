@@ -525,37 +525,59 @@ public class ExamTakingService {
     
     /* ---------------------------------------------------
      * Update submission tracking trong separate transaction
-     * Để tránh rollback answer save khi có optimistic locking conflict
+     * Sử dụng retry mechanism để handle optimistic locking
      * @param submissionId ID của submission
      * @author: K24DTCN210-NVMANH (24/11/2025 16:13)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 14:10) - Added retry with delay
      * --------------------------------------------------- */
     @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void updateSubmissionTracking(Long submissionId) {
-        try {
-            ExamSubmission submission = submissionRepository.findById(submissionId)
-                .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
-            
-            Timestamp now = new Timestamp(System.currentTimeMillis());
-            submission.setLastSavedAt(now);
-            
-            Integer currentCount = submission.getAutoSaveCount();
-            submission.setAutoSaveCount(currentCount != null ? currentCount + 1 : 1);
-            
-            submission = submissionRepository.save(submission);
-            
-            log.info("[SaveAnswer] ExamSubmission updated - ID: {}, AutoSaveCount: {}", 
-                submission.getId(), submission.getAutoSaveCount());
+        int maxRetries = 3;
+        int retryDelay = 50; // ms
+        
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                ExamSubmission submission = submissionRepository.findById(submissionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
                 
-        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
-            // Optimistic locking failure - another process updated submission
-            log.warn("[SaveAnswer] Optimistic locking conflict on submission {} - " +
-                "Another process updated it. This is OK, answer was saved. Error: {}", 
-                submissionId, e.getMessage());
-        } catch (Exception e) {
-            // Other errors - log but don't fail the whole save operation
-            log.error("[SaveAnswer] CRITICAL: Failed to update submission tracking - ID: {}. " +
-                "Answer was saved but submission tracking failed! Error: {}", 
-                submissionId, e.getMessage(), e);
+                Timestamp now = new Timestamp(System.currentTimeMillis());
+                submission.setLastSavedAt(now);
+                
+                Integer currentCount = submission.getAutoSaveCount();
+                submission.setAutoSaveCount(currentCount != null ? currentCount + 1 : 1);
+                
+                submission = submissionRepository.save(submission);
+                
+                log.info("[SaveAnswer] ExamSubmission updated - ID: {}, AutoSaveCount: {} (attempt {})", 
+                    submission.getId(), submission.getAutoSaveCount(), attempt);
+                    
+                return; // Success - exit method
+                    
+            } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+                // Optimistic locking failure - another process updated submission
+                if (attempt < maxRetries) {
+                    log.warn("[SaveAnswer] Optimistic locking conflict on submission {} (attempt {}/{}) - " +
+                        "Retrying in {}ms...", submissionId, attempt, maxRetries, retryDelay);
+                    try {
+                        Thread.sleep(retryDelay);
+                        retryDelay *= 2; // Exponential backoff
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        log.error("[SaveAnswer] Retry interrupted for submission {}", submissionId);
+                        return;
+                    }
+                } else {
+                    log.warn("[SaveAnswer] Failed to update submission {} after {} attempts. " +
+                        "Answer was saved successfully. Final error: {}", 
+                        submissionId, maxRetries, e.getMessage());
+                }
+            } catch (Exception e) {
+                // Other errors - log but don't fail the whole save operation
+                log.error("[SaveAnswer] CRITICAL: Failed to update submission tracking - ID: {} (attempt {}). " +
+                    "Answer was saved but submission tracking failed! Error: {}", 
+                    submissionId, attempt, e.getMessage(), e);
+                return; // Don't retry on non-locking errors
+            }
         }
     }
     

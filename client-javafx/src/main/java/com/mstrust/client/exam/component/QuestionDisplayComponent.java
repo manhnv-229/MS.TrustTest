@@ -28,6 +28,7 @@ public class QuestionDisplayComponent extends VBox {
     private TextFlow questionContentFlow;
     private VBox answerContainer;
     private CheckBox markForReviewCheckbox;
+    private Label saveStatusLabel; // Phase 8.6: Save status indicator
     private Node currentAnswerWidget;
     private QuestionDTO currentQuestion;
     
@@ -85,13 +86,27 @@ public class QuestionDisplayComponent extends VBox {
         markForReviewCheckbox = new CheckBox("🔖 Đánh dấu để xem lại sau");
         markForReviewCheckbox.setStyle("-fx-font-size: 12px;");
         
+        // Phase 8.6: Save status indicator
+        saveStatusLabel = new Label("💾 Chưa lưu");
+        saveStatusLabel.setStyle(
+            "-fx-font-size: 11px; " +
+            "-fx-text-fill: #FF9800; " +
+            "-fx-padding: 5px 10px; " +
+            "-fx-background-color: #FFF3E0; " +
+            "-fx-background-radius: 3px; " +
+            "-fx-border-color: #FFE0B2; " +
+            "-fx-border-radius: 3px;"
+        );
+        saveStatusLabel.setVisible(true);
+        
         // Add all to main container
         this.getChildren().addAll(
             questionHeaderLabel,
             questionContentFlow,
             separator,
             answerContainer,
-            markForReviewCheckbox
+            markForReviewCheckbox,
+            saveStatusLabel
         );
         
         // Wrap in ScrollPane for long content
@@ -104,6 +119,7 @@ public class QuestionDisplayComponent extends VBox {
      * Hiển thị câu hỏi
      * @param question QuestionDTO cần hiển thị
      * @author: K24DTCN210-NVMANH (23/11/2025 13:48)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 14:40) - Reset save status khi load question mới
      * --------------------------------------------------- */
     public void displayQuestion(QuestionDTO question) {
         if (question == null) {
@@ -139,6 +155,9 @@ public class QuestionDisplayComponent extends VBox {
         
         // Reset mark checkbox
         markForReviewCheckbox.setSelected(false);
+        
+        // ✅ FIX: Reset save status về "Chưa lưu" khi load câu hỏi mới
+        updateSaveStatus("unsaved");
     }
 
     /* ---------------------------------------------------
@@ -319,6 +338,74 @@ public class QuestionDisplayComponent extends VBox {
      * --------------------------------------------------- */
     public void setOnAnswerChanged(Consumer<String> callback) {
         this.onAnswerChanged = callback;
+    }
+    
+    /* ---------------------------------------------------
+     * Update save status indicator (Phase 8.6)
+     * @param status Save status ("unsaved", "saving", "saved", "error")
+     * @author: K24DTCN210-NVMANH (25/11/2025 12:30)
+     * --------------------------------------------------- */
+    public void updateSaveStatus(String status) {
+        if (saveStatusLabel == null) return;
+        
+        switch (status.toLowerCase()) {
+            case "unsaved":
+                saveStatusLabel.setText("💾 Chưa lưu");
+                saveStatusLabel.setStyle(
+                    "-fx-font-size: 11px; " +
+                    "-fx-text-fill: #FF9800; " +
+                    "-fx-padding: 5px 10px; " +
+                    "-fx-background-color: #FFF3E0; " +
+                    "-fx-background-radius: 3px; " +
+                    "-fx-border-color: #FFE0B2; " +
+                    "-fx-border-radius: 3px;"
+                );
+                break;
+                
+            case "saving":
+                saveStatusLabel.setText("⏳ Đang lưu...");
+                saveStatusLabel.setStyle(
+                    "-fx-font-size: 11px; " +
+                    "-fx-text-fill: #2196F3; " +
+                    "-fx-padding: 5px 10px; " +
+                    "-fx-background-color: #E3F2FD; " +
+                    "-fx-background-radius: 3px; " +
+                    "-fx-border-color: #BBDEFB; " +
+                    "-fx-border-radius: 3px;"
+                );
+                break;
+                
+            case "saved":
+                saveStatusLabel.setText("✅ Đã lưu");
+                saveStatusLabel.setStyle(
+                    "-fx-font-size: 11px; " +
+                    "-fx-text-fill: #4CAF50; " +
+                    "-fx-padding: 5px 10px; " +
+                    "-fx-background-color: #E8F5E9; " +
+                    "-fx-background-radius: 3px; " +
+                    "-fx-border-color: #C8E6C9; " +
+                    "-fx-border-radius: 3px;"
+                );
+                break;
+                
+            case "error":
+                saveStatusLabel.setText("❌ Lỗi lưu");
+                saveStatusLabel.setStyle(
+                    "-fx-font-size: 11px; " +
+                    "-fx-text-fill: #F44336; " +
+                    "-fx-padding: 5px 10px; " +
+                    "-fx-background-color: #FFEBEE; " +
+                    "-fx-background-radius: 3px; " +
+                    "-fx-border-color: #FFCDD2; " +
+                    "-fx-border-radius: 3px;"
+                );
+                break;
+                
+            default:
+                saveStatusLabel.setText("💾 Chưa lưu");
+        }
+        
+        saveStatusLabel.setVisible(true);
     }
     
     /* ---------------------------------------------------

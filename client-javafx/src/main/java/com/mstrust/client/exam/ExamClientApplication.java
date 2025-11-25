@@ -2,6 +2,7 @@ package com.mstrust.client.exam;
 
 import com.mstrust.client.exam.api.ExamApiClient;
 import com.mstrust.client.exam.controller.LoginController;
+import com.mstrust.client.exam.util.WindowCenterHelper;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -124,6 +125,10 @@ public class ExamClientApplication extends Application {
             
             primaryStage.setScene(scene);
             primaryStage.setResizable(false);
+            
+            // ✅ Center login window on screen
+            WindowCenterHelper.centerStageOnScreen(primaryStage);
+            
             primaryStage.show();
             
         } catch (IOException e) {
@@ -157,6 +162,7 @@ public class ExamClientApplication extends Application {
      * Hiển thị thông báo lỗi và thoát ứng dụng
      * @param message Thông báo lỗi
      * @author: K24DTCN210-NVMANH (24/11/2025 07:57)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 15:04) - Added dialog centering
      * --------------------------------------------------- */
     private void showErrorAndExit(String message) {
         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
@@ -164,6 +170,10 @@ public class ExamClientApplication extends Application {
         alert.setTitle("Lỗi Khởi Động");
         alert.setHeaderText("Không thể khởi động ứng dụng");
         alert.setContentText(message);
+        
+        // ✅ Center error dialog
+        WindowCenterHelper.centerWindowOnShown(alert.getDialogPane().getScene().getWindow());
+        
         alert.showAndWait();
         System.exit(1);
     }

@@ -19,6 +19,7 @@ module com.mstrust.client {
     opens com.mstrust.client.dto to com.google.gson;
     opens com.mstrust.client.exam.controller to javafx.fxml;
     opens com.mstrust.client.exam.dto to com.google.gson;
+    opens com.mstrust.client.exam.api to com.google.gson;  // Phase 8.6: For ExamResultResponse
     opens com.mstrust.client.exam.service to com.google.gson;  // Phase 8.4: For QueuedAnswer JSON
     
     exports com.mstrust.client;
