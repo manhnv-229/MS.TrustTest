@@ -6,7 +6,7 @@
 -- Insert Teacher user (username: teacher1, password: Teacher@123)
 -- Password hash: $2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5lk3K3Z7.n8Nu (Teacher@123)
 INSERT INTO users (student_code, email, password_hash, full_name, phone_number, department_id, is_active, created_at) VALUES
-('T001', 'teacher1@mstrust.edu.vn', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5lk3K3Z7.n8Nu', 'Nguyen Van B - Giao Vien', '0901234567', (SELECT id FROM departments WHERE code = 'CNTT'), TRUE, NOW());
+('T001', 'giaovien@gmail.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5lk3K3Z7.n8Nu', 'Nguyen Van B - Giao Vien', '0901234567', (SELECT id FROM departments WHERE code = 'CNTT'), TRUE, NOW());
 
 -- Assign TEACHER role to teacher user
 INSERT INTO user_roles (user_id, role_id) VALUES

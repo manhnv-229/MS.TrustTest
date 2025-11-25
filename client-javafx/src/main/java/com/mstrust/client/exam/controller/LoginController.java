@@ -125,23 +125,25 @@ public class LoginController {
      * @param email Email của user
      * @param password Mật khẩu
      * @author: K24DTCN210-NVMANH (24/11/2025 08:00)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 21:45) - Added role-based redirect
      * --------------------------------------------------- */
     private void performLogin(String email, String password) {
         try {
             logger.info("Attempting login for user: {}", email);
             
-            // Call login API (returns token and sets it in apiClient)
-            apiClient.login(email, password);
+            // Call login API (returns LoginResponse with role)
+            var loginResponse = apiClient.login(email, password);
             
-            logger.info("Login successful for user: {}", email);
+            logger.info("Login successful for user: {} with role: {}", 
+                    email, loginResponse.getRole());
             
             // Save credentials if remember me is checked
             if (rememberMeCheckbox.isSelected()) {
                 saveCredentials(email);
             }
             
-            // Navigate to exam list on JavaFX thread
-            Platform.runLater(this::navigateToExamList);
+            // Navigate based on role on JavaFX thread
+            Platform.runLater(() -> navigateBasedOnRole(loginResponse));
             
         } catch (Exception e) {
             Platform.runLater(() -> {
@@ -186,7 +188,37 @@ public class LoginController {
     }
     
     /* ---------------------------------------------------
-     * Navigate đến màn hình danh sách bài thi
+     * Navigate dựa trên role của user
+     * @param loginResponse LoginResponse chứa user info và role
+     * @author: K24DTCN210-NVMANH (25/11/2025 21:45)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 21:52) - Handle ROLE_ prefix
+     * --------------------------------------------------- */
+    private void navigateBasedOnRole(com.mstrust.client.exam.dto.LoginResponse loginResponse) {
+        String role = loginResponse.getRole();
+        
+        // Normalize role: remove ROLE_ prefix nếu có
+        String normalizedRole = role;
+        if (role.startsWith("ROLE_")) {
+            normalizedRole = role.substring(5); // Remove "ROLE_"
+        }
+        
+        logger.info("Navigating with normalized role: {}", normalizedRole);
+        
+        if ("STUDENT".equals(normalizedRole)) {
+            // Student → Exam List
+            navigateToExamList();
+        } else if ("TEACHER".equals(normalizedRole) || "DEPT_MANAGER".equals(normalizedRole) || "ADMIN".equals(normalizedRole)) {
+            // Teacher/Admin → Teacher Dashboard
+            navigateToTeacherDashboard(loginResponse);
+        } else {
+            logger.warn("Unknown role: {} (normalized: {})", role, normalizedRole);
+            setLoading(false);
+            showError("Role không xác định: " + role);
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Navigate đến màn hình danh sách bài thi (cho Student)
      * @author: K24DTCN210-NVMANH (24/11/2025 08:00)
      * --------------------------------------------------- */
     private void navigateToExamList() {
@@ -220,6 +252,50 @@ public class LoginController {
             logger.error("Failed to load exam list screen", e);
             setLoading(false);
             showError("Không thể tải danh sách bài thi: " + e.getMessage());
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Navigate đến Teacher Dashboard (cho Teacher/Admin)
+     * @param loginResponse LoginResponse chứa user info
+     * @author: K24DTCN210-NVMANH (25/11/2025 21:46)
+     * --------------------------------------------------- */
+    private void navigateToTeacherDashboard(com.mstrust.client.exam.dto.LoginResponse loginResponse) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/view/teacher-main.fxml"));
+            Parent root = loader.load();
+            
+            // Pass dependencies to controller
+            com.mstrust.client.teacher.controller.TeacherMainController controller = loader.getController();
+            controller.setupUserInfo(
+                loginResponse.getUserName(), 
+                loginResponse.getRole()
+            );
+            controller.setStage(stage);
+            controller.setApiClient(apiClient);
+            
+            Scene scene = new Scene(root, 1200, 700);
+            
+            // Apply CSS
+            try {
+                String css = getClass().getResource("/css/teacher-styles.css").toExternalForm();
+                scene.getStylesheets().add(css);
+            } catch (Exception e) {
+                logger.warn("Could not load CSS for teacher dashboard");
+            }
+            
+            stage.setScene(scene);
+            stage.setTitle("MS.TrustTest - Quản Lý Giáo Viên");
+            stage.setResizable(true);
+            stage.setMaximized(true);
+            
+            logger.info("Navigated to teacher dashboard for role: {}", loginResponse.getRole());
+            
+        } catch (IOException e) {
+            logger.error("Failed to load teacher dashboard", e);
+            setLoading(false);
+            showError("Không thể tải giao diện quản lý: " + e.getMessage());
         }
     }
     

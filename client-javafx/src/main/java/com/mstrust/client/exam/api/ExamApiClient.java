@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mstrust.client.config.AppConfig;
 import com.mstrust.client.exam.dto.ExamInfoDTO;
+import com.mstrust.client.exam.dto.LoginResponse;
 import com.mstrust.client.exam.dto.QuestionDTO;
 import com.mstrust.client.exam.dto.SaveAnswerRequest;
 import com.mstrust.client.exam.dto.StartExamResponse;
@@ -87,16 +88,26 @@ public class ExamApiClient {
     public String getAuthToken() {
         return this.authToken;
     }
+    
+    /* ---------------------------------------------------
+     * Get base URL của API
+     * @returns String base URL
+     * @author: K24DTCN210-NVMANH (25/11/2025 22:47)
+     * --------------------------------------------------- */
+    public String getBaseUrl() {
+        return this.baseUrl;
+    }
 
     /* ---------------------------------------------------
      * Login authentication
      * POST /api/auth/login
      * @param email Email của user
      * @param password Password
-     * @returns JWT token
+     * @returns LoginResponse chứa token và user info
      * @author: K24DTCN210-NVMANH (24/11/2025 08:03)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 21:43) - Return LoginResponse with role
      * --------------------------------------------------- */
-    public String login(String email, String password) throws IOException, InterruptedException {
+    public LoginResponse login(String email, String password) throws IOException, InterruptedException {
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("username", email); // Backend yêu cầu field "username" thay vì "email"
         requestBody.put("password", password);
@@ -117,12 +128,73 @@ public class ExamApiClient {
                     new TypeToken<Map<String, Object>>(){}.getType());
             String token = (String) responseMap.get("token");
             this.authToken = token;
-            logger.info("Login successful for email: {}", email);
-            return token;
+            
+            // Decode JWT to get role
+            String role = decodeJwtRole(token);
+            String userName = email.split("@")[0]; // Simple extraction
+            
+            logger.info("Login successful for email: {} with role: {}", email, role);
+            
+            return new LoginResponse(token, userName, email, role);
         } else {
             logger.error("Login failed. Status: {}, Body: {}", 
                     response.statusCode(), response.body());
             throw new IOException("Login failed: " + response.statusCode());
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Decode JWT token để lấy role từ claims
+     * @param token JWT token
+     * @returns String role name
+     * @author: K24DTCN210-NVMANH (25/11/2025 21:43)
+     * --------------------------------------------------- */
+    private String decodeJwtRole(String token) {
+        try {
+            // JWT format: header.payload.signature
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) {
+                logger.warn("Invalid JWT format");
+                return "UNKNOWN";
+            }
+            
+            // Decode base64 payload
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            
+            // Parse JSON to get role
+            Map<String, Object> claims = gson.fromJson(payload, 
+                    new TypeToken<Map<String, Object>>(){}.getType());
+            
+            // Try different possible claim names
+            if (claims.containsKey("role")) {
+                return (String) claims.get("role");
+            } else if (claims.containsKey("roles")) {
+                // If roles is an array, take first one
+                Object rolesObj = claims.get("roles");
+                if (rolesObj instanceof List) {
+                    List<?> roles = (List<?>) rolesObj;
+                    return roles.isEmpty() ? "UNKNOWN" : roles.get(0).toString();
+                }
+                return rolesObj.toString();
+            } else if (claims.containsKey("authorities")) {
+                // Spring Security format
+                Object authObj = claims.get("authorities");
+                if (authObj instanceof List) {
+                    List<?> authorities = (List<?>) authObj;
+                    if (!authorities.isEmpty()) {
+                        String auth = authorities.get(0).toString();
+                        // Remove "ROLE_" prefix if present
+                        return auth.replace("ROLE_", "");
+                    }
+                }
+            }
+            
+            logger.warn("No role found in JWT claims");
+            return "UNKNOWN";
+            
+        } catch (Exception e) {
+            logger.error("Failed to decode JWT role", e);
+            return "UNKNOWN";
         }
     }
 

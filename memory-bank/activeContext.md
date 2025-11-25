@@ -244,7 +244,7 @@ ftp:
 
 ### Test Accounts Available
 1. **Admin**: admin / Admin@123
-2. **Teacher**: teacher1@mstrust.edu.vn / Teacher@123  
+2. **Teacher**: giaovien@gmail.com / Teacher@123  
 3. **Student**: student1@mstrust.edu.vn / Student@123
 
 ## Lessons Learned

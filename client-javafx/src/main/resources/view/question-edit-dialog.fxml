@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mstrust.client.teacher.controller.QuestionEditDialogController"
+            styleClass="content-container"
+            prefWidth="900" prefHeight="750">
+    
+    <!-- Header -->
+    <top>
+        <VBox styleClass="dialog-header">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label fx:id="dialogTitle" styleClass="page-title" text="Tạo câu hỏi mới"/>
+        </VBox>
+    </top>
+    
+    <!-- Content với ScrollPane -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="dialog-content">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                
+                <!-- Common Fields Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Thông tin chung" styleClass="section-title"/>
+                    
+                    <!-- Subject Selection -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Môn học:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="subjectCombo" promptText="-- Chọn môn học --" 
+                                  styleClass="combo-box" prefWidth="300"/>
+                        <Label text="*" styleClass="required-mark"/>
+                    </HBox>
+                    
+                    <!-- Question Type Selection -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Loại câu hỏi:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="questionTypeCombo" promptText="-- Chọn loại câu hỏi --" 
+                                  styleClass="combo-box" prefWidth="300"
+                                  onAction="#onQuestionTypeChange"/>
+                        <Label text="*" styleClass="required-mark"/>
+                    </HBox>
+                    
+                    <!-- Difficulty Selection -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Độ khó:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="difficultyCombo" promptText="-- Chọn độ khó --" 
+                                  styleClass="combo-box" prefWidth="300"/>
+                        <Label text="*" styleClass="required-mark"/>
+                    </HBox>
+                    
+                    <!-- Tags Input -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Tags:" minWidth="120" styleClass="form-label"/>
+                        <TextField fx:id="tagsField" promptText="Ví dụ: java, oop, inheritance" 
+                                   styleClass="form-field" prefWidth="500"/>
+                        <Label text="(Phân cách bằng dấu phẩy)" styleClass="hint-text"/>
+                    </HBox>
+                    
+                    <!-- Question Content -->
+                    <VBox spacing="5">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Nội dung câu hỏi:" styleClass="form-label"/>
+                            <Label text="*" styleClass="required-mark"/>
+                        </HBox>
+                        <TextArea fx:id="questionTextArea" promptText="Nhập nội dung câu hỏi..." 
+                                  styleClass="form-field" prefHeight="150" wrapText="true"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Multiple Choice / Multiple Select Section -->
+                <VBox fx:id="multipleChoiceSection" spacing="15" styleClass="form-section" 
+                      managed="false" visible="false">
+                    <Label text="Lựa chọn trả lời" styleClass="section-title"/>
+                    
+                    <VBox spacing="10">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Danh sách lựa chọn:" styleClass="form-label"/>
+                            <Button text="+ Thêm" onAction="#handleAddOption" 
+                                    styleClass="secondary-button"/>
+                        </HBox>
+                        
+                        <ListView fx:id="optionsListView" prefHeight="200" styleClass="options-list"/>
+                        
+                        <HBox spacing="10">
+                            <Button text="Xóa lựa chọn" onAction="#handleRemoveOption" 
+                                    styleClass="secondary-button"/>
+                            <Button text="Sửa lựa chọn" onAction="#handleEditOption" 
+                                    styleClass="secondary-button"/>
+                        </HBox>
+                        
+                        <Label text="Đáp án đúng:" styleClass="form-label"/>
+                        <VBox fx:id="correctAnswerContainer" spacing="5">
+                            <!-- Radio buttons hoặc CheckBoxes sẽ được thêm động -->
+                        </VBox>
+                    </VBox>
+                </VBox>
+                
+                <!-- True/False Section -->
+                <VBox fx:id="trueFalseSection" spacing="15" styleClass="form-section" 
+                      managed="false" visible="false">
+                    <Label text="Đáp án Đúng/Sai" styleClass="section-title"/>
+                    
+                    <VBox spacing="10">
+                        <Label text="Chọn đáp án đúng:" styleClass="form-label"/>
+                        <RadioButton fx:id="trueRadio" text="Đúng" toggleGroup="$trueFalseGroup"/>
+                        <RadioButton fx:id="falseRadio" text="Sai" toggleGroup="$trueFalseGroup"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Essay Section -->
+                <VBox fx:id="essaySection" spacing="15" styleClass="form-section" 
+                      managed="false" visible="false">
+                    <Label text="Cấu hình câu tự luận" styleClass="section-title"/>
+                    
+                    <HBox spacing="20">
+                        <VBox spacing="5">
+                            <Label text="Số từ tối thiểu:" styleClass="form-label"/>
+                            <TextField fx:id="minWordsField" promptText="Ví dụ: 100" 
+                                       styleClass="form-field" prefWidth="150"/>
+                        </VBox>
+                        
+                        <VBox spacing="5">
+                            <Label text="Số từ tối đa:" styleClass="form-label"/>
+                            <TextField fx:id="maxWordsField" promptText="Ví dụ: 500" 
+                                       styleClass="form-field" prefWidth="150"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Tiêu chí chấm điểm:" styleClass="form-label"/>
+                        <TextArea fx:id="gradingCriteriaArea" 
+                                  promptText="Nhập tiêu chí chấm điểm cho câu tự luận..." 
+                                  styleClass="form-field" prefHeight="100" wrapText="true"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Short Answer Section -->
+                <VBox fx:id="shortAnswerSection" spacing="15" styleClass="form-section" 
+                      managed="false" visible="false">
+                    <Label text="Câu trả lời ngắn" styleClass="section-title"/>
+                    
+                    <VBox spacing="5">
+                        <Label text="Đáp án mẫu:" styleClass="form-label"/>
+                        <TextField fx:id="shortAnswerField" 
+                                   promptText="Nhập đáp án mẫu (dùng cho tham khảo)" 
+                                   styleClass="form-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Hướng dẫn chấm:" styleClass="form-label"/>
+                        <TextArea fx:id="shortAnswerGradingArea" 
+                                  promptText="Hướng dẫn cách chấm điểm cho câu trả lời ngắn..." 
+                                  styleClass="form-field" prefHeight="80" wrapText="true"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Coding Section -->
+                <VBox fx:id="codingSection" spacing="15" styleClass="form-section" 
+                      managed="false" visible="false">
+                    <Label text="Cấu hình câu lập trình" styleClass="section-title"/>
+                    
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Ngôn ngữ:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="programmingLanguageCombo" 
+                                  promptText="-- Chọn ngôn ngữ --" 
+                                  styleClass="combo-box" prefWidth="200"/>
+                    </HBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Code khởi tạo (template):" styleClass="form-label"/>
+                        <TextArea fx:id="starterCodeArea" 
+                                  promptText="Nhập code template cho sinh viên..." 
+                                  styleClass="form-field code-area" prefHeight="150" 
+                                  style="-fx-font-family: 'Consolas', monospace;"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Test cases (JSON format):" styleClass="form-label"/>
+                        <TextArea fx:id="testCasesArea" 
+                                  promptText='[{"input": "...", "expectedOutput": "..."}]' 
+                                  styleClass="form-field code-area" prefHeight="120" 
+                                  style="-fx-font-family: 'Consolas', monospace;"/>
+                    </VBox>
+                    
+                    <HBox spacing="20">
+                        <VBox spacing="5">
+                            <Label text="Thời gian (giây):" styleClass="form-label"/>
+                            <TextField fx:id="timeLimitField" promptText="Ví dụ: 5" 
+                                       styleClass="form-field" prefWidth="120"/>
+                        </VBox>
+                        
+                        <VBox spacing="5">
+                            <Label text="Bộ nhớ (MB):" styleClass="form-label"/>
+                            <TextField fx:id="memoryLimitField" promptText="Ví dụ: 128" 
+                                       styleClass="form-field" prefWidth="120"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+                
+                <!-- Fill in Blank Section -->
+                <VBox fx:id="fillInBlankSection" spacing="15" styleClass="form-section" 
+                      managed="false" visible="false">
+                    <Label text="Điền khuyết" styleClass="section-title"/>
+                    
+                    <VBox spacing="5">
+                        <Label styleClass="form-label">
+                            <text>Hướng dẫn: Sử dụng _____ để đánh dấu chỗ trống</text>
+                        </Label>
+                        <TextArea fx:id="fillInBlankTextArea" 
+                                  promptText="Ví dụ: Java là ngôn ngữ _____ và _____" 
+                                  styleClass="form-field" prefHeight="100" wrapText="true"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Đáp án cho các chỗ trống (JSON array):" styleClass="form-label"/>
+                        <TextArea fx:id="blankAnswersArea" 
+                                  promptText='["hướng đối tượng", "đa nền tảng"]' 
+                                  styleClass="form-field code-area" prefHeight="80" 
+                                  style="-fx-font-family: 'Consolas', monospace;"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Matching Section -->
+                <VBox fx:id="matchingSection" spacing="15" styleClass="form-section" 
+                      managed="false" visible="false">
+                    <Label text="Nối cặp" styleClass="section-title"/>
+                    
+                    <HBox spacing="20">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Cột bên trái:" styleClass="form-label"/>
+                            <ListView fx:id="leftItemsListView" prefHeight="180" 
+                                      styleClass="options-list"/>
+                            <HBox spacing="10">
+                                <Button text="+ Thêm" onAction="#handleAddLeftItem" 
+                                        styleClass="secondary-button"/>
+                                <Button text="- Xóa" onAction="#handleRemoveLeftItem" 
+                                        styleClass="secondary-button"/>
+                            </HBox>
+                        </VBox>
+                        
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <Label text="Cột bên phải:" styleClass="form-label"/>
+                            <ListView fx:id="rightItemsListView" prefHeight="180" 
+                                      styleClass="options-list"/>
+                            <HBox spacing="10">
+                                <Button text="+ Thêm" onAction="#handleAddRightItem" 
+                                        styleClass="secondary-button"/>
+                                <Button text="- Xóa" onAction="#handleRemoveRightItem" 
+                                        styleClass="secondary-button"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Cặp đúng (JSON format):" styleClass="form-label"/>
+                        <TextArea fx:id="correctMatchesArea" 
+                                  promptText='[{"left": 0, "right": 0}, {"left": 1, "right": 1}]' 
+                                  styleClass="form-field code-area" prefHeight="80" 
+                                  style="-fx-font-family: 'Consolas', monospace;"/>
+                        <Label text="Lưu ý: Sử dụng index (bắt đầu từ 0) của items" 
+                               styleClass="hint-text"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Attachments Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Tệp đính kèm" styleClass="section-title"/>
+                    
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="📎 Chọn tệp" onAction="#handleSelectAttachment" 
+                                styleClass="secondary-button"/>
+                        <Label fx:id="attachmentLabel" text="Chưa có tệp đính kèm" 
+                               styleClass="hint-text"/>
+                    </HBox>
+                    
+                    <ListView fx:id="attachmentsListView" prefHeight="80" 
+                              styleClass="options-list" managed="false" visible="false"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <!-- Action Buttons -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="dialog-footer">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <Button text="Hủy" onAction="#handleCancel" styleClass="secondary-button" 
+                    prefWidth="100"/>
+            <Button fx:id="saveButton" text="Lưu" onAction="#handleSave" 
+                    styleClass="primary-button" prefWidth="100"/>
+        </HBox>
+    </bottom>
+</BorderPane>

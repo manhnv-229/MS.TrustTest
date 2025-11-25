@@ -40,19 +40,28 @@ public class QuestionBankService {
      * --------------------------------------------------- */
     @Transactional
     public QuestionBankDTO createQuestion(CreateQuestionBankRequest request) {
+        System.out.println("=== DEBUG: createQuestion START ===");
+        System.out.println("Request: " + request);
+        
         // Validate
+        System.out.println("DEBUG: Validating question type: " + request.getQuestionType());
         validateQuestionByType(request.getQuestionType(), request);
+        System.out.println("DEBUG: Validation passed");
 
         // Get subject
         Subject subject = null;
         if (request.getSubjectId() != null) {
+            System.out.println("DEBUG: Finding subject with ID: " + request.getSubjectId());
             subject = subjectRepository.findByIdAndDeletedAtIsNull(request.getSubjectId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Không tìm thấy môn học với ID: " + request.getSubjectId()));
+            System.out.println("DEBUG: Subject found: " + subject.getSubjectName());
         }
 
         // Get current user
+        System.out.println("DEBUG: Getting current user...");
         User currentUser = getCurrentUser();
+        System.out.println("DEBUG: Current user found: " + currentUser.getFullName() + " (ID: " + currentUser.getId() + ")");
 
         // Create entity
         QuestionBank questionBank = QuestionBank.builder()
@@ -334,13 +343,22 @@ public class QuestionBankService {
     }
 
     /* ---------------------------------------------------
-     * Lấy user hiện tại
+     * Lấy user hiện tại từ JWT token
      * @return User
      * @author: K24DTCN210-NVMANH (19/11/2025 02:07)
+     * EditBy: K24DTCN210-NVMANH (25/11/2025 23:24) - Fix: Dùng findByEmail vì JWT lưu email
      * --------------------------------------------------- */
     private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user: " + username));
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        System.out.println("DEBUG getCurrentUser: Looking for email = '" + email + "'");
+        
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    System.out.println("DEBUG getCurrentUser: User NOT FOUND for email: " + email);
+                    return new ResourceNotFoundException("Không tìm thấy user: " + email);
+                });
+        
+        System.out.println("DEBUG getCurrentUser: User FOUND - ID: " + user.getId() + ", Name: " + user.getFullName());
+        return user;
     }
 }

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mstrust.client.teacher.controller.QuestionBankController"
+      spacing="10" styleClass="content-container">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="Quản lý Ngân hàng Câu hỏi" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="createButton" text="+ Tạo Câu hỏi Mới" styleClass="primary-button" 
+                onAction="#handleCreateQuestion"/>
+        <Button fx:id="importButton" text="📥 Import" styleClass="secondary-button"
+                onAction="#handleImport"/>
+        <Button fx:id="exportButton" text="📤 Export" styleClass="secondary-button"
+                onAction="#handleExport"/>
+    </HBox>
+    
+    <!-- Filters Section -->
+    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="filter-bar">
+        <Label text="Bộ lọc:"/>
+        
+        <!-- Subject Filter -->
+        <VBox spacing="3">
+            <Label text="Môn học" styleClass="filter-label"/>
+            <ComboBox fx:id="subjectFilter" promptText="Tất cả môn học" prefWidth="150"/>
+        </VBox>
+        
+        <!-- Difficulty Filter -->
+        <VBox spacing="3">
+            <Label text="Độ khó" styleClass="filter-label"/>
+            <ComboBox fx:id="difficultyFilter" promptText="Tất cả" prefWidth="120"/>
+        </VBox>
+        
+        <!-- Type Filter -->
+        <VBox spacing="3">
+            <Label text="Loại câu hỏi" styleClass="filter-label"/>
+            <ComboBox fx:id="typeFilter" promptText="Tất cả" prefWidth="150"/>
+        </VBox>
+        
+        <!-- Search Field -->
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Tìm kiếm" styleClass="filter-label"/>
+            <TextField fx:id="searchField" promptText="Nhập từ khóa tìm kiếm..." 
+                      prefWidth="250"/>
+        </VBox>
+        
+        <VBox spacing="3" alignment="BOTTOM_CENTER">
+            <Label text=" "/>
+            <Button text="🔍 Tìm" styleClass="primary-button" onAction="#handleSearch"/>
+        </VBox>
+        
+        <VBox spacing="3" alignment="BOTTOM_CENTER">
+            <Label text=" "/>
+            <Button text="↻ Reset" styleClass="secondary-button" onAction="#handleResetFilters"/>
+        </VBox>
+    </HBox>
+    
+    <!-- Statistics Bar -->
+    <HBox spacing="15" alignment="CENTER_LEFT" styleClass="stats-bar">
+        <Label fx:id="totalQuestionsLabel" text="Tổng số: 0 câu hỏi"/>
+        <Separator orientation="VERTICAL"/>
+        <Label fx:id="easyCountLabel" text="Dễ: 0"/>
+        <Label fx:id="mediumCountLabel" text="Trung bình: 0"/>
+        <Label fx:id="hardCountLabel" text="Khó: 0"/>
+    </HBox>
+    
+    <!-- Table View -->
+    <TableView fx:id="questionsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="idColumn" text="ID" prefWidth="50" sortable="true"/>
+            <TableColumn fx:id="questionTextColumn" text="Nội dung Câu hỏi" prefWidth="300" sortable="false"/>
+            <TableColumn fx:id="subjectColumn" text="Môn học" prefWidth="120" sortable="true"/>
+            <TableColumn fx:id="typeColumn" text="Loại" prefWidth="120" sortable="true"/>
+            <TableColumn fx:id="difficultyColumn" text="Độ khó" prefWidth="100" sortable="true"/>
+            <TableColumn fx:id="tagsColumn" text="Tags" prefWidth="150" sortable="false"/>
+            <TableColumn fx:id="usageCountColumn" text="Sử dụng" prefWidth="80" sortable="true"/>
+            <TableColumn fx:id="createdByColumn" text="Người tạo" prefWidth="120" sortable="true"/>
+            <TableColumn fx:id="actionsColumn" text="Thao tác" prefWidth="180" sortable="false"/>
+        </columns>
+        <placeholder>
+            <Label text="Không có câu hỏi nào. Nhấn 'Tạo Câu hỏi Mới' để bắt đầu."/>
+        </placeholder>
+    </TableView>
+    
+    <!-- Pagination Bar -->
+    <HBox spacing="10" alignment="CENTER" styleClass="pagination-bar">
+        <Button fx:id="firstPageButton" text="⏮ Đầu" onAction="#handleFirstPage"/>
+        <Button fx:id="prevPageButton" text="◀ Trước" onAction="#handlePreviousPage"/>
+        <Label fx:id="pageInfoLabel" text="Trang 1 / 1"/>
+        <Button fx:id="nextPageButton" text="Sau ▶" onAction="#handleNextPage"/>
+        <Button fx:id="lastPageButton" text="Cuối ⏭" onAction="#handleLastPage"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label text="Số câu hỏi / trang:"/>
+        <ComboBox fx:id="pageSizeComboBox" value="20" prefWidth="80"/>
+    </HBox>
+    
+    <!-- Loading Indicator -->
+    <StackPane fx:id="loadingPane" visible="false" managed="false" 
+               style="-fx-background-color: rgba(0,0,0,0.3);">
+        <VBox alignment="CENTER" spacing="10" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 10;">
+            <ProgressIndicator/>
+            <Label text="Đang tải dữ liệu..."/>
+        </VBox>
+    </StackPane>
+</VBox>

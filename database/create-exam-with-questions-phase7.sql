@@ -66,7 +66,7 @@ INSERT INTO exams (
     TRUE, -- Cho phép chạy code
     'Java',
     TRUE, -- Đã publish
-    6, -- Created by teacher_id = 6 (teacher1@mstrust.edu.vn)
+    6, -- Created by teacher_id = 6 (giaovien@gmail.com)
     NOW(),
     NOW(),
     0 -- version = 0

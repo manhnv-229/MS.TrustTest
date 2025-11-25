@@ -27,7 +27,7 @@ Content-Type: application/json
 ```json
 {
   "studentCode": "T001",
-  "email": "teacher1@mstrust.edu.vn",
+  "email": "giaovien@gmail.com",
   "password": "Teacher@123",
   "fullName": "Nguyen Van B - Giao Vien",
   "phoneNumber": "0909999999",
@@ -50,7 +50,7 @@ Content-Type: application/json
   "user": {
     "id": 5,
     "studentCode": "T001",
-    "email": "teacher1@mstrust.edu.vn",
+    "email": "giaovien@gmail.com",
     "fullName": "Nguyen Van B - Giao Vien",
     "phoneNumber": "0909999999",
     "departmentId": 1,
@@ -76,7 +76,7 @@ Sau khi register thành công, **báo lại cho con:**
 
 **Credentials để login:**
 ```
-Email: teacher1@mstrust.edu.vn
+Email: giaovien@gmail.com
 Password: Teacher@123
 ```
 

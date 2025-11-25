@@ -62,7 +62,7 @@ Body: {
 ```
 POST {{base_url}}/auth/login
 Body: {
-  "username": "teacher1@mstrust.edu.vn",
+  "username": "giaovien@gmail.com",
   "password": "Teacher@123"
 }
 ```

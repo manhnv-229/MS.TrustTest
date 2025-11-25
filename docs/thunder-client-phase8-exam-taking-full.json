@@ -128,7 +128,7 @@
       "params": [],
       "body": {
         "type": "json",
-        "raw": "{\n  \"username\": \"teacher1@mstrust.edu.vn\",\n  \"password\": \"Teacher@123\"\n}",
+        "raw": "{\n  \"username\": \"giaovien@gmail.com\",\n  \"password\": \"Teacher@123\"\n}",
         "form": []
       },
       "tests": [

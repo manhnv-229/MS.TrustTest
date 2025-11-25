@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" 
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mstrust.client.teacher.controller.TeacherMainController"
+            styleClass="root"
+            stylesheets="@../css/teacher-styles.css">
+    
+    <!-- Top Bar -->
+    <top>
+        <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="10">
+            <padding>
+                <Insets top="10" right="15" bottom="10" left="15"/>
+            </padding>
+            
+            <Label text="MS.TrustTest - Teacher Dashboard" styleClass="app-title"/>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <Label fx:id="userLabel" text="Teacher Name" styleClass="user-label"/>
+            <Label fx:id="roleLabel" text="[TEACHER]" styleClass="role-badge"/>
+            <Button fx:id="logoutButton" text="Đăng xuất" styleClass="logout-button" 
+                    onAction="#handleLogout"/>
+        </HBox>
+    </top>
+    
+    <!-- Main Content -->
+    <center>
+        <SplitPane dividerPositions="0.2" styleClass="main-split">
+            
+            <!-- Left Sidebar - Navigation Menu -->
+            <VBox styleClass="sidebar" spacing="5">
+                <padding>
+                    <Insets top="10" right="5" bottom="10" left="5"/>
+                </padding>
+                
+                <Label text="MENU" styleClass="menu-header"/>
+                <Separator/>
+                
+                <!-- Question Bank Menu Item -->
+                <Button fx:id="questionBankButton" 
+                        text="📚 Quản lý Ngân hàng Câu hỏi" 
+                        styleClass="menu-item"
+                        onAction="#handleQuestionBankClick"
+                        maxWidth="Infinity"/>
+                
+                <!-- Exam Management Menu Item -->
+                <Button fx:id="examManagementButton" 
+                        text="📝 Quản lý Đề thi" 
+                        styleClass="menu-item"
+                        onAction="#handleExamManagementClick"
+                        maxWidth="Infinity"/>
+                
+                <!-- Grading Menu Item -->
+                <Button fx:id="gradingButton" 
+                        text="✍️ Chấm bài" 
+                        styleClass="menu-item"
+                        onAction="#handleGradingClick"
+                        maxWidth="Infinity"/>
+                
+                <!-- Monitoring Menu Item -->
+                <Button fx:id="monitoringButton" 
+                        text="📊 Giám sát Thi" 
+                        styleClass="menu-item"
+                        onAction="#handleMonitoringClick"
+                        maxWidth="Infinity"/>
+                
+                <Separator/>
+                
+                <!-- Admin-only menu items -->
+                <VBox fx:id="adminMenuSection" visible="false" managed="false" spacing="5">
+                    <Button fx:id="userManagementButton" 
+                            text="👥 Quản lý Người dùng" 
+                            styleClass="menu-item"
+                            onAction="#handleUserManagementClick"
+                            maxWidth="Infinity"/>
+                    
+                    <Button fx:id="organizationButton" 
+                            text="🏫 Quản lý Tổ chức" 
+                            styleClass="menu-item"
+                            onAction="#handleOrganizationClick"
+                            maxWidth="Infinity"/>
+                    
+                    <Button fx:id="systemConfigButton" 
+                            text="⚙️ Cấu hình Hệ thống" 
+                            styleClass="menu-item"
+                            onAction="#handleSystemConfigClick"
+                            maxWidth="Infinity"/>
+                </VBox>
+                
+                <Region VBox.vgrow="ALWAYS"/>
+                
+                <!-- Help & Info -->
+                <Separator/>
+                <Button text="❓ Trợ giúp" styleClass="menu-item-small" 
+                        onAction="#handleHelpClick" maxWidth="Infinity"/>
+            </VBox>
+            
+            <!-- Right Content Area -->
+            <StackPane fx:id="contentArea" styleClass="content-area">
+                <VBox alignment="CENTER" spacing="20">
+                    <Label text="Chào mừng đến với Teacher Dashboard!" 
+                           styleClass="welcome-title"/>
+                    <Text text="Vui lòng chọn một chức năng từ menu bên trái để bắt đầu."
+                          styleClass="welcome-text"
+                          wrappingWidth="400"/>
+                </VBox>
+            </StackPane>
+            
+        </SplitPane>
+    </center>
+    
+    <!-- Bottom Status Bar -->
+    <bottom>
+        <HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="15">
+            <padding>
+                <Insets top="5" right="15" bottom="5" left="15"/>
+            </padding>
+            
+            <Label text="●" styleClass="status-indicator-online"/>
+            <Label fx:id="connectionStatus" text="Đã kết nối" styleClass="status-text"/>
+            
+            <Separator orientation="VERTICAL"/>
+            
+            <Label text="Đồng bộ lần cuối:" styleClass="status-text"/>
+            <Label fx:id="lastSyncTime" text="21:00:00" styleClass="status-text"/>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <Label fx:id="versionLabel" text="v1.0.0" styleClass="version-text"/>
+        </HBox>
+    </bottom>
+    
+</BorderPane>

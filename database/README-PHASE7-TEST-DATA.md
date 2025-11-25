@@ -14,7 +14,7 @@ File này hướng dẫn cách tạo exam với đầy đủ questions để tes
 - **Total Points:** 100 điểm
 - **Passing Score:** 50/100
 - **Subject Class:** Lớp học Lập trình Java OOP (ID=1)
-- **Teacher:** teacher1@mstrust.edu.vn (ID=6)
+- **Teacher:** giaovien@gmail.com (ID=6)
 
 ### Câu hỏi (9 questions):
 
@@ -294,7 +294,7 @@ public class Rectangle {
 
 ### Dependencies:
 - Requires `subject_class_id = 1` (Lớp học Java OOP)
-- Requires `teacher_id = 6` (teacher1@mstrust.edu.vn)
+- Requires `teacher_id = 6` (giaovien@gmail.com)
 - Requires `subject_id = 1` (Môn học Lập trình Java)
 
 ### Nếu gặp lỗi Foreign Key:

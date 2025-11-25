@@ -30,8 +30,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param email Email của user
      * @returns Optional chứa user nếu tìm thấy
      * @author: K24DTCN210-NVMANH (13/11/2025 14:53)
+     * EditBy: K24DTCN210-NVMANH (26/11/2025 00:22) - Add deletedAt check
      * --------------------------------------------------- */
-    Optional<User> findByEmail(String email);
+    @Query("SELECT u FROM User u WHERE u.email = :email AND u.deletedAt IS NULL")
+    Optional<User> findByEmail(@Param("email") String email);
 
     /* ---------------------------------------------------
      * Tìm user theo số điện thoại
