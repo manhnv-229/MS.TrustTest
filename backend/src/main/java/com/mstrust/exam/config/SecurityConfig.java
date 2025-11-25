@@ -90,6 +90,7 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/health/**").permitAll() // Health check endpoint
                         // Swagger UI endpoints - Cho phép truy cập không cần authentication
                         .requestMatchers(
                                 "/api/swagger-ui/**",

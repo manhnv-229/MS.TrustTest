@@ -27,6 +27,7 @@ module com.mstrust.client {
     exports com.mstrust.client.config;
     exports com.mstrust.client.dto;
     exports com.mstrust.client.util;
+    exports com.mstrust.client.exam;  // Phase 8.6: ExamClientApplication
     exports com.mstrust.client.exam.controller;
     exports com.mstrust.client.exam.component;
     exports com.mstrust.client.exam.dto;

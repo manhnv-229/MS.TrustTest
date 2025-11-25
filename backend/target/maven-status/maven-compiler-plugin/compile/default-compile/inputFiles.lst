@@ -11,6 +11,7 @@ D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\cont
 D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\controller\ExamSessionWebSocketController.java
 D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\controller\ExamTakingController.java
 D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\controller\GradingController.java
+D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\controller\HealthCheckController.java
 D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\controller\MonitoringController.java
 D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\controller\MonitoringWebSocketController.java
 D:\PRIVATE\MS.TrustTest\MS.TrustTest\backend\src\main\java\com\mstrust\exam\controller\QuestionBankController.java

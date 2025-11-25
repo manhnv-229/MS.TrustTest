@@ -5,6 +5,7 @@ import com.mstrust.exam.dto.grading.StudentResultDTO;
 import com.mstrust.exam.service.ExamTakingService;
 import com.mstrust.exam.service.GradingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import java.util.Map;
  * EditBy: K24DTCN210-NVMANH (20/11/2025 09:18) - Fix context-path violation
  * EditBy: K24DTCN210-NVMANH (21/11/2025 14:50) - Add graded result endpoint
  * --------------------------------------------------- */
+@Slf4j
 @RestController
 @RequestMapping("/exam-taking")
 @RequiredArgsConstructor
@@ -111,9 +113,22 @@ public class ExamTakingController {
             @PathVariable Long submissionId,
             @RequestBody SubmitAnswerRequest request,
             Authentication auth) {
-        Long studentId = getCurrentUserId(auth);
-        Map<String, Object> result = examTakingService.saveAnswer(submissionId, request, studentId);
-        return ResponseEntity.ok(result);
+        try {
+            log.info("[Controller] saveAnswer called - submissionId: {}, questionId: {}, isAutoSave: {}", 
+                submissionId, request.getQuestionId(), request.getIsAutoSave());
+            
+            Long studentId = getCurrentUserId(auth);
+            log.info("[Controller] Student ID: {}", studentId);
+            
+            Map<String, Object> result = examTakingService.saveAnswer(submissionId, request, studentId);
+            
+            log.info("[Controller] saveAnswer SUCCESS - result: {}", result);
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            log.error("[Controller] saveAnswer FAILED - Exception: {}", e.getMessage(), e);
+            throw e;  // Re-throw to let GlobalExceptionHandler handle it
+        }
     }
     
     /* ---------------------------------------------------

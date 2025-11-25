@@ -7,12 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Map;
+import java.util.List;
 
 /* ---------------------------------------------------
  * DTO để review answer sau khi submit
  * Hiển thị theo exam settings
  * @author: K24DTCN210-NVMANH (19/11/2025 15:19)
+ * EditBy: K24DTCN210-NVMANH (24/11/2025 10:31) - Changed options from Map to List<String>
  * --------------------------------------------------- */
 @Data
 @Builder
@@ -24,8 +25,8 @@ public class AnswerReviewDTO {
     private String questionText;
     private QuestionType questionType;
     
-    // Question options (if applicable)
-    private Map<String, String> options;
+    // Question options (if applicable) - Format: ["A. Option text", "B. Option text", ...]
+    private List<String> options;
     
     // Student's answer
     private Object studentAnswer;  // JSON format based on question type

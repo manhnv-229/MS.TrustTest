@@ -260,7 +260,7 @@ public class ExamTakingService {
             QuestionBank question = eq.getQuestion();
             
             // Parse options (without correct answer)
-            Map<String, String> options = parseOptionsWithoutAnswer(question, 
+            List<String> options = parseOptionsWithoutAnswer(question, 
                 exam.getRandomizeOptions(), submission.getOptionSeed());
             
             // Get saved answer if exists
@@ -370,13 +370,12 @@ public class ExamTakingService {
         answer.setLastSavedAt(now);
         answer.setSavedCount(answer.getSavedCount() + 1);
         
-        answerRepository.save(answer);
-        
-        // Update submission tracking
-        submission.setLastSavedAt(now);
-        Integer currentCount = submission.getAutoSaveCount();
-        submission.setAutoSaveCount(currentCount != null ? currentCount + 1 : 1);
-        submissionRepository.save(submission);
+        answer = answerRepository.save(answer);
+        log.info("[SaveAnswer] StudentAnswer saved successfully - ID: {}, QuestionId: {}", 
+            answer.getId(), answer.getQuestion().getId());
+
+        // Update submission tracking trong separate transaction để tránh rollback
+        updateSubmissionTracking(submission.getId());
         
         Map<String, Object> result = new HashMap<>();
         result.put("success", true);
@@ -524,6 +523,42 @@ public class ExamTakingService {
     
     // =============== PRIVATE HELPER METHODS ===============
     
+    /* ---------------------------------------------------
+     * Update submission tracking trong separate transaction
+     * Để tránh rollback answer save khi có optimistic locking conflict
+     * @param submissionId ID của submission
+     * @author: K24DTCN210-NVMANH (24/11/2025 16:13)
+     * --------------------------------------------------- */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
+    public void updateSubmissionTracking(Long submissionId) {
+        try {
+            ExamSubmission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+            
+            Timestamp now = new Timestamp(System.currentTimeMillis());
+            submission.setLastSavedAt(now);
+            
+            Integer currentCount = submission.getAutoSaveCount();
+            submission.setAutoSaveCount(currentCount != null ? currentCount + 1 : 1);
+            
+            submission = submissionRepository.save(submission);
+            
+            log.info("[SaveAnswer] ExamSubmission updated - ID: {}, AutoSaveCount: {}", 
+                submission.getId(), submission.getAutoSaveCount());
+                
+        } catch (org.springframework.orm.ObjectOptimisticLockingFailureException e) {
+            // Optimistic locking failure - another process updated submission
+            log.warn("[SaveAnswer] Optimistic locking conflict on submission {} - " +
+                "Another process updated it. This is OK, answer was saved. Error: {}", 
+                submissionId, e.getMessage());
+        } catch (Exception e) {
+            // Other errors - log but don't fail the whole save operation
+            log.error("[SaveAnswer] CRITICAL: Failed to update submission tracking - ID: {}. " +
+                "Answer was saved but submission tracking failed! Error: {}", 
+                submissionId, e.getMessage(), e);
+        }
+    }
+    
     private AvailableExamDTO mapToAvailableExamDTO(Exam exam, Long studentId) {
         Map<String, Object> eligibility = checkEligibility(exam.getId(), studentId);
         
@@ -566,32 +601,59 @@ public class ExamTakingService {
             .build();
     }
     
-    private Map<String, String> parseOptionsWithoutAnswer(QuestionBank question, 
+    /* ---------------------------------------------------
+     * Parse options từ JSON Map sang List<String> format "A. Text"
+     * @param question QuestionBank entity
+     * @param randomize Có shuffle options không
+     * @param seed Random seed để shuffle
+     * @returns List<String> với format ["A. Option A", "B. Option B", ...]
+     * @author: K24DTCN210-NVMANH (24/11/2025 10:28)
+     * --------------------------------------------------- */
+    private List<String> parseOptionsWithoutAnswer(QuestionBank question, 
             Boolean randomize, Long seed) {
         try {
+            // ✅ Check if options is null or empty
+            String optionsJson = question.getOptions();
+            if (optionsJson == null || optionsJson.trim().isEmpty()) {
+                log.warn("Question {} has null or empty options field", question.getId());
+                return new ArrayList<>();
+            }
+            
             @SuppressWarnings("unchecked")
-            Map<String, String> options = objectMapper.readValue(
-                question.getOptions(), Map.class);
+            Map<String, String> optionsMap = objectMapper.readValue(
+                optionsJson, Map.class);
+            
+            // Check if map is null or empty
+            if (optionsMap == null || optionsMap.isEmpty()) {
+                log.warn("Question {} has empty options map", question.getId());
+                return new ArrayList<>();
+            }
             
             // Remove correctAnswer key if exists
-            options.remove("correctAnswer");
+            optionsMap.remove("correctAnswer");
+            
+            // Convert Map to List with format "Key. Value"
+            List<String> optionsList = new ArrayList<>();
+            
+            // Get entries and sort by key (A, B, C, D)
+            List<Map.Entry<String, String>> entries = new ArrayList<>(optionsMap.entrySet());
+            entries.sort(Map.Entry.comparingByKey());
             
             // Randomize if needed
             if (Boolean.TRUE.equals(randomize) && seed != null) {
-                List<Map.Entry<String, String>> entries = new ArrayList<>(options.entrySet());
                 Random random = new Random(seed + question.getId());
                 Collections.shuffle(entries, random);
-                
-                Map<String, String> randomized = new LinkedHashMap<>();
-                for (Map.Entry<String, String> entry : entries) {
-                    randomized.put(entry.getKey(), entry.getValue());
-                }
-                return randomized;
             }
             
-            return options;
+            // Format as "Key. Value"
+            for (Map.Entry<String, String> entry : entries) {
+                optionsList.add(entry.getKey() + ". " + entry.getValue());
+            }
+            
+            return optionsList;
         } catch (Exception e) {
-            return new HashMap<>();
+            log.error("Error parsing options for question {}", question.getId(), e);
+            return new ArrayList<>();
         }
     }
     
@@ -641,35 +703,37 @@ public class ExamTakingService {
     
     private List<AnswerReviewDTO> mapToAnswerReviewDTOs(List<StudentAnswer> answers, 
             Boolean showCorrectAnswers) {
-        return answers.stream()
-            .map(answer -> {
-                QuestionBank question = answer.getQuestion();
-                
-                return AnswerReviewDTO.builder()
-                    .questionId(question.getId())
-                    .questionText(question.getQuestionText())
-                    .questionType(question.getQuestionType())
-                    .options(parseOptionsWithoutAnswer(question, false, null))
-                    .studentAnswer(parseAnswerJson(answer.getAnswerJson()))
-                    .studentAnswerText(answer.getAnswerText())
-                    .correctAnswer(showCorrectAnswers ? 
-                        parseAnswerJson(question.getCorrectAnswer()) : null)
-                    .correctAnswerText(showCorrectAnswers ? 
-                        question.getCorrectAnswer() : null)
-                    .isCorrect(answer.getIsCorrect())
-                    .pointsEarned(answer.getPointsEarned())
-                    .maxPoints(answer.getMaxPoints())
-                    .teacherFeedback(answer.getTeacherFeedback())
-                    .gradedByName(answer.getGradedBy() != null ? 
-                        answer.getGradedBy().getFullName() : null)
-                    .isGraded(answer.isGraded())
-                    .requiresManualGrading(question.getQuestionType() == QuestionType.ESSAY || 
-                        question.getQuestionType() == QuestionType.CODING)
-                    .uploadedFileUrl(answer.getUploadedFileUrl())
-                    .uploadedFileName(answer.getUploadedFileName())
-                    .build();
-            })
-            .collect(Collectors.toList());
+        List<AnswerReviewDTO> result = new ArrayList<>();
+        for (StudentAnswer answer : answers) {
+            QuestionBank question = answer.getQuestion();
+            
+            AnswerReviewDTO dto = AnswerReviewDTO.builder()
+                .questionId(question.getId())
+                .questionText(question.getQuestionText())
+                .questionType(question.getQuestionType())
+                .options(parseOptionsWithoutAnswer(question, false, null))
+                .studentAnswer(parseAnswerJson(answer.getAnswerJson()))
+                .studentAnswerText(answer.getAnswerText())
+                .correctAnswer(showCorrectAnswers ? 
+                    parseAnswerJson(question.getCorrectAnswer()) : null)
+                .correctAnswerText(showCorrectAnswers ? 
+                    question.getCorrectAnswer() : null)
+                .isCorrect(answer.getIsCorrect())
+                .pointsEarned(answer.getPointsEarned())
+                .maxPoints(answer.getMaxPoints())
+                .teacherFeedback(answer.getTeacherFeedback())
+                .gradedByName(answer.getGradedBy() != null ? 
+                    answer.getGradedBy().getFullName() : null)
+                .isGraded(answer.isGraded())
+                .requiresManualGrading(question.getQuestionType() == QuestionType.ESSAY || 
+                    question.getQuestionType() == QuestionType.CODING)
+                .uploadedFileUrl(answer.getUploadedFileUrl())
+                .uploadedFileName(answer.getUploadedFileName())
+                .build();
+            
+            result.add(dto);
+        }
+        return result;
     }
     
     /* ---------------------------------------------------

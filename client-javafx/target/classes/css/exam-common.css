@@ -359,3 +359,358 @@
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
+
+/* ========================================
+ * EXAM RESULT SCREEN STYLES (Phase 8.5)
+ * @author: K24DTCN210-NVMANH (23/11/2025 18:58)
+ * ======================================== */
+
+/* Result Container */
+.exam-result-container {
+    -fx-background-color: -fx-background;
+}
+
+/* Result Header */
+.result-header {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 0 0 1 0;
+}
+
+.exam-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.submission-time {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* Result Content */
+.result-content {
+    -fx-background-color: -fx-background;
+}
+
+.result-scroll {
+    -fx-background-color: transparent;
+}
+
+/* Result Card */
+.result-card {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 4, 0, 0, 2);
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* Info Grid */
+.info-grid {
+    -fx-hgap: 20;
+    -fx-vgap: 10;
+}
+
+.info-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: bold;
+}
+
+.info-value {
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* Status Labels */
+.status-submitted {
+    -fx-text-fill: -fx-success;
+    -fx-font-weight: bold;
+}
+
+.status-grading {
+    -fx-text-fill: -fx-warning;
+    -fx-font-weight: bold;
+}
+
+.status-graded {
+    -fx-text-fill: -fx-primary;
+    -fx-font-weight: bold;
+}
+
+/* Grading Status */
+.grading-status {
+    -fx-font-size: 16px;
+    -fx-text-fill: -fx-warning;
+    -fx-font-weight: bold;
+}
+
+.grading-note {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-wrap-text: true;
+}
+
+/* Score Display */
+.score-box, .percentage-box, .grade-box {
+    -fx-padding: 15;
+    -fx-background-color: derive(-fx-background, -5%);
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.score-label, .percentage-label, .grade-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: bold;
+}
+
+.score-value {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primary;
+}
+
+.score-separator {
+    -fx-font-size: 24px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.score-max {
+    -fx-font-size: 24px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.percentage-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primary;
+}
+
+.grade-value {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+}
+
+/* Grade Colors */
+.grade-a {
+    -fx-text-fill: #4CAF50; /* Green */
+}
+
+.grade-b {
+    -fx-text-fill: #8BC34A; /* Light Green */
+}
+
+.grade-c {
+    -fx-text-fill: #FFC107; /* Amber */
+}
+
+.grade-d {
+    -fx-text-fill: #FF9800; /* Orange */
+}
+
+.grade-f {
+    -fx-text-fill: #F44336; /* Red */
+}
+
+/* Question Results */
+.question-result-box {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.question-number {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+}
+
+.question-score {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.question-content-small {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-wrap-text: true;
+}
+
+.answer-title, .feedback-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.student-answer {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-primary;
+    -fx-wrap-text: true;
+    -fx-padding: 10;
+    -fx-background-color: derive(-fx-background, -3%);
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.feedback-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-info;
+    -fx-wrap-text: true;
+    -fx-padding: 10;
+    -fx-background-color: derive(-fx-primary-light, 50%);
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+/* Answer Status Styles */
+.question-result-box.status-correct {
+    -fx-border-color: -fx-success;
+    -fx-border-width: 2;
+}
+
+.question-result-box.status-partial {
+    -fx-border-color: -fx-warning;
+    -fx-border-width: 2;
+}
+
+.question-result-box.status-incorrect {
+    -fx-border-color: -fx-danger;
+    -fx-border-width: 2;
+}
+
+.question-result-box.status-unanswered {
+    -fx-border-color: -fx-text-disabled;
+    -fx-border-width: 1;
+    -fx-opacity: 0.7;
+}
+
+/* Result Footer */
+.result-footer {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1 0 0 0;
+}
+
+.btn-primary {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 24;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: -fx-primary-dark;
+}
+
+.btn-primary:pressed {
+    -fx-background-color: derive(-fx-primary-dark, -10%);
+}
+
+/* ========================================
+ * LOGIN SCREEN STYLES (Phase 8.6)
+ * @author: K24DTCN210-NVMANH (24/11/2025 08:01)
+ * ======================================== */
+
+/* Login Container */
+.login-container {
+    -fx-background-color: linear-gradient(to bottom, #E3F2FD, #FFFFFF);
+}
+
+/* Login Title & Subtitle */
+.login-title {
+    -fx-fill: -fx-primary;
+    -fx-font-weight: bold;
+}
+
+.login-subtitle {
+    -fx-fill: -fx-text-secondary;
+}
+
+/* Login Form Elements */
+.login-label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: bold;
+}
+
+.login-textfield, .password-field {
+    -fx-background-color: -fx-surface;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 2;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 12 16;
+    -fx-font-size: 14px;
+    -fx-pref-width: 300;
+}
+
+.login-textfield:focused, .password-field:focused {
+    -fx-border-color: -fx-primary;
+    -fx-border-width: 2;
+}
+
+/* Login Checkbox */
+.login-checkbox {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* Login Button */
+.login-button {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+    -fx-padding: 14 0;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-pref-width: 300;
+}
+
+.login-button:hover {
+    -fx-background-color: -fx-primary-dark;
+}
+
+.login-button:pressed {
+    -fx-background-color: derive(-fx-primary-dark, -10%);
+}
+
+.login-button:disabled {
+    -fx-background-color: -fx-text-disabled;
+    -fx-opacity: 0.6;
+}
+
+/* Error Message */
+.error-message {
+    -fx-text-fill: -fx-danger;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 8;
+    -fx-background-color: derive(-fx-danger, 80%);
+    -fx-border-color: -fx-danger;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+/* Loading Indicator */
+.loading-text {
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* Login Footer */
+.login-footer {
+    -fx-fill: -fx-text-secondary;
+}

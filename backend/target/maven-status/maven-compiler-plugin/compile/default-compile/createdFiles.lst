@@ -94,6 +94,7 @@ com\mstrust\exam\controller\GradingController.class
 com\mstrust\exam\dto\QuestionForStudentDTO$QuestionForStudentDTOBuilder.class
 com\mstrust\exam\service\SubjectService.class
 com\mstrust\exam\MsTrustExamApplication.class
+com\mstrust\exam\controller\HealthCheckController.class
 com\mstrust\exam\entity\SubjectClass.class
 com\mstrust\exam\repository\ExamRepository.class
 com\mstrust\exam\dto\AssignRoleRequest$AssignRoleRequestBuilder.class

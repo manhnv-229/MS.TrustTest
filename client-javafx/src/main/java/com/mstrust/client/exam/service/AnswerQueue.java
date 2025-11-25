@@ -1,7 +1,11 @@
 package com.mstrust.client.exam.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +15,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -39,10 +44,14 @@ public class AnswerQueue {
     /* ---------------------------------------------------
      * Constructor - Khởi tạo queue và restore từ file
      * @author: K24DTCN210-NVMANH (23/11/2025 17:38)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 15:11) - Added LocalDateTime TypeAdapter for Java 17+
      * --------------------------------------------------- */
     public AnswerQueue() {
         this.queue = new ConcurrentHashMap<>();
-        this.gson = new Gson();
+        // Create Gson with LocalDateTime adapter to fix Java 17+ module restriction
+        this.gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
         restoreFromFile();
     }
 
@@ -269,6 +278,34 @@ public class AnswerQueue {
                     ", queuedAt=" + queuedAt +
                     ", retryCount=" + retryCount +
                     '}';
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * LocalDateTime TypeAdapter for Gson (Java 17+ compatibility)
+     * Fixes: module java.base does not "opens java.time" to module com.google.gson
+     * @author: K24DTCN210-NVMANH (24/11/2025 15:11)
+     * --------------------------------------------------- */
+    private static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
+        private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        
+        @Override
+        public void write(JsonWriter out, LocalDateTime value) throws IOException {
+            if (value == null) {
+                out.nullValue();
+            } else {
+                out.value(value.format(formatter));
+            }
+        }
+        
+        @Override
+        public LocalDateTime read(JsonReader in) throws IOException {
+            if (in.peek() == com.google.gson.stream.JsonToken.NULL) {
+                in.nextNull();
+                return null;
+            }
+            String dateTimeStr = in.nextString();
+            return LocalDateTime.parse(dateTimeStr, formatter);
         }
     }
 }

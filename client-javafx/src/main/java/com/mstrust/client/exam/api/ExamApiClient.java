@@ -89,6 +89,44 @@ public class ExamApiClient {
     }
 
     /* ---------------------------------------------------
+     * Login authentication
+     * POST /api/auth/login
+     * @param email Email của user
+     * @param password Password
+     * @returns JWT token
+     * @author: K24DTCN210-NVMANH (24/11/2025 08:03)
+     * --------------------------------------------------- */
+    public String login(String email, String password) throws IOException, InterruptedException {
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("username", email); // Backend yêu cầu field "username" thay vì "email"
+        requestBody.put("password", password);
+        
+        String jsonBody = gson.toJson(requestBody);
+        
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/auth/login"))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        
+        HttpResponse<String> response = httpClient.send(request, 
+                HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() == 200) {
+            Map<String, Object> responseMap = gson.fromJson(response.body(), 
+                    new TypeToken<Map<String, Object>>(){}.getType());
+            String token = (String) responseMap.get("token");
+            this.authToken = token;
+            logger.info("Login successful for email: {}", email);
+            return token;
+        } else {
+            logger.error("Login failed. Status: {}, Body: {}", 
+                    response.statusCode(), response.body());
+            throw new IOException("Login failed: " + response.statusCode());
+        }
+    }
+
+    /* ---------------------------------------------------
      * Lấy danh sách đề thi available cho student
      * GET /api/exam-taking/available
      * @returns List<ExamInfoDTO> danh sách đề thi
@@ -121,9 +159,11 @@ public class ExamApiClient {
      * POST /api/exam-taking/start/{examId}
      * @param examId ID của đề thi
      * @returns Map chứa submissionId và questions
+     * @throws ExamStartException nếu có lỗi từ backend (chứa error message)
      * @author: K24DTCN210-NVMANH (23/11/2025 11:59)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 11:50) - Improved error handling
      * --------------------------------------------------- */
-    public StartExamResponse startExam(Long examId) throws IOException, InterruptedException {
+    public StartExamResponse startExam(Long examId) throws IOException, InterruptedException, ExamStartException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/exam-taking/start/" + examId))
                 .header("Authorization", "Bearer " + authToken)
@@ -139,9 +179,23 @@ public class ExamApiClient {
             logger.info("Started exam {}. SubmissionId: {}", examId, result.getSubmissionId());
             return result;
         } else {
+            // Parse error message from response body
+            String errorMessage = "Không thể bắt đầu bài thi";
+            try {
+                Map<String, Object> errorBody = gson.fromJson(response.body(), 
+                        new TypeToken<Map<String, Object>>(){}.getType());
+                if (errorBody != null && errorBody.containsKey("message")) {
+                    errorMessage = (String) errorBody.get("message");
+                }
+            } catch (Exception e) {
+                // If can't parse, use status code
+                errorMessage = "Lỗi HTTP " + response.statusCode();
+            }
+            
             logger.error("Failed to start exam. Status: {}, Body: {}", 
                     response.statusCode(), response.body());
-            throw new IOException("Failed to start exam: " + response.statusCode());
+            
+            throw new ExamStartException(errorMessage, response.statusCode());
         }
     }
 
@@ -192,10 +246,15 @@ public class ExamApiClient {
      * @param submissionId ID của submission
      * @param request SaveAnswerRequest object
      * @author: K24DTCN210-NVMANH (23/11/2025 13:51)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 15:26) - Added detailed logging
      * --------------------------------------------------- */
     public void saveAnswer(Long submissionId, SaveAnswerRequest request) 
                           throws IOException, InterruptedException {
         String jsonBody = gson.toJson(request);
+        
+        logger.info("[API] Saving answer - SubmissionId: {}, QuestionId: {}, AutoSave: {}", 
+            submissionId, request.getQuestionId(), request.getIsAutoSave());
+        logger.debug("[API] Request body: {}", jsonBody);
         
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/exam-taking/save-answer/" + submissionId))
@@ -207,9 +266,13 @@ public class ExamApiClient {
         HttpResponse<String> response = httpClient.send(httpRequest, 
                 HttpResponse.BodyHandlers.ofString());
         
-        if (response.statusCode() != 200) {
-            logger.error("Failed to save answer. Status: {}, Body: {}", 
-                    response.statusCode(), response.body());
+        if (response.statusCode() == 200) {
+            logger.info("[API] Save answer SUCCESS - Status: 200, QuestionId: {}", 
+                request.getQuestionId());
+            logger.debug("[API] Response body: {}", response.body());
+        } else {
+            logger.error("[API] Save answer FAILED - Status: {}, QuestionId: {}, Body: {}", 
+                    response.statusCode(), request.getQuestionId(), response.body());
             throw new IOException("Failed to save answer: " + response.statusCode());
         }
     }
@@ -281,7 +344,7 @@ public class ExamApiClient {
     public ExamResultResponse getExamResult(Long submissionId) 
             throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(baseUrl + "/api/exam-taking/results/" + submissionId))
+                .uri(URI.create(baseUrl + "/api/exam-taking/result/" + submissionId))
                 .header("Authorization", "Bearer " + authToken)
                 .GET()
                 .build();
@@ -394,6 +457,32 @@ public class ExamApiClient {
 
         public String getFeedback() { return feedback; }
         public void setFeedback(String feedback) { this.feedback = feedback; }
+    }
+
+    /* ---------------------------------------------------
+     * Custom exception cho startExam errors
+     * @author: K24DTCN210-NVMANH (24/11/2025 11:50)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 12:16) - Added isMaxAttemptsError()
+     * --------------------------------------------------- */
+    public static class ExamStartException extends Exception {
+        private final int statusCode;
+        
+        public ExamStartException(String message, int statusCode) {
+            super(message);
+            this.statusCode = statusCode;
+        }
+        
+        public int getStatusCode() {
+            return statusCode;
+        }
+        
+        public boolean isActiveSubmissionError() {
+            return statusCode == 400 && getMessage().toLowerCase().contains("active submission");
+        }
+        
+        public boolean isMaxAttemptsError() {
+            return statusCode == 400 && getMessage().toLowerCase().contains("maximum attempts");
+        }
     }
 
     /* ---------------------------------------------------

@@ -59,7 +59,20 @@ public class TimeFormatter {
      * --------------------------------------------------- */
     public static String formatTime(LocalDateTime dateTime) {
         if (dateTime == null) return "";
-        return dateTime.format(TIME_FORMATTER);
+        return dateTime.format(DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"));
+    }
+    
+    /* ---------------------------------------------------
+     * Format thời gian từ số giây (dạng long) sang dạng HH:mm:ss
+     * @param seconds Số giây cần format
+     * @returns Chuỗi thời gian định dạng HH:mm:ss
+     * @author: K24DTCN210-NVMANH (24/11/2025 08:06)
+     * --------------------------------------------------- */
+    public static String formatTime(long seconds) {
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long secs = seconds % 60;
+        return String.format("%02d:%02d:%02d", hours, minutes, secs);
     }
 
     /* ---------------------------------------------------

@@ -40,8 +40,7 @@
                     <Label text="Môn học:" styleClass="filter-label"/>
                     <ComboBox fx:id="subjectFilterCombo" 
                               promptText="Tất cả môn học"
-                              prefWidth="200"
-                              onAction="#onFilterChanged"/>
+                              prefWidth="200"/>
                 </VBox>
                 
                 <!-- Status Filter -->
@@ -49,8 +48,7 @@
                     <Label text="Trạng thái:" styleClass="filter-label"/>
                     <ComboBox fx:id="statusFilterCombo" 
                               promptText="Tất cả trạng thái"
-                              prefWidth="200"
-                              onAction="#onFilterChanged"/>
+                              prefWidth="200"/>
                 </VBox>
                 
                 <!-- Spacer -->

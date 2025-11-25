@@ -2,6 +2,7 @@ package com.mstrust.client.exam.controller;
 
 import com.mstrust.client.exam.api.ExamApiClient;
 import com.mstrust.client.exam.dto.ExamInfoDTO;
+import com.mstrust.client.exam.dto.StartExamResponse;
 import com.mstrust.client.exam.util.TimeFormatter;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -33,7 +34,7 @@ import java.util.stream.Collectors;
 public class ExamListController {
     private static final Logger logger = LoggerFactory.getLogger(ExamListController.class);
     
-    private final ExamApiClient examApiClient;
+    private ExamApiClient examApiClient;
     private List<ExamInfoDTO> allExams;
     private List<ExamInfoDTO> filteredExams;
     
@@ -47,19 +48,14 @@ public class ExamListController {
     @FXML private Label lastRefreshLabel;
 
     /* ---------------------------------------------------
-     * Constructor - khởi tạo API client
-     * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
-     * --------------------------------------------------- */
-    public ExamListController() {
-        this.examApiClient = new ExamApiClient();
-    }
-
-    /* ---------------------------------------------------
      * Initialize - được gọi sau khi FXML loaded
+     * Nhận ExamApiClient đã authenticated từ login
+     * @param apiClient ExamApiClient với auth token
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 08:04) - Accept apiClient parameter
      * --------------------------------------------------- */
-    @FXML
-    public void initialize() {
+    public void initialize(ExamApiClient apiClient) {
+        this.examApiClient = apiClient;
         logger.info("Initializing ExamListController");
         
         // Setup filters
@@ -189,7 +185,9 @@ public class ExamListController {
                 TimeFormatter.formatDateTime(exam.getStartTime()) + 
                 " - " + TimeFormatter.formatTime(exam.getEndTime())),
             createInfoRow("⏱️ Thời lượng:", 
-                TimeFormatter.formatDuration(exam.getDurationMinutes())),
+                exam.getDurationMinutes() != null 
+                    ? TimeFormatter.formatDuration(exam.getDurationMinutes())
+                    : "Không xác định"),
             createInfoRow("📝 Số câu hỏi:", 
                 String.valueOf(exam.getTotalQuestions()))
         );
@@ -340,8 +338,67 @@ public class ExamListController {
      * @param exam ExamInfoDTO
      * @author: K24DTCN210-NVMANH (23/11/2025 14:20)
      * EditBy: K24DTCN210-NVMANH (23/11/2025 14:20) - Implement navigation to ExamTakingController
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 09:14) - Phase 8.6: Pass Stage to ExamTakingController
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 11:51) - Validate API before loading UI
      * --------------------------------------------------- */
     private void startExamSession(ExamInfoDTO exam) {
+        // Show loading indicator
+        Alert loadingAlert = new Alert(Alert.AlertType.INFORMATION);
+        loadingAlert.setTitle("Đang xử lý");
+        loadingAlert.setHeaderText("Đang khởi tạo bài thi...");
+        loadingAlert.setContentText("Vui lòng chờ trong giây lát");
+        loadingAlert.show();
+        
+        // Call API in background thread
+        new Thread(() -> {
+            try {
+                logger.info("Calling startExam API for exam: {}", exam.getExamId());
+                
+                // 1. Call API FIRST to validate
+                StartExamResponse response = examApiClient.startExam(exam.getExamId());
+                
+                // 2. If successful, navigate to exam screen on JavaFX thread
+                Platform.runLater(() -> {
+                    loadingAlert.close();
+                    navigateToExamScreen(exam, response);
+                });
+                
+            } catch (ExamApiClient.ExamStartException e) {
+                // Handle specific exam start errors
+                logger.error("ExamStartException: {}", e.getMessage());
+                Platform.runLater(() -> {
+                    loadingAlert.close();
+                    handleExamStartError(e, exam);
+                });
+                
+            } catch (IOException | InterruptedException e) {
+                // Handle network errors
+                logger.error("Network error during exam start", e);
+                Platform.runLater(() -> {
+                    loadingAlert.close();
+                    showError("Lỗi kết nối", 
+                        "Không thể kết nối đến server. Vui lòng kiểm tra mạng và thử lại.");
+                });
+            } catch (Exception e) {
+                // Handle unexpected errors
+                logger.error("Unexpected error during exam start", e);
+                Platform.runLater(() -> {
+                    loadingAlert.close();
+                    showError("Lỗi", 
+                        "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+    
+    /* ---------------------------------------------------
+     * Navigate to exam taking screen after API success
+     * @param exam ExamInfoDTO
+     * @param response StartExamResponse từ API (already called by ExamListController)
+     * @author: K24DTCN210-NVMANH (24/11/2025 11:51)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 13:42) - Pass response để tránh double API call
+     * --------------------------------------------------- */
+    private void navigateToExamScreen(ExamInfoDTO exam, StartExamResponse response) {
         try {
             logger.info("Starting exam session for: {}", exam.getTitle());
             
@@ -354,22 +411,27 @@ public class ExamListController {
             // 2. Get ExamTakingController
             ExamTakingController controller = loader.getController();
             
-            // 3. Initialize exam với examId và authToken
-            String authToken = examApiClient.getAuthToken();
-            controller.initializeExam(exam.getExamId(), authToken);
+            // 3. Get current stage
+            Stage stage = (Stage) examCardsContainer.getScene().getWindow();
             
-            // 4. Create new scene
+            // 4. Set stage to controller for full-screen support
+            controller.setStage(stage);
+            
+            // 5. Initialize exam với response ĐÃ CÓ (không call API lần nữa!)
+            String authToken = examApiClient.getAuthToken();
+            controller.initializeExamWithResponse(response, authToken);
+            
+            // 6. Create new scene
             Scene scene = new Scene(root, 1400, 900);
             
-            // 5. Load CSS
+            // 7. Load CSS
             String css = getClass().getResource("/css/exam-common.css").toExternalForm();
             scene.getStylesheets().add(css);
             
-            // 6. Get current stage and switch scene
-            Stage stage = (Stage) examCardsContainer.getScene().getWindow();
+            // 8. Switch scene
             stage.setScene(scene);
             stage.setTitle("Làm bài thi: " + exam.getTitle());
-            stage.setMaximized(true); // Maximize window for better exam experience
+            stage.setMaximized(true);
             
             logger.info("Successfully navigated to exam taking screen");
             
@@ -377,45 +439,65 @@ public class ExamListController {
             logger.error("Failed to load exam-taking.fxml", e);
             showError("Lỗi tải giao diện", 
                 "Không thể mở màn hình làm bài thi: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("Unexpected error during exam start", e);
-            showError("Lỗi", 
-                "Đã xảy ra lỗi không mong muốn: " + e.getMessage());
         }
     }
-
+    
     /* ---------------------------------------------------
-     * Handle filter changed event
-     * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * Handle exam start errors với friendly dialogs
+     * @param e ExamStartException
+     * @param exam ExamInfoDTO of the exam
+     * @author: K24DTCN210-NVMANH (24/11/2025 11:40)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 12:17) - Added max attempts error handling
      * --------------------------------------------------- */
-    @FXML
-    private void onFilterChanged() {
-        if (allExams == null) return;
-        
-        String selectedSubject = subjectFilterCombo.getValue();
-        String selectedStatus = statusFilterCombo.getValue();
-        
-        // Filter exams
-        filteredExams = allExams.stream()
-            .filter(exam -> filterBySubject(exam, selectedSubject))
-            .filter(exam -> filterByStatus(exam, selectedStatus))
-            .collect(Collectors.toList());
-        
-        displayExams();
-    }
-
-    /* ---------------------------------------------------
-     * Filter by subject
-     * @param exam ExamInfoDTO
-     * @param subject Subject filter value
-     * @returns true nếu pass filter
-     * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
-     * --------------------------------------------------- */
-    private boolean filterBySubject(ExamInfoDTO exam, String subject) {
-        if (subject == null || subject.equals("Tất cả môn học")) {
-            return true;
+    private void handleExamStartError(ExamApiClient.ExamStartException e, ExamInfoDTO exam) {
+        if (e.isActiveSubmissionError()) {
+            // User có submission đang active
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Bài thi đang diễn ra");
+            alert.setHeaderText("Bạn đã có một bài thi đang làm dở");
+            alert.setContentText(
+                "Đề thi: " + exam.getTitle() + "\n\n" +
+                "Bạn đã bắt đầu làm bài thi này trước đó và chưa nộp bài.\n" +
+                "Vui lòng liên hệ giáo viên để được hỗ trợ hoặc reset bài thi."
+            );
+            
+            // Add custom buttons
+            ButtonType contactTeacherBtn = new ButtonType("Liên hệ GV");
+            ButtonType closeBtn = new ButtonType("Đóng", ButtonBar.ButtonData.CANCEL_CLOSE);
+            alert.getButtonTypes().setAll(contactTeacherBtn, closeBtn);
+            
+            alert.showAndWait();
+            
+        } else if (e.isMaxAttemptsError()) {
+            // User đã hết số lần thi
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Hết số lần thi");
+            alert.setHeaderText("Bạn đã hết số lần thi cho đề này");
+            
+            // Extract số lần thi từ message (VD: "Maximum attempts reached (1)")
+            String message = e.getMessage();
+            alert.setContentText(
+                "Đề thi: " + exam.getTitle() + "\n\n" +
+                message + "\n\n" +
+                "Bạn đã sử dụng hết số lần thi được phép cho đề thi này.\n" +
+                "Vui lòng liên hệ giáo viên nếu cần được thi lại."
+            );
+            
+            // Add custom buttons
+            ButtonType contactTeacherBtn = new ButtonType("Liên hệ GV");
+            ButtonType closeBtn = new ButtonType("Đóng", ButtonBar.ButtonData.CANCEL_CLOSE);
+            alert.getButtonTypes().setAll(contactTeacherBtn, closeBtn);
+            
+            alert.showAndWait();
+            
+        } else {
+            // Other errors
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Không thể bắt đầu bài thi");
+            alert.setHeaderText(null);
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
         }
-        return exam.getSubjectName().equals(subject);
     }
 
     /* ---------------------------------------------------
@@ -479,12 +561,4 @@ public class ExamListController {
         alert.showAndWait();
     }
 
-    /* ---------------------------------------------------
-     * Set auth token cho API client
-     * @param token JWT token
-     * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
-     * --------------------------------------------------- */
-    public void setAuthToken(String token) {
-        examApiClient.setAuthToken(token);
-    }
 }

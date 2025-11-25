@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<!--
+    Exam Result Screen FXML
+    - Hiển thị kết quả bài thi sau khi submit
+    - Hỗ trợ 2 trạng thái: Grading in progress / Graded
+    - Hiển thị điểm, grade, chi tiết từng câu
+    Author: K24DTCN210-NVMANH (23/11/2025 18:53)
+-->
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.mstrust.client.exam.controller.ExamResultController"
+            styleClass="exam-result-container"
+            stylesheets="@../css/exam-common.css">
+    
+    <!-- TOP: Header with exam title -->
+    <top>
+        <VBox styleClass="result-header" spacing="10">
+            <padding>
+                <Insets top="20" right="30" bottom="20" left="30"/>
+            </padding>
+            
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label text="📊" style="-fx-font-size: 32px;"/>
+                <VBox spacing="5">
+                    <Label fx:id="examTitleLabel" 
+                           text="Kết Quả Bài Thi" 
+                           styleClass="exam-title"/>
+                    <Label fx:id="submissionTimeLabel" 
+                           text="Nộp bài lúc: --:--:--" 
+                           styleClass="submission-time"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+    
+    <!-- CENTER: Result content -->
+    <center>
+        <ScrollPane fitToWidth="true" 
+                    fitToHeight="true" 
+                    styleClass="result-scroll">
+            <VBox spacing="20" styleClass="result-content">
+                <padding>
+                    <Insets top="20" right="30" bottom="20" left="30"/>
+                </padding>
+                
+                <!-- Submission Status Card -->
+                <VBox styleClass="result-card" spacing="15">
+                    <Label text="📋 Trạng Thái Nộp Bài" styleClass="card-title"/>
+                    
+                    <GridPane hgap="20" vgap="10" styleClass="info-grid">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="30" />
+                            <ColumnConstraints percentWidth="70" />
+                        </columnConstraints>
+                        
+                        <Label text="Submission ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" 
+                               styleClass="info-label"/>
+                        <Label fx:id="submissionIdLabel" text="--" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               styleClass="info-value"/>
+                        
+                        <Label text="Trạng thái:" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                               styleClass="info-label"/>
+                        <Label fx:id="statusLabel" text="Đã nộp thành công ✓" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                               styleClass="info-value status-submitted"/>
+                        
+                        <Label text="Thời gian nộp:" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                               styleClass="info-label"/>
+                        <Label fx:id="submitTimeDetailLabel" text="--" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                               styleClass="info-value"/>
+                    </GridPane>
+                </VBox>
+                
+                <!-- Grading Status Card -->
+                <VBox fx:id="gradingStatusCard" styleClass="result-card" spacing="15">
+                    <Label text="🎯 Trạng Thái Chấm Điểm" styleClass="card-title"/>
+                    
+                    <!-- Show when grading in progress -->
+                    <VBox fx:id="gradingInProgressContainer" spacing="10" managed="false" visible="false">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <ProgressIndicator prefWidth="30" prefHeight="30"/>
+                            <Label text="Đang chờ giáo viên chấm điểm..." styleClass="grading-status"/>
+                        </HBox>
+                        <Label text="Kết quả sẽ được cập nhật sau khi giáo viên hoàn tất chấm điểm." 
+                               styleClass="grading-note" wrapText="true"/>
+                    </VBox>
+                    
+                    <!-- Show when graded -->
+                    <VBox fx:id="gradedContainer" spacing="15" managed="false" visible="false">
+                        <HBox spacing="30" alignment="CENTER_LEFT">
+                            <VBox spacing="5" alignment="CENTER" styleClass="score-box">
+                                <Label text="Điểm số" styleClass="score-label"/>
+                                <HBox spacing="5" alignment="BASELINE_CENTER">
+                                    <Label fx:id="scoreLabel" text="0.0" styleClass="score-value"/>
+                                    <Label text="/" styleClass="score-separator"/>
+                                    <Label fx:id="maxScoreLabel" text="10.0" styleClass="score-max"/>
+                                </HBox>
+                            </VBox>
+                            
+                            <VBox spacing="5" alignment="CENTER" styleClass="percentage-box">
+                                <Label text="Phần trăm" styleClass="percentage-label"/>
+                                <Label fx:id="percentageLabel" text="0%" styleClass="percentage-value"/>
+                            </VBox>
+                            
+                            <VBox spacing="5" alignment="CENTER" styleClass="grade-box">
+                                <Label text="Xếp loại" styleClass="grade-label"/>
+                                <Label fx:id="gradeLabel" text="F" styleClass="grade-value"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+                
+                <!-- Question Results Card (only show when graded) -->
+                <VBox fx:id="questionResultsCard" styleClass="result-card" spacing="15" 
+                      managed="false" visible="false">
+                    <Label text="📝 Kết Quả Chi Tiết" styleClass="card-title"/>
+                    
+                    <VBox fx:id="questionResultsContainer" spacing="10">
+                        <!-- Question results will be added programmatically -->
+                    </VBox>
+                </VBox>
+                
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <!-- BOTTOM: Action buttons -->
+    <bottom>
+        <HBox styleClass="result-footer" spacing="15" alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="15" right="30" bottom="15" left="30"/>
+            </padding>
+            
+            <Button fx:id="backToListButton" 
+                    text="Quay Lại Danh Sách Đề Thi" 
+                    styleClass="btn-primary"
+                    onAction="#onBackToExamList"
+                    prefWidth="200"/>
+        </HBox>
+    </bottom>
+    
+</BorderPane>

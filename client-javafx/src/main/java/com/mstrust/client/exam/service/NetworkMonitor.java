@@ -134,12 +134,13 @@ public class NetworkMonitor {
      * Check connection to server
      * @returns true nếu server reachable
      * @author: K24DTCN210-NVMANH (23/11/2025 17:39)
+     * EditBy: K24DTCN210-NVMANH (24/11/2025 14:18) - Changed to public health check endpoint
      * --------------------------------------------------- */
     private boolean checkConnection() {
         try {
-            // Simple HEAD request to check server availability
+            // Simple HEAD request to public health check endpoint (no auth required)
             Request request = new Request.Builder()
-                .url(API_BASE_URL + "/exam-taking/available")
+                .url(API_BASE_URL + "/health/ping")
                 .head()
                 .build();
             

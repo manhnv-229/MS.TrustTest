@@ -11,6 +11,7 @@ import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import java.util.function.Consumer;
 
 /* ---------------------------------------------------
  * Question Display Component - Hiển thị câu hỏi + answer input
@@ -19,6 +20,7 @@ import javafx.scene.text.TextFlow;
  * - "Mark for review" checkbox
  * - Extract current answer
  * @author: K24DTCN210-NVMANH (23/11/2025 13:48)
+ * EditBy: K24DTCN210-NVMANH (24/11/2025 14:51) - Phase 8.6: Added answer change listener
  * --------------------------------------------------- */
 public class QuestionDisplayComponent extends VBox {
     
@@ -28,6 +30,9 @@ public class QuestionDisplayComponent extends VBox {
     private CheckBox markForReviewCheckbox;
     private Node currentAnswerWidget;
     private QuestionDTO currentQuestion;
+    
+    // Phase 8.6: Callback for answer changes
+    private Consumer<String> onAnswerChanged;
 
     /* ---------------------------------------------------
      * Constructor - khởi tạo component
@@ -120,6 +125,9 @@ public class QuestionDisplayComponent extends VBox {
         
         // Create and embed answer widget
         currentAnswerWidget = AnswerInputFactory.createInputWidget(question);
+        
+        // Phase 8.6: Setup answer change listener
+        setupAnswerChangeListener(currentAnswerWidget);
         
         // Clear answer container and add new widget
         answerContainer.getChildren().clear();
@@ -302,5 +310,64 @@ public class QuestionDisplayComponent extends VBox {
         if (currentAnswerWidget != null) {
             currentAnswerWidget.requestFocus();
         }
+    }
+    
+    /* ---------------------------------------------------
+     * Set callback khi answer thay đổi (Phase 8.6)
+     * @param callback Consumer nhận String là answer mới
+     * @author: K24DTCN210-NVMANH (24/11/2025 14:51)
+     * --------------------------------------------------- */
+    public void setOnAnswerChanged(Consumer<String> callback) {
+        this.onAnswerChanged = callback;
+    }
+    
+    /* ---------------------------------------------------
+     * Setup listener cho answer widget để detect changes (Phase 8.6)
+     * Called internally sau khi create answer widget
+     * @param widget Answer input widget
+     * @author: K24DTCN210-NVMANH (24/11/2025 14:51)
+     * --------------------------------------------------- */
+    private void setupAnswerChangeListener(Node widget) {
+        if (widget == null || onAnswerChanged == null) {
+            return;
+        }
+        
+        // TextField (SHORT_ANSWER)
+        if (widget instanceof javafx.scene.control.TextField) {
+            javafx.scene.control.TextField field = (javafx.scene.control.TextField) widget;
+            field.textProperty().addListener((obs, oldVal, newVal) -> {
+                onAnswerChanged.accept(newVal != null ? newVal : "");
+            });
+        }
+        
+        // TextArea (ESSAY, LONG_ANSWER)
+        else if (widget instanceof javafx.scene.control.TextArea) {
+            javafx.scene.control.TextArea area = (javafx.scene.control.TextArea) widget;
+            area.textProperty().addListener((obs, oldVal, newVal) -> {
+                onAnswerChanged.accept(newVal != null ? newVal : "");
+            });
+        }
+        
+        // RadioButton group (MULTIPLE_CHOICE single)
+        else if (widget instanceof VBox) {
+            // VBox chứa RadioButtons
+            for (Node child : ((VBox) widget).getChildren()) {
+                if (child instanceof javafx.scene.control.RadioButton) {
+                    javafx.scene.control.RadioButton radio = (javafx.scene.control.RadioButton) child;
+                    radio.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                        if (newVal) {
+                            // Get current answer when selection changes
+                            String answer = getCurrentAnswer();
+                            if (answer != null) {
+                                onAnswerChanged.accept(answer);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        
+        // CheckBox group (MULTIPLE_CHOICE multi)
+        // Similar pattern như RadioButton nhưng listen each checkbox
     }
 }

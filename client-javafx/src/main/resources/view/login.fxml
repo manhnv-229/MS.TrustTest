@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mstrust.client.exam.controller.LoginController"
+      alignment="CENTER"
+      spacing="20"
+      styleClass="login-container">
+    
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    
+    <!-- Logo/Title -->
+    <VBox alignment="CENTER" spacing="10">
+        <Text text="MS.TrustTest" styleClass="login-title">
+            <font>
+                <Font name="System Bold" size="32"/>
+            </font>
+        </Text>
+        <Text text="Hệ Thống Thi Trực Tuyến" styleClass="login-subtitle">
+            <font>
+                <Font size="14"/>
+            </font>
+        </Text>
+    </VBox>
+    
+    <!-- Spacer -->
+    <Region VBox.vgrow="ALWAYS" minHeight="20"/>
+    
+    <!-- Login Form -->
+    <VBox spacing="15" alignment="CENTER" maxWidth="300">
+        
+        <!-- Email Field -->
+        <VBox spacing="5">
+            <Label text="Email:" styleClass="login-label">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Label>
+            <TextField fx:id="emailField" 
+                      promptText="Nhập email của bạn"
+                      styleClass="login-textfield"/>
+        </VBox>
+        
+        <!-- Password Field -->
+        <VBox spacing="5">
+            <Label text="Mật khẩu:" styleClass="login-label">
+                <font>
+                    <Font size="13"/>
+                </font>
+            </Label>
+            <PasswordField fx:id="passwordField" 
+                          promptText="Nhập mật khẩu"
+                          styleClass="login-textfield"/>
+        </VBox>
+        
+        <!-- Remember Me Checkbox -->
+        <CheckBox fx:id="rememberMeCheckbox" 
+                 text="Ghi nhớ đăng nhập"
+                 styleClass="login-checkbox"/>
+        
+        <!-- Error Message -->
+        <Label fx:id="errorLabel" 
+               styleClass="error-message"
+               wrapText="true"
+               visible="false"
+               managed="false"
+               textAlignment="CENTER">
+            <font>
+                <Font size="12"/>
+            </font>
+        </Label>
+        
+        <!-- Login Button -->
+        <Button fx:id="loginButton"
+                text="Đăng Nhập"
+                defaultButton="true"
+                maxWidth="Infinity"
+                styleClass="login-button"
+                onAction="#onLogin">
+            <font>
+                <Font size="14" name="System Bold"/>
+            </font>
+        </Button>
+        
+        <!-- Loading Indicator -->
+        <HBox fx:id="loadingBox" 
+              alignment="CENTER" 
+              spacing="10"
+              visible="false"
+              managed="false">
+            <ProgressIndicator fx:id="loadingIndicator" 
+                             prefWidth="30" 
+                             prefHeight="30"/>
+            <Label text="Đang đăng nhập..." styleClass="loading-text">
+                <font>
+                    <Font size="12"/>
+                </font>
+            </Label>
+        </HBox>
+        
+    </VBox>
+    
+    <!-- Spacer -->
+    <Region VBox.vgrow="ALWAYS" minHeight="20"/>
+    
+    <!-- Footer -->
+    <VBox alignment="CENTER" spacing="5">
+        <Text text="Version 1.0.0" styleClass="login-footer">
+            <font>
+                <Font size="11"/>
+            </font>
+        </Text>
+        <Text text="© 2025 MS.TrustTest" styleClass="login-footer">
+            <font>
+                <Font size="11"/>
+            </font>
+        </Text>
+    </VBox>
+    
+</VBox>
