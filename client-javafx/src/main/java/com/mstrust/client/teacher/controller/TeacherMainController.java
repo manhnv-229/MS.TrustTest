@@ -37,6 +37,7 @@ public class TeacherMainController {
     @FXML private Button examManagementButton;
     @FXML private Button gradingButton;
     @FXML private Button monitoringButton;
+    @FXML private Button helpButton;
     
     // Admin-only section
     @FXML private VBox adminMenuSection;
@@ -56,17 +57,52 @@ public class TeacherMainController {
     private String currentUserName;
     private Stage stage;
     private Timer syncTimer;
-    private com.mstrust.client.exam.api. ExamApiClient apiClient;
+    private com.mstrust.client.exam.api.ExamApiClient apiClient;
     private com.mstrust.client.exam.ExamClientApplication application;
     
     /* ---------------------------------------------------
      * Initialize controller sau khi FXML loaded
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 16:57) - Thêm Ikonli icons
      * --------------------------------------------------- */
     @FXML
     public void initialize() {
-        // Sẽ được set từ bên ngoài
+        // Setup icons cho menu items
+        setupMenuIcons();
+        // Setup sync timer
         setupSyncTimer();
+    }
+    
+    /* ---------------------------------------------------
+     * Setup Ikonli icons cho các menu items
+     * @author: K24DTCN210-NVMANH (27/11/2025 16:57)
+     * --------------------------------------------------- */
+    private void setupMenuIcons() {
+        // Main menu icons
+        questionBankButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createQuestionBankIcon());
+        subjectManagementButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createSubjectIcon());
+        examManagementButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createExamIcon());
+        gradingButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createGradingIcon());
+        monitoringButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createMonitoringIcon());
+        
+        // Admin menu icons (sẽ được hiển thị nếu user là admin)
+        if (userManagementButton != null) {
+            userManagementButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createUserManagementIcon());
+        }
+        if (organizationButton != null) {
+            organizationButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createOrganizationIcon());
+        }
+        if (systemConfigButton != null) {
+            systemConfigButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createSettingsIcon());
+        }
+        
+        // Logout button icon
+        logoutButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createLogoutIcon());
+        
+        // Help button icon  
+        if (helpButton != null) {
+            helpButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createHelpIcon());
+        }
     }
     
     /* ---------------------------------------------------
@@ -122,8 +158,8 @@ public class TeacherMainController {
     public void setStage(Stage stage) {
         this.stage = stage;
         // Try to get application instance from stage userData
-        if (stage. getUserData() instanceof com.mstrust.client. exam.ExamClientApplication) {
-            this.application = (com.mstrust.client.exam.ExamClientApplication) stage. getUserData();
+        if (stage.getUserData() instanceof com.mstrust.client.exam.ExamClientApplication) {
+            this.application = (com.mstrust.client.exam.ExamClientApplication) stage.getUserData();
         }
     }
     
@@ -152,7 +188,7 @@ public class TeacherMainController {
             // Create API client with same base URL and auth token
             // Note: Add /api prefix to base URL for Subject Management endpoints
             String baseUrlWithApi = apiClient.getBaseUrl() + "/api";
-            com. mstrust.client.teacher. api.SubjectApiClient subjectApiClient = 
+            com.mstrust.client.teacher.api.SubjectApiClient subjectApiClient = 
                 new com.mstrust.client.teacher.api.SubjectApiClient(baseUrlWithApi);
             subjectApiClient.setAuthToken(apiClient.getAuthToken());
             
@@ -343,7 +379,7 @@ public class TeacherMainController {
     /* ---------------------------------------------------
      * Quay lại màn hình login
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
-     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:32) - Use application. showLoginScreen() để khởi tạo đúng
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:32) - Use application.showLoginScreen() để khởi tạo đúng
      * --------------------------------------------------- */
     private void backToLogin() {
         if (application != null) {

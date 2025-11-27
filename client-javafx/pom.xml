@@ -137,6 +137,23 @@
             <artifactId>javafx-web</artifactId>
             <version>${javafx.version}</version>
         </dependency>
+        
+        <!-- ==================== Ikonli Icon Library ==================== -->
+        
+        <!-- Ikonli Core - Thư viện chính -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-javafx</artifactId>
+            <version>12.3.1</version>
+        </dependency>
+        
+        <!-- FontAwesome 5 - Bộ icon phổ biến nhất (1,500+ icons) -->
+        <dependency>
+            <groupId>org.kordamp.ikonli</groupId>
+            <artifactId>ikonli-fontawesome5-pack</artifactId>
+            <version>12.3.1</version>
+        </dependency>
+        
     </dependencies>
 
     <build>

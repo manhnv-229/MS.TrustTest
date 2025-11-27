@@ -91,13 +91,13 @@
     -fx-font-weight: 500;
 }
 
-/* Menu Icon - Đẹp hơn */
+/* Menu Icon - Đẹp hơn với kích thước cố định 18px */
 .menu-icon {
-    -fx-font-size: 20px;
+    -fx-font-size: 18px;
     -fx-text-fill: #FFFFFF;
-    -fx-min-width: 32px;
-    /* -fx-max-width:28px; */
-    /* -fx-width:40px; */
+    -fx-min-width: 26px;
+    -fx-max-width: 26px;
+    -fx-pref-width: 26px;
 }
 
 .menu-item:hover {
@@ -122,7 +122,7 @@
     -fx-text-fill: #FFFFFF ! important;
 }
 
-/* Help Button - Style riêng */
+/* Help Button - Icon màu đỏ, nền trong suốt */
 .menu-item-help {
     -fx-background-color: transparent;
     -fx-text-fill: #B0BEC5;
@@ -135,7 +135,7 @@
 
 .menu-item-help .menu-icon {
     -fx-font-size: 18px;
-    -fx-text-fill: #78909C;
+    -fx-text-fill: #F44336;  /* Icon màu đỏ */
 }
 
 .menu-item-help:hover {
@@ -144,7 +144,7 @@
 }
 
 .menu-item-help:hover .menu-icon {
-    -fx-text-fill: #FFFFFF;
+    -fx-text-fill: #F44336;  /* Giữ nguyên màu đỏ khi hover */
 }
 
 /* ==================== CONTENT AREA ==================== */

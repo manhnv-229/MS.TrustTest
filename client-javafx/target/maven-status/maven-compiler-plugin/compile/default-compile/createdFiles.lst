@@ -84,6 +84,7 @@ com\mstrust\client\exam\controller\ExamTakingController$1.class
 com\mstrust\client\exam\dto\StartExamResponse$StartExamResponseBuilder.class
 com\mstrust\client\teacher\controller\SubjectEditDialogController$2.class
 com\mstrust\client\teacher\dto\UpdateSubjectRequest.class
+com\mstrust\client\exam\util\IconFactory.class
 com\mstrust\client\exam\ExamClientApplication.class
 com\mstrust\client\monitoring\ScreenshotCaptureService.class
 com\mstrust\client\exam\util\TimerPhase.class

@@ -237,10 +237,10 @@ public class LoginController {
             
             // Apply CSS
             try {
-                String css = getClass().getResource("/css/exam-common.css").toExternalForm();
+                String css = getClass().getResource("/css/teacher-styles.css").toExternalForm();
                 scene.getStylesheets().add(css);
             } catch (Exception e) {
-                logger.warn("Could not load CSS");
+                logger.warn("Could not load CSS for teacher dashboard");
             }
             
             stage.setScene(scene);
@@ -281,7 +281,7 @@ public class LoginController {
             controller.setStage(stage);
             controller.setApiClient(apiClient);
             
-            Scene scene = new Scene(root, 1200, 700);
+            Scene scene = new Scene(root, 1400, 850);
             
             // Apply CSS
             try {

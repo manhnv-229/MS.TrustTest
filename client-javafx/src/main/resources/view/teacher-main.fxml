@@ -31,11 +31,13 @@
     
     <!-- Main Content -->
     <center>
-        <SplitPane dividerPositions="0.15" styleClass="main-split">
+        <SplitPane dividerPositions="1" styleClass="main-split">
             
             <!-- Left Sidebar - Navigation Menu with ScrollPane -->
-            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" style="-fx-background-color: #263238;">
-            <VBox styleClass="sidebar" spacing="8" prefWidth="280" maxWidth="550" minHeight="400">
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" prefWidth="250" maxWidth="300"
+                        style="-fx-background: #263238; -fx-background-color: #263238;">
+            <VBox styleClass="sidebar" spacing="8" prefWidth="250" maxWidth="300"
+                  style="-fx-background-color: #263238;">
                 <padding>
                     <Insets top="15" right="10" bottom="15" left="10"/>
                 </padding>
@@ -174,15 +176,13 @@
                 </Label>
                 <Separator/>
                 
-                <Button text="Trợ giúp" 
+                <Button fx:id="helpButton"
+                        text="Trợ giúp" 
                         styleClass="menu-item-help" 
                         onAction="#handleHelpClick" 
                         maxWidth="Infinity"
                         contentDisplay="LEFT"
                         graphicTextGap="8">
-                    <graphic>
-                        <Label text="❓" styleClass="menu-icon"/>
-                    </graphic>
                     <VBox.margin>
                         <Insets top="5"/>
                     </VBox.margin>
