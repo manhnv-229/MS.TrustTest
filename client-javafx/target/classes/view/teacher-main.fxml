@@ -31,78 +31,168 @@
     
     <!-- Main Content -->
     <center>
-        <SplitPane dividerPositions="0.2" styleClass="main-split">
+        <SplitPane dividerPositions="0.15" styleClass="main-split">
             
-            <!-- Left Sidebar - Navigation Menu -->
-            <VBox styleClass="sidebar" spacing="5">
+            <!-- Left Sidebar - Navigation Menu with ScrollPane -->
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" style="-fx-background-color: #263238;">
+            <VBox styleClass="sidebar" spacing="8" prefWidth="280" maxWidth="550" minHeight="400">
                 <padding>
-                    <Insets top="10" right="5" bottom="10" left="5"/>
+                    <Insets top="15" right="10" bottom="15" left="10"/>
                 </padding>
                 
-                <Label text="MENU" styleClass="menu-header"/>
+                <Label text="MENU CHÍNH" styleClass="menu-header"/>
                 <Separator/>
                 
                 <!-- Question Bank Menu Item -->
                 <Button fx:id="questionBankButton" 
-                        text="📚 Quản lý Ngân hàng Câu hỏi" 
+                        text="Ngân hàng Câu hỏi" 
                         styleClass="menu-item"
                         onAction="#handleQuestionBankClick"
-                        maxWidth="Infinity"/>
+                        maxWidth="Infinity"
+                        contentDisplay="LEFT"
+                        graphicTextGap="8">
+                    <graphic>
+                        <Label text="📚" styleClass="menu-icon"/>
+                    </graphic>
+                    <VBox.margin>
+                        <Insets top="5"/>
+                    </VBox.margin>
+                </Button>
+                
+                <!-- Subject Management Menu Item -->
+                <Button fx:id="subjectManagementButton" 
+                        text="Quản lý Môn học" 
+                        styleClass="menu-item"
+                        onAction="#handleSubjectManagementClick"
+                        maxWidth="Infinity"
+                        contentDisplay="LEFT"
+                        graphicTextGap="8">
+                    <graphic>
+                        <Label text="📖" styleClass="menu-icon"/>
+                    </graphic>
+                </Button>
                 
                 <!-- Exam Management Menu Item -->
                 <Button fx:id="examManagementButton" 
-                        text="📝 Quản lý Đề thi" 
+                        text="Quản lý Đề thi" 
                         styleClass="menu-item"
                         onAction="#handleExamManagementClick"
-                        maxWidth="Infinity"/>
+                        maxWidth="Infinity"
+                        contentDisplay="LEFT"
+                        graphicTextGap="8">
+                    <graphic>
+                        <Label text="📝" styleClass="menu-icon"/>
+                    </graphic>
+                </Button>
                 
                 <!-- Grading Menu Item -->
                 <Button fx:id="gradingButton" 
-                        text="✍️ Chấm bài" 
+                        text="Chấm bài" 
                         styleClass="menu-item"
                         onAction="#handleGradingClick"
-                        maxWidth="Infinity"/>
+                        maxWidth="Infinity"
+                        contentDisplay="LEFT"
+                        graphicTextGap="8">
+                    <graphic>
+                        <Label text="✍️" styleClass="menu-icon"/>
+                    </graphic>
+                </Button>
                 
                 <!-- Monitoring Menu Item -->
                 <Button fx:id="monitoringButton" 
-                        text="📊 Giám sát Thi" 
+                        text="Giám sát Thi" 
                         styleClass="menu-item"
                         onAction="#handleMonitoringClick"
-                        maxWidth="Infinity"/>
+                        maxWidth="Infinity"
+                        contentDisplay="LEFT"
+                        graphicTextGap="8">
+                    <graphic>
+                        <Label text="📊" styleClass="menu-icon"/>
+                    </graphic>
+                </Button>
                 
-                <Separator/>
-                
-                <!-- Admin-only menu items -->
-                <VBox fx:id="adminMenuSection" visible="false" managed="false" spacing="5">
+                <!-- Admin Section -->
+                <VBox fx:id="adminMenuSection" visible="false" managed="false" spacing="8">
+                    <VBox.margin>
+                        <Insets top="10"/>
+                    </VBox.margin>
+                    
+                    <Label text="QUẢN TRỊ" styleClass="menu-header">
+                        <VBox.margin>
+                            <Insets top="5"/>
+                        </VBox.margin>
+                    </Label>
+                    <Separator/>
+                    
                     <Button fx:id="userManagementButton" 
-                            text="👥 Quản lý Người dùng" 
+                            text="Quản lý Người dùng" 
                             styleClass="menu-item"
                             onAction="#handleUserManagementClick"
-                            maxWidth="Infinity"/>
+                            maxWidth="Infinity"
+                            contentDisplay="LEFT"
+                            graphicTextGap="8">
+                        <graphic>
+                            <Label text="👥" styleClass="menu-icon"/>
+                        </graphic>
+                        <VBox.margin>
+                            <Insets top="5"/>
+                        </VBox.margin>
+                    </Button>
                     
                     <Button fx:id="organizationButton" 
-                            text="🏫 Quản lý Tổ chức" 
+                            text="Quản lý Tổ chức" 
                             styleClass="menu-item"
                             onAction="#handleOrganizationClick"
-                            maxWidth="Infinity"/>
+                            maxWidth="Infinity"
+                            contentDisplay="LEFT"
+                            graphicTextGap="8">
+                        <graphic>
+                            <Label text="🏫" styleClass="menu-icon"/>
+                        </graphic>
+                    </Button>
                     
                     <Button fx:id="systemConfigButton" 
-                            text="⚙️ Cấu hình Hệ thống" 
+                            text="Cấu hình Hệ thống" 
                             styleClass="menu-item"
                             onAction="#handleSystemConfigClick"
-                            maxWidth="Infinity"/>
+                            maxWidth="Infinity"
+                            contentDisplay="LEFT"
+                            graphicTextGap="8">
+                        <graphic>
+                            <Label text="⚙️" styleClass="menu-icon"/>
+                        </graphic>
+                    </Button>
                 </VBox>
                 
                 <Region VBox.vgrow="ALWAYS"/>
                 
                 <!-- Help & Info -->
+                <Label text="HỖ TRỢ" styleClass="menu-header">
+                    <VBox.margin>
+                        <Insets top="10"/>
+                    </VBox.margin>
+                </Label>
                 <Separator/>
-                <Button text="❓ Trợ giúp" styleClass="menu-item-small" 
-                        onAction="#handleHelpClick" maxWidth="Infinity"/>
+                
+                <Button text="Trợ giúp" 
+                        styleClass="menu-item-help" 
+                        onAction="#handleHelpClick" 
+                        maxWidth="Infinity"
+                        contentDisplay="LEFT"
+                        graphicTextGap="8">
+                    <graphic>
+                        <Label text="❓" styleClass="menu-icon"/>
+                    </graphic>
+                    <VBox.margin>
+                        <Insets top="5"/>
+                    </VBox.margin>
+                </Button>
             </VBox>
+            </ScrollPane>
             
-            <!-- Right Content Area -->
-            <StackPane fx:id="contentArea" styleClass="content-area">
+            <!-- Right Content Area with ScrollPane -->
+            <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED" style="-fx-background-color: white;">
+            <StackPane fx:id="contentArea" styleClass="content-area" minHeight="400">
                 <VBox alignment="CENTER" spacing="20">
                     <Label text="Chào mừng đến với Teacher Dashboard!" 
                            styleClass="welcome-title"/>
@@ -111,13 +201,14 @@
                           wrappingWidth="400"/>
                 </VBox>
             </StackPane>
+            </ScrollPane>
             
         </SplitPane>
     </center>
     
     <!-- Bottom Status Bar -->
     <bottom>
-        <HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="15">
+        <HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="15" minHeight="35" prefHeight="35" maxHeight="35">
             <padding>
                 <Insets top="5" right="15" bottom="5" left="15"/>
             </padding>

@@ -33,6 +33,7 @@ public class TeacherMainController {
     
     // Menu buttons
     @FXML private Button questionBankButton;
+    @FXML private Button subjectManagementButton;
     @FXML private Button examManagementButton;
     @FXML private Button gradingButton;
     @FXML private Button monitoringButton;
@@ -55,7 +56,8 @@ public class TeacherMainController {
     private String currentUserName;
     private Stage stage;
     private Timer syncTimer;
-    private com.mstrust.client.exam.api.ExamApiClient apiClient;
+    private com.mstrust.client.exam.api. ExamApiClient apiClient;
+    private com.mstrust.client.exam.ExamClientApplication application;
     
     /* ---------------------------------------------------
      * Initialize controller sau khi FXML loaded
@@ -115,9 +117,14 @@ public class TeacherMainController {
      * Set stage reference
      * @param stage Primary stage
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:31) - Extract application from stage userData
      * --------------------------------------------------- */
     public void setStage(Stage stage) {
         this.stage = stage;
+        // Try to get application instance from stage userData
+        if (stage. getUserData() instanceof com.mstrust.client. exam.ExamClientApplication) {
+            this.application = (com.mstrust.client.exam.ExamClientApplication) stage. getUserData();
+        }
     }
     
     /* ---------------------------------------------------
@@ -127,6 +134,39 @@ public class TeacherMainController {
      * --------------------------------------------------- */
     public void setApiClient(com.mstrust.client.exam.api.ExamApiClient apiClient) {
         this.apiClient = apiClient;
+    }
+    
+    /* ---------------------------------------------------
+     * Handle Subject Management menu click
+     * @author: K24DTCN210-NVMANH (26/11/2025 02:02)
+     * --------------------------------------------------- */
+    @FXML
+    private void handleSubjectManagementClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/subject-management.fxml"));
+            Parent subjectManagementView = loader.load();
+            
+            // Get controller and initialize with API client
+            SubjectManagementController controller = loader.getController();
+            
+            // Create API client with same base URL and auth token
+            // Note: Add /api prefix to base URL for Subject Management endpoints
+            String baseUrlWithApi = apiClient.getBaseUrl() + "/api";
+            com. mstrust.client.teacher. api.SubjectApiClient subjectApiClient = 
+                new com.mstrust.client.teacher.api.SubjectApiClient(baseUrlWithApi);
+            subjectApiClient.setAuthToken(apiClient.getAuthToken());
+            
+            controller.initialize(subjectApiClient, stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(subjectManagementView);
+            highlightSelectedMenu(subjectManagementButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Quản lý Môn học: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /* ---------------------------------------------------
@@ -285,6 +325,7 @@ public class TeacherMainController {
     private void highlightSelectedMenu(Button selectedButton) {
         // Remove highlight from all menu buttons
         questionBankButton.getStyleClass().remove("menu-item-selected");
+        subjectManagementButton.getStyleClass().remove("menu-item-selected");
         examManagementButton.getStyleClass().remove("menu-item-selected");
         gradingButton.getStyleClass().remove("menu-item-selected");
         monitoringButton.getStyleClass().remove("menu-item-selected");
@@ -302,19 +343,13 @@ public class TeacherMainController {
     /* ---------------------------------------------------
      * Quay lại màn hình login
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:32) - Use application. showLoginScreen() để khởi tạo đúng
      * --------------------------------------------------- */
     private void backToLogin() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/login.fxml"));
-            Parent root = loader.load();
-            
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("MS.TrustTest - Đăng nhập");
-            stage.centerOnScreen();
-            
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (application != null) {
+            // Gọi lại showLoginScreen() từ Application để khởi tạo đúng dependencies và CSS
+            application.showLoginScreen();
+        } else {
             showError("Lỗi", "Không thể quay lại màn hình đăng nhập!");
         }
     }

@@ -74,6 +74,12 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.15.3</version>
         </dependency>
+        <!-- Jackson JSR310 - Java 8 Date/Time support -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.3</version>
+        </dependency>
 
         <!-- Lombok -->
         <dependency>
@@ -165,6 +171,11 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.mstrust.client.exam.ExamClientApplication</mainClass>
+                    <options>
+                        <option>--add-reads=com.mstrust.client=ALL-UNNAMED</option>
+                        <option>--add-opens=com.mstrust.client/com.mstrust.client.teacher.api=ALL-UNNAMED</option>
+                        <option>--add-opens=com.mstrust.client/com.mstrust.client.teacher.dto=ALL-UNNAMED</option>
+                    </options>
                 </configuration>
             </plugin>
 

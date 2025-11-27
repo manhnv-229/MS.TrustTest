@@ -89,11 +89,15 @@ public class ExamClientApplication extends Application {
     /* ---------------------------------------------------
      * Cấu hình các thuộc tính của primary stage
      * @author: K24DTCN210-NVMANH (24/11/2025 07:57)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:33) - Store application instance in stage userData
      * --------------------------------------------------- */
     private void configureStage() {
         primaryStage.setTitle("MS.TrustTest - Hệ Thống Thi Trực Tuyến");
         primaryStage.setMinWidth(800);
         primaryStage.setMinHeight(600);
+        
+        // Store application instance in stage userData để các controller có thể access
+        primaryStage.setUserData(this);
         
         // Handle close request
         primaryStage.setOnCloseRequest(this::handleExit);
@@ -102,8 +106,9 @@ public class ExamClientApplication extends Application {
     /* ---------------------------------------------------
      * Hiển thị màn hình đăng nhập
      * @author: K24DTCN210-NVMANH (24/11/2025 07:57)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:30) - Made public for logout flow
      * --------------------------------------------------- */
-    private void showLoginScreen() {
+    public void showLoginScreen() {
         try {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/view/login.fxml"));
@@ -125,11 +130,10 @@ public class ExamClientApplication extends Application {
             
             primaryStage.setScene(scene);
             primaryStage.setResizable(false);
-            
-            // ✅ Center login window on screen
-            WindowCenterHelper.centerStageOnScreen(primaryStage);
-            
             primaryStage.show();
+            
+            // ✅ Center login window on screen (phải gọi sau show())
+            WindowCenterHelper. centerStageOnScreen(primaryStage);
             
         } catch (IOException e) {
             logger.error("Failed to load login screen", e);

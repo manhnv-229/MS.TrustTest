@@ -31,9 +31,6 @@
         </Text>
     </VBox>
     
-    <!-- Spacer -->
-    <Region VBox.vgrow="ALWAYS" minHeight="20"/>
-    
     <!-- Login Form -->
     <VBox spacing="15" alignment="CENTER" maxWidth="300">
         
@@ -108,11 +105,11 @@
         
     </VBox>
     
-    <!-- Spacer -->
-    <Region VBox.vgrow="ALWAYS" minHeight="20"/>
+    <!-- Spacer with fixed height -->
+    <Region minHeight="30" maxHeight="30"/>
     
     <!-- Footer -->
-    <VBox alignment="CENTER" spacing="5">
+    <VBox alignment="CENTER" spacing="5" VBox.vgrow="NEVER">
         <Text text="Version 1.0.0" styleClass="login-footer">
             <font>
                 <Font size="11"/>

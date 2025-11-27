@@ -36,18 +36,19 @@ public class WindowCenterHelper {
      * Center stage sau khi nó được show (vì width/height chưa có trước show)
      * @param stage Stage cần center
      * @author: K24DTCN210-NVMANH (25/11/2025 15:03)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:38) - Use Platform.runLater for immediate centering
      * --------------------------------------------------- */
     public static void centerStageOnScreen(Stage stage) {
         if (stage == null) return;
         
-        // Wait for stage to be shown and get actual dimensions
-        stage.setOnShown(event -> {
+        // Use Platform.runLater to ensure stage dimensions are available
+        javafx.application.Platform.runLater(() -> {
             Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
             
             double centerX = (screenBounds.getWidth() - stage.getWidth()) / 2;
             double centerY = (screenBounds.getHeight() - stage.getHeight()) / 2;
             
-            stage.setX(screenBounds.getMinX() + centerX);
+            stage.setX(screenBounds. getMinX() + centerX);
             stage.setY(screenBounds.getMinY() + centerY);
         });
     }

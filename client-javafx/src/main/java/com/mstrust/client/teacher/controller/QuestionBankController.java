@@ -144,7 +144,7 @@ public class QuestionBankController {
         );
         
         ObservableList<String> subjectNames = FXCollections.observableArrayList(
-            subjects.stream().map(SubjectDTO::getName).collect(Collectors.toList())
+            subjects.stream().map(SubjectDTO::getSubjectName).collect(Collectors.toList())
         );
         subjectFilter.setItems(subjectNames);
     }

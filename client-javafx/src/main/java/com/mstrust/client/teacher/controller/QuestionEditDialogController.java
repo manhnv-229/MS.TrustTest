@@ -174,18 +174,18 @@ public class QuestionEditDialogController {
         
         // Setup Subject ComboBox
         subjectCombo.setItems(FXCollections.observableArrayList(subjects));
-        subjectCombo.setCellFactory(lv -> new ListCell<SubjectDTO>() {
+        subjectCombo. setCellFactory(lv -> new ListCell<SubjectDTO>() {
             @Override
             protected void updateItem(SubjectDTO item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty ? null : item.getName());
+                setText(empty ? null : item.getSubjectName());
             }
         });
-        subjectCombo.setButtonCell(new ListCell<SubjectDTO>() {
+        subjectCombo. setButtonCell(new ListCell<SubjectDTO>() {
             @Override
             protected void updateItem(SubjectDTO item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty ? null : item.getName());
+                setText(empty ? null : item.getSubjectName());
             }
         });
         

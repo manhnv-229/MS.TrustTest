@@ -74,23 +74,31 @@
         <Label fx:id="hardCountLabel" text="Khó: 0"/>
     </HBox>
     
-    <!-- Table View -->
-    <TableView fx:id="questionsTable" VBox.vgrow="ALWAYS">
-        <columns>
-            <TableColumn fx:id="idColumn" text="ID" prefWidth="50" sortable="true"/>
-            <TableColumn fx:id="questionTextColumn" text="Nội dung Câu hỏi" prefWidth="300" sortable="false"/>
-            <TableColumn fx:id="subjectColumn" text="Môn học" prefWidth="120" sortable="true"/>
-            <TableColumn fx:id="typeColumn" text="Loại" prefWidth="120" sortable="true"/>
-            <TableColumn fx:id="difficultyColumn" text="Độ khó" prefWidth="100" sortable="true"/>
-            <TableColumn fx:id="tagsColumn" text="Tags" prefWidth="150" sortable="false"/>
-            <TableColumn fx:id="usageCountColumn" text="Sử dụng" prefWidth="80" sortable="true"/>
-            <TableColumn fx:id="createdByColumn" text="Người tạo" prefWidth="120" sortable="true"/>
-            <TableColumn fx:id="actionsColumn" text="Thao tác" prefWidth="180" sortable="false"/>
-        </columns>
-        <placeholder>
-            <Label text="Không có câu hỏi nào. Nhấn 'Tạo Câu hỏi Mới' để bắt đầu."/>
-        </placeholder>
-    </TableView>
+    <!-- Table View with Loading Overlay -->
+    <StackPane VBox.vgrow="ALWAYS">
+        <TableView fx:id="questionsTable">
+            <columns>
+                <TableColumn fx:id="idColumn" text="ID" prefWidth="50" sortable="true"/>
+                <TableColumn fx:id="questionTextColumn" text="Nội dung Câu hỏi" prefWidth="300" sortable="false"/>
+                <TableColumn fx:id="subjectColumn" text="Môn học" prefWidth="120" sortable="true"/>
+                <TableColumn fx:id="typeColumn" text="Loại" prefWidth="120" sortable="true"/>
+                <TableColumn fx:id="difficultyColumn" text="Độ khó" prefWidth="100" sortable="true"/>
+                <TableColumn fx:id="tagsColumn" text="Tags" prefWidth="150" sortable="false"/>
+                <TableColumn fx:id="usageCountColumn" text="Sử dụng" prefWidth="80" sortable="true"/>
+                <TableColumn fx:id="createdByColumn" text="Người tạo" prefWidth="120" sortable="true"/>
+                <TableColumn fx:id="actionsColumn" text="Thao tác" prefWidth="180" sortable="false"/>
+            </columns>
+            <placeholder>
+                <Label text="Không có câu hỏi nào.Nhấn 'Tạo Câu hỏi Mới' để bắt đầu."/>
+            </placeholder>
+        </TableView>
+        
+        <!-- Loading Overlay -->
+        <StackPane fx:id="loadingPane" visible="false" managed="false" 
+                   style="-fx-background-color: rgba(0,0,0,0.3);">
+            <ProgressIndicator style="-fx-progress-color: white; -fx-background-color: transparent; -fx-background-radius: 0; -fx-padding: 0;"/>
+        </StackPane>
+    </StackPane>
     
     <!-- Pagination Bar -->
     <HBox spacing="10" alignment="CENTER" styleClass="pagination-bar">
@@ -103,13 +111,4 @@
         <Label text="Số câu hỏi / trang:"/>
         <ComboBox fx:id="pageSizeComboBox" value="20" prefWidth="80"/>
     </HBox>
-    
-    <!-- Loading Indicator -->
-    <StackPane fx:id="loadingPane" visible="false" managed="false" 
-               style="-fx-background-color: rgba(0,0,0,0.3);">
-        <VBox alignment="CENTER" spacing="10" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 10;">
-            <ProgressIndicator/>
-            <Label text="Đang tải dữ liệu..."/>
-        </VBox>
-    </StackPane>
 </VBox>

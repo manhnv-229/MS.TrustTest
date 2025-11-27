@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mstrust.client.teacher.controller.SubjectEditDialogController"
+            styleClass="content-container"
+            prefWidth="700" prefHeight="550">
+    
+    <!-- Header -->
+    <top>
+        <VBox styleClass="dialog-header">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label fx:id="dialogTitle" styleClass="page-title" text="Tạo môn học mới"/>
+        </VBox>
+    </top>
+    
+    <!-- Content với ScrollPane -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="dialog-content">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                
+                <!-- Basic Information Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Thông tin cơ bản" styleClass="section-title"/>
+                    
+                    <!-- Subject Code -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Mã môn học:" minWidth="120" styleClass="form-label"/>
+                        <TextField fx:id="codeField" promptText="Ví dụ: IT101" 
+                                   styleClass="form-field" prefWidth="300"/>
+                        <Label text="*" styleClass="required-mark"/>
+                        <Label fx:id="codeErrorLabel" styleClass="error-label" visible="false" 
+                               text="Mã môn học không được để trống"/>
+                    </HBox>
+                    
+                    <!-- Subject Name -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Tên môn học:" minWidth="120" styleClass="form-label"/>
+                        <TextField fx:id="nameField" promptText="Ví dụ: Lập trình Java" 
+                                   styleClass="form-field" prefWidth="400"/>
+                        <Label text="*" styleClass="required-mark"/>
+                        <Label fx:id="nameErrorLabel" styleClass="error-label" visible="false" 
+                               text="Tên môn học không được để trống"/>
+                    </HBox>
+                    
+                    <!-- Credits -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Số tín chỉ:" minWidth="120" styleClass="form-label"/>
+                        <Spinner fx:id="creditsSpinner" prefWidth="100" 
+                                 styleClass="form-field" editable="true">
+                            <valueFactory>
+                                <SpinnerValueFactory.IntegerSpinnerValueFactory 
+                                    min="1" max="10" initialValue="3"/>
+                            </valueFactory>
+                        </Spinner>
+                        <Label text="*" styleClass="required-mark"/>
+                        <Label text="(Từ 1 đến 10 tín chỉ)" styleClass="hint-text"/>
+                    </HBox>
+                    
+                    <!-- Department Selection -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Khoa/Bộ môn:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="departmentCombo" promptText="-- Chọn khoa/bộ môn --" 
+                                  styleClass="combo-box" prefWidth="300"/>
+                        <Label text="*" styleClass="required-mark"/>
+                        <Label fx:id="departmentErrorLabel" styleClass="error-label" visible="false" 
+                               text="Vui lòng chọn khoa/bộ môn"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Description Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Mô tả chi tiết" styleClass="section-title"/>
+                    
+                    <VBox spacing="5">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Mô tả môn học:" styleClass="form-label"/>
+                            <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                        </HBox>
+                        <TextArea fx:id="descriptionArea" 
+                                  promptText="Nhập mô tả chi tiết về môn học, nội dung, mục tiêu..." 
+                                  styleClass="form-field" prefHeight="120" wrapText="true"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Additional Info Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Thông tin bổ sung" styleClass="section-title"/>
+                    
+                    <HBox spacing="20">
+                        <VBox spacing="5">
+                            <Label text="Học kỳ:" styleClass="form-label"/>
+                            <ComboBox fx:id="semesterCombo" promptText="-- Chọn học kỳ --" 
+                                      styleClass="combo-box" prefWidth="150"/>
+                        </VBox>
+                        
+                        <VBox spacing="5">
+                            <Label text="Năm học:" styleClass="form-label"/>
+                            <TextField fx:id="academicYearField" 
+                                       promptText="Ví dụ: 2024-2025" 
+                                       styleClass="form-field" prefWidth="150"/>
+                        </VBox>
+                    </HBox>
+                    
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="isActiveCheckBox" text="Môn học đang hoạt động" 
+                                  selected="true"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Validation Summary -->
+                <VBox fx:id="validationSummary" spacing="5" styleClass="validation-summary" 
+                      visible="false" managed="false">
+                    <Label text="⚠️ Vui lòng kiểm tra các lỗi sau:" styleClass="error-label"/>
+                    <Label fx:id="validationMessage" styleClass="hint-text" 
+                           text="- Các trường bắt buộc phải được điền đầy đủ"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <!-- Action Buttons -->
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="dialog-footer">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <Button text="Hủy" onAction="#handleCancel" styleClass="secondary-button" 
+                    prefWidth="100"/>
+            <Button fx:id="saveButton" text="Lưu" onAction="#handleSave" 
+                    styleClass="primary-button" prefWidth="100"/>
+        </HBox>
+    </bottom>
+</BorderPane>

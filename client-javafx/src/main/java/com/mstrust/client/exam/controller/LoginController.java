@@ -171,6 +171,7 @@ public class LoginController {
      * @param email Email cần validate
      * @return true nếu email hợp lệ
      * @author: K24DTCN210-NVMANH (24/11/2025 08:00)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:50) - Fixed regex pattern
      * --------------------------------------------------- */
     private boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
@@ -220,6 +221,7 @@ public class LoginController {
     /* ---------------------------------------------------
      * Navigate đến màn hình danh sách bài thi (cho Student)
      * @author: K24DTCN210-NVMANH (24/11/2025 08:00)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:44) - Fixed size + center window
      * --------------------------------------------------- */
     private void navigateToExamList() {
         try {
@@ -244,7 +246,10 @@ public class LoginController {
             stage.setScene(scene);
             stage.setTitle("MS.TrustTest - Danh Sách Bài Thi");
             stage.setResizable(true);
-            stage.setMaximized(true);
+            stage.show();
+            
+            // ✅ Center window on screen
+            com.mstrust.client.exam.util.WindowCenterHelper.centerStageOnScreen(stage);
             
             logger.info("Navigated to exam list screen");
             
@@ -259,6 +264,7 @@ public class LoginController {
      * Navigate đến Teacher Dashboard (cho Teacher/Admin)
      * @param loginResponse LoginResponse chứa user info
      * @author: K24DTCN210-NVMANH (25/11/2025 21:46)
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:44) - Fixed size + center window
      * --------------------------------------------------- */
     private void navigateToTeacherDashboard(com.mstrust.client.exam.dto.LoginResponse loginResponse) {
         try {
@@ -288,7 +294,10 @@ public class LoginController {
             stage.setScene(scene);
             stage.setTitle("MS.TrustTest - Quản Lý Giáo Viên");
             stage.setResizable(true);
-            stage.setMaximized(true);
+            stage.show();
+            
+            // ✅ Center window on screen
+            com.mstrust.client.exam.util.WindowCenterHelper.centerStageOnScreen(stage);
             
             logger.info("Navigated to teacher dashboard for role: {}", loginResponse.getRole());
             

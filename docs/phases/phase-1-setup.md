@@ -590,7 +590,7 @@ INSERT INTO system_configs (config_key, config_value, description, data_type) VA
 
 -- Insert default admin user (password: Admin@123)
 INSERT INTO users (student_code, email, password_hash, full_name, is_active) VALUES
-('ADMIN', 'admin@mstrust.edu.vn', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5lk3K3Z7.n8Nu', 'System Administrator', TRUE);
+('ADMIN', 'admin@gmail.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5lk3K3Z7.n8Nu', 'System Administrator', TRUE);
 
 INSERT INTO user_roles (user_id, role_id) VALUES
 ((SELECT id FROM users WHERE student_code = 'ADMIN'), (SELECT id FROM roles WHERE name = 'ROLE_ADMIN'));
