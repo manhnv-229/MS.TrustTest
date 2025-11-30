@@ -9,9 +9,11 @@
             fx:controller="com.mstrust.client.teacher.controller.wizard.Step5ReviewController"
             stylesheets="@../../css/teacher-styles.css"
             fitToWidth="true"
-            hbarPolicy="NEVER">
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            pannable="true">
     
-    <VBox styleClass="wizard-step" spacing="25" alignment="TOP_CENTER">
+    <VBox styleClass="wizard-step" spacing="20" alignment="TOP_CENTER">
         <padding>
             <Insets top="30" right="40" bottom="30" left="40"/>
         </padding>
@@ -25,7 +27,7 @@
                wrapText="true"/>
         
         <!-- Section 1: Basic Info -->
-        <VBox spacing="10" styleClass="review-section" maxWidth="700">
+        <VBox spacing="10" styleClass="review-section" maxWidth="1000">
             <Label text="1.Thông tin cơ bản" styleClass="section-title"/>
             <Separator/>
             
@@ -60,7 +62,7 @@
         </VBox>
         
         <!-- Section 2: Questions -->
-        <VBox spacing="10" styleClass="review-section" maxWidth="700">
+        <VBox spacing="10" styleClass="review-section" maxWidth="1000">
             <Label text="2.Câu hỏi" styleClass="section-title"/>
             <Separator/>
             
@@ -76,12 +78,13 @@
             <TextArea fx:id="questionsListArea" 
                       editable="false" 
                       wrapText="true" 
-                      prefRowCount="6"
+                      prefRowCount="12"
+                      minHeight="200"
                       styleClass="review-textarea"/>
         </VBox>
         
         <!-- Section 3: Schedule -->
-        <VBox spacing="10" styleClass="review-section" maxWidth="700">
+        <VBox spacing="10" styleClass="review-section" maxWidth="1000">
             <Label text="3.Thời gian" styleClass="section-title"/>
             <Separator/>
             
@@ -104,7 +107,7 @@
         </VBox>
         
         <!-- Section 4: Settings -->
-        <VBox spacing="10" styleClass="review-section" maxWidth="700">
+        <VBox spacing="10" styleClass="review-section" maxWidth="1000">
             <Label text="4.Cài đặt" styleClass="section-title"/>
             <Separator/>
             
@@ -134,7 +137,7 @@
         </VBox>
         
         <!-- Section 5: Classes -->
-        <VBox spacing="10" styleClass="review-section" maxWidth="700">
+        <VBox spacing="10" styleClass="review-section" maxWidth="1000">
             <Label text="5.Lớp học" styleClass="section-title"/>
             <Separator/>
             
@@ -147,12 +150,13 @@
             <TextArea fx:id="assignedClassesArea" 
                       editable="false" 
                       wrapText="true" 
-                      prefRowCount="4"
+                      prefRowCount="6"
+                      minHeight="120"
                       styleClass="review-textarea"/>
         </VBox>
         
         <!-- Publish Option -->
-        <VBox spacing="10" styleClass="publish-section" maxWidth="700" alignment="CENTER">
+        <VBox spacing="10" styleClass="publish-section" maxWidth="1000" alignment="CENTER">
             <CheckBox fx:id="publishImmediatelyCheck" 
                       text="Xuất bản đề thi ngay lập tức" 
                       selected="true"
@@ -166,7 +170,7 @@
             <ProgressIndicator fx:id="progressIndicator" visible="false"/>
             <Label fx:id="statusLabel" styleClass="info-label" visible="false"/>
             <Label fx:id="errorLabel" styleClass="error-label" wrapText="true" 
-                   maxWidth="700" visible="false"/>
+                   maxWidth="1000" visible="false"/>
         </VBox>
         
     </VBox>

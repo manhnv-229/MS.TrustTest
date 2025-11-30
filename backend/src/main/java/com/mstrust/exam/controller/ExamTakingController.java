@@ -2,6 +2,8 @@ package com.mstrust.exam.controller;
 
 import com.mstrust.exam.dto.*;
 import com.mstrust.exam.dto.grading.StudentResultDTO;
+import com.mstrust.exam.entity.User;
+import com.mstrust.exam.repository.UserRepository;
 import com.mstrust.exam.service.ExamTakingService;
 import com.mstrust.exam.service.GradingService;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class ExamTakingController {
     
     private final ExamTakingService examTakingService;
     private final GradingService gradingService;
+    private final UserRepository userRepository;
     
     /* ---------------------------------------------------
      * GET /exam-taking/available
@@ -187,8 +190,19 @@ public class ExamTakingController {
      * @param auth Authentication object
      * @returns userId
      * @author: K24DTCN210-NVMANH (19/11/2025 15:32)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 00:20) - Fix lỗi parse email thành Long
      * --------------------------------------------------- */
     private Long getCurrentUserId(Authentication auth) {
-        return Long.parseLong(auth.getName());
+        String subject = auth.getName();
+        
+        // Try parse as Long first (if JWT has userId in "sub")
+        try {
+            return Long.parseLong(subject);
+        } catch (NumberFormatException e) {
+            // If not a number, it's email - fallback to query by email
+            User user = userRepository.findByEmail(subject)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + subject));
+            return user.getId();
+        }
     }
 }

@@ -21,51 +21,31 @@
     <Separator/>
     
     <!-- Form -->
-    <GridPane hgap="15" vgap="15" maxWidth="650">
-        
-        <!-- Section: Cấu hình thời gian -->
-        <Label text="Cấu hình thời gian" styleClass="section-title" 
-               GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"/>
-        
-        <!-- Thời gian bắt đầu -->
-        <Label text="Ngày giờ bắt đầu" styleClass="form-label" 
-               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="1">
-            <DatePicker fx:id="startDatePicker" prefWidth="150"/>
-            <TextField fx:id="startTimeField" promptText="HH:mm" prefWidth="100"/>
-        </HBox>
-        
-        <!-- Thời gian kết thúc -->
-        <Label text="Ngày giờ kết thúc" styleClass="form-label" 
-               GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="2">
-            <DatePicker fx:id="endDatePicker" prefWidth="150"/>
-            <TextField fx:id="endTimeField" promptText="HH:mm" prefWidth="100"/>
-        </HBox>
+    <GridPane hgap="20" vgap="18" maxWidth="900">
         
         <!-- Thời lượng -->
         <Label text="Thời lượng (phút) *" styleClass="form-label" 
-               GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
         <Spinner fx:id="durationSpinner" editable="true" minWidth="200"
-                 GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                 GridPane.columnIndex="1" GridPane.rowIndex="0"/>
         
         <!-- Điểm đạt -->
         <Label text="Điểm đạt *" styleClass="form-label" 
-               GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
         <TextField fx:id="passingScoreField" promptText="VD: 5.0" minWidth="200"
-                   GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                   GridPane.columnIndex="1" GridPane.rowIndex="1"/>
         
         <!-- Separator -->
-        <Separator GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
+        <Separator GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
             <GridPane.margin><Insets top="10" bottom="10"/></GridPane.margin>
         </Separator>
         
         <!-- Section: Hành vi -->
         <Label text="Hành vi trong khi làm bài" styleClass="section-title" 
-               GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2"/>
+               GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2"/>
         
         <!-- Checkbox group -->
-        <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2">
+        <VBox spacing="10" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2">
             <CheckBox fx:id="randomizeQuestionsCheck" text="Trộn thứ tự câu hỏi"/>
             <CheckBox fx:id="randomizeOptionsCheck" text="Trộn thứ tự đáp án"/>
             <CheckBox fx:id="allowReviewCheck" text="Cho phép xem lại bài làm"/>
@@ -74,29 +54,29 @@
         </VBox>
         
         <!-- Separator -->
-        <Separator GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2">
+        <Separator GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2">
             <GridPane.margin><Insets top="10" bottom="10"/></GridPane.margin>
         </Separator>
         
         <!-- Section: Giám sát -->
         <Label text="Cấu hình giám sát" styleClass="section-title" 
-               GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.columnSpan="2"/>
+               GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2"/>
         
         <!-- Mức độ giám sát -->
         <Label text="Mức độ giám sát *" styleClass="form-label" 
-               GridPane.columnIndex="0" GridPane.rowIndex="10"/>
-        <ComboBox fx:id="monitoringLevelCombo" promptText="Chọn mức độ giám sát" minWidth="300"
-                  GridPane.columnIndex="1" GridPane.rowIndex="10"/>
+               GridPane.columnIndex="0" GridPane.rowIndex="7"/>
+        <ComboBox fx:id="monitoringLevelCombo" promptText="Chọn mức độ giám sát" GridPane.hgrow="ALWAYS" minWidth="400"
+                  GridPane.columnIndex="1" GridPane.rowIndex="7"/>
         
         <!-- Ngôn ngữ lập trình -->
         <Label fx:id="programmingLanguageLabel" text="Ngôn ngữ lập trình" styleClass="form-label" 
-               GridPane.columnIndex="0" GridPane.rowIndex="11"/>
-        <ComboBox fx:id="programmingLanguageCombo" promptText="Chọn ngôn ngữ (nếu có)" minWidth="300"
-                  GridPane.columnIndex="1" GridPane.rowIndex="11"/>
+               GridPane.columnIndex="0" GridPane.rowIndex="8"/>
+        <ComboBox fx:id="programmingLanguageCombo" promptText="Chọn ngôn ngữ (nếu có)" GridPane.hgrow="ALWAYS" minWidth="400"
+                  GridPane.columnIndex="1" GridPane.rowIndex="8"/>
         
         <!-- Error Label -->
         <Label fx:id="errorLabel" styleClass="error-text" visible="false" managed="false"
-               GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"
+               GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.columnSpan="2"
                wrapText="true"/>
         
     </GridPane>

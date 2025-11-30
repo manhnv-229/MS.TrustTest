@@ -15,6 +15,8 @@
 ### Client
 - **UI Framework**: JavaFX 21
 - **Layout**: FXML + CSS
+- **Icons**: Ikonli 12.3.1 (FontAwesome 5)
+- **Icon Factory**: IconFactory utility class
 - **Monitoring**: JNA 5.x, Robot API, java.awt.Toolkit
 - **HTTP Client**: Spring WebClient
 - **WebSocket**: STOMP Client
@@ -298,6 +300,61 @@ server:
 
 ---
 
+## Icon System (Ikonli)
+
+### Library
+- **Ikonli Version**: 12.3.1
+- **Icon Set**: FontAwesome 5 (Solid)
+- **Package**: `org.kordamp.ikonli.fontawesome5.FontAwesomeSolid`
+- **Prefix**: `fas-`
+
+### IconFactory Utility
+**Location**: `client-javafx/src/main/java/com/mstrust/client/exam/util/IconFactory.java`
+
+**Purpose**: Centralized icon creation với consistent sizing và coloring
+
+**Common Methods**:
+```java
+// Standard icons
+IconFactory.createViewIcon()           // Eye icon (18px, primary)
+IconFactory.createEditIconForButton()  // Pencil icon (18px, primary)
+IconFactory.createPublishIcon()        // Bullhorn icon (18px, success)
+IconFactory.createLockIconForButton()  // Lock icon (18px, warning)
+IconFactory.createDeleteIconForButton() // Trash icon (18px, danger)
+
+// Menu icons (18px, white)
+IconFactory.createQuestionBankIcon()   // Book icon
+IconFactory.createExamIcon()           // File-alt icon
+IconFactory.createGradingIcon()        // Edit icon
+```
+
+**Size Constants**:
+- `SIZE_SMALL = 14`
+- `SIZE_NORMAL = 16`
+- `SIZE_MEDIUM = 20`
+- `SIZE_LARGE = 24`
+- `MENU_ICON_SIZE = 18`
+
+**Color Constants**:
+- `COLOR_PRIMARY = #2196F3`
+- `COLOR_SUCCESS = #4CAF50`
+- `COLOR_WARNING = #FF9800`
+- `COLOR_DANGER = #F44336`
+- `COLOR_INFO = #00BCD4`
+- `COLOR_WHITE = white`
+- `COLOR_GRAY = #757575`
+
+**Usage Pattern**:
+```java
+Button viewButton = new Button();
+viewButton.setGraphic(IconFactory.createViewIcon());
+viewButton.getStyleClass().add("icon-button");
+```
+
+**Documentation**: `docs/IKONLI-USAGE-GUIDE.md`
+
+---
+
 **Author**: K24DTCN210-NVMANH  
 **Created**: 13/11/2025 14:00  
-**Last Updated**: 15/11/2025 13:28
+**Last Updated**: 30/11/2025

@@ -79,6 +79,15 @@ public class ExamManagementApiClient {
     }
     
     /* ---------------------------------------------------
+     * Get JWT token hiện tại
+     * @return JWT token
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public String getAuthToken() {
+        return this.jwtToken;
+    }
+    
+    /* ---------------------------------------------------
      * Tạo exam mới
      * POST /api/exams
      * @param request ExamCreateRequest
@@ -232,6 +241,62 @@ public class ExamManagementApiClient {
     }
     
     /* ---------------------------------------------------
+     * Lấy danh sách tất cả exams với pagination
+     * GET /api/exams?page=0&size=100
+     * @param page Số trang (0-based)
+     * @param size Số items per page
+     * @return List<ExamDTO> danh sách exams
+     * @throws IOException Network error
+     * @throws ApiException API error
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public List<ExamDTO> getAllExams(int page, int size) throws IOException, ApiException {
+        String url = baseUrl + "/exams?page=" + page + "&size=" + size;
+        
+        Request httpRequest = new Request.Builder()
+            .url(url)
+            .header("Authorization", "Bearer " + jwtToken)
+            .get()
+            .build();
+        
+        try (Response response = client.newCall(httpRequest).execute()) {
+            String responseBody = response.body().string();
+            
+            if (!response.isSuccessful()) {
+                throw new ApiException(response.code(), responseBody);
+            }
+            
+            // Parse Page response từ Spring
+            // Backend trả về Page<ExamSummaryDTO> với structure:
+            // { "content": [...], "totalElements": ..., "totalPages": ..., ... }
+            com.google.gson.JsonObject pageJson = gson.fromJson(responseBody, com.google.gson.JsonObject.class);
+            
+            // Extract content array từ Page response
+            com.google.gson.JsonArray contentArray = pageJson.getAsJsonArray("content");
+            if (contentArray == null) {
+                return new java.util.ArrayList<>();
+            }
+            
+            // Parse content array thành List<ExamDTO>
+            // ExamSummaryDTO có thể map sang ExamDTO vì có các field tương tự
+            Type listType = new TypeToken<List<ExamDTO>>(){}.getType();
+            return gson.fromJson(contentArray, listType);
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Lấy danh sách tất cả exams (không pagination, lấy tất cả)
+     * GET /api/exams?page=0&size=1000
+     * @return List<ExamDTO> danh sách exams
+     * @throws IOException Network error
+     * @throws ApiException API error
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public List<ExamDTO> getAllExams() throws IOException, ApiException {
+        return getAllExams(0, 1000); // Lấy tối đa 1000 exams
+    }
+
+    /* ---------------------------------------------------
      * Lấy chi tiết exam theo ID
      * GET /api/exams/{examId}
      * @param examId ID của exam
@@ -332,6 +397,33 @@ public class ExamManagementApiClient {
             }
             
             Type listType = new TypeToken<List<ClassDTO>>(){}.getType();
+            return gson.fromJson(responseBody, listType);
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Lấy danh sách tất cả các lớp học phần
+     * GET /api/subject-classes
+     * @return List<SubjectClassDTO>
+     * @throws IOException Network error
+     * @throws ApiException API error
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public List<SubjectClassDTO> getAllSubjectClasses() throws IOException, ApiException {
+        Request httpRequest = new Request.Builder()
+            .url(baseUrl + "/subject-classes")
+            .header("Authorization", "Bearer " + jwtToken)
+            .get()
+            .build();
+        
+        try (Response response = client.newCall(httpRequest).execute()) {
+            String responseBody = response.body().string();
+            
+            if (!response.isSuccessful()) {
+                throw new ApiException(response.code(), responseBody);
+            }
+            
+            Type listType = new TypeToken<List<SubjectClassDTO>>(){}.getType();
             return gson.fromJson(responseBody, listType);
         }
     }

@@ -207,7 +207,7 @@ public class LoginController {
         
         if ("STUDENT".equals(normalizedRole)) {
             // Student → Exam List
-            navigateToExamList();
+            navigateToExamList(loginResponse);
         } else if ("TEACHER".equals(normalizedRole) || "DEPT_MANAGER".equals(normalizedRole) || "ADMIN".equals(normalizedRole)) {
             // Teacher/Admin → Teacher Dashboard
             navigateToTeacherDashboard(loginResponse);
@@ -220,10 +220,12 @@ public class LoginController {
     
     /* ---------------------------------------------------
      * Navigate đến màn hình danh sách bài thi (cho Student)
+     * @param loginResponse LoginResponse chứa user info
      * @author: K24DTCN210-NVMANH (24/11/2025 08:00)
      * EditBy: K24DTCN210-NVMANH (27/11/2025 15:44) - Fixed size + center window
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 00:30) - Pass user info to controller
      * --------------------------------------------------- */
-    private void navigateToExamList() {
+    private void navigateToExamList(com.mstrust.client.exam.dto.LoginResponse loginResponse) {
         try {
             FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/view/exam-list.fxml"));
@@ -231,7 +233,7 @@ public class LoginController {
             
             // Pass dependencies to controller
             ExamListController controller = loader.getController();
-            controller.initialize(apiClient);
+            controller.initialize(apiClient, loginResponse.getUserName(), loginResponse.getRole());
             
             Scene scene = new Scene(root, 1200, 800);
             

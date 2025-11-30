@@ -651,6 +651,117 @@ public class GlobalExceptionHandler {
 }
 ```
 
+## JavaFX UI Patterns
+
+### 1. Icon Button Pattern (Compact Actions)
+
+**Mục đích**: Tạo icon-only buttons với tooltips cho compact UI
+
+**Implementation**:
+```java
+// Create icon button
+Button viewButton = new Button();
+viewButton.setGraphic(IconFactory.createViewIcon());
+viewButton.getStyleClass().add("icon-button");
+viewButton.setTooltip(new Tooltip("Chi tiết"));
+viewButton.setOnAction(e -> handleAction());
+
+// CSS styling
+.icon-button {
+    -fx-background-color: linear-gradient(to bottom, #FFFFFF, #F0F4F8);
+    -fx-border-color: #B0BEC5;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-padding: 8;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+}
+
+.icon-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #E3F2FD, #BBDEFB);
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2;  // Cố định để tránh nhấp nháy
+}
+
+.icon-button:focused {
+    -fx-border-width: 2;  // Override default focus border
+}
+```
+
+**Key Points**:
+- Border width cố định (2px) cho tất cả states để tránh layout shift
+- Không dùng scale animation để tránh nhấp nháy
+- Override focus border để tránh border xấu khi focus
+
+### 2. Stage Reference Pattern (Modal Windows)
+
+**Mục đích**: Đảm bảo đóng modal window đúng cách
+
+**Implementation**:
+```java
+// Trong parent controller (ExamManagementController)
+Stage wizardStage = new Stage();
+wizardController.setWizardStage(wizardStage);  // Truyền reference
+wizardStage.showAndWait();
+
+// Trong wizard controller (ExamCreationWizardController)
+private Stage wizardStage;
+
+public void setWizardStage(Stage stage) {
+    this.wizardStage = stage;
+}
+
+public void cancelWizard() {
+    // ... confirmation dialog ...
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+        if (wizardStage != null) {
+            wizardStage.close();  // Đóng trực tiếp
+        }
+    }
+}
+```
+
+**Key Points**:
+- Truyền stage reference vào controller khi tạo
+- Đảm bảo đóng đúng stage khi cancel
+- Fallback: lấy từ scene nếu reference chưa được set
+
+### 3. Compact Card Design Pattern
+
+**Mục đích**: Hiển thị nhiều items trong không gian hạn chế
+
+**Implementation**:
+```java
+// Horizontal layout cho compact card
+HBox card = new HBox(12);
+card.getStyleClass().add("exam-card-compact");
+
+VBox leftSection = new VBox(6);
+// Title + status badge
+HBox titleRow = new HBox(8);
+// Info row (subject, time, duration, questions)
+HBox infoRow = new HBox(16);
+
+HBox actionButtons = createCompactActionButtons(exam);
+card.getChildren().addAll(leftSection, actionButtons);
+```
+
+**CSS**:
+```css
+.exam-card-compact {
+    -fx-background-color: linear-gradient(to bottom, #FFFFFF, #FAFBFC);
+    -fx-border-color: #CFD8DC;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+    -fx-min-height: 75;
+}
+
+.exam-card-compact:hover {
+    -fx-background-color: linear-gradient(to bottom, #E8F5E9, #F1F8E9);
+    -fx-border-color: #4CAF50;
+}
+```
+
 ## Caching Strategy (Future)
 
 ```
@@ -672,4 +783,4 @@ public class GlobalExceptionHandler {
 
 **Author**: K24DTCN210-NVMANH  
 **Created**: 13/11/2025 13:59  
-**Last Updated**: 13/11/2025 13:59
+**Last Updated**: 30/11/2025

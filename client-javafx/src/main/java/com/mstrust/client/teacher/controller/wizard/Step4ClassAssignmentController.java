@@ -1,25 +1,25 @@
-package com.mstrust.client. teacher.controller.wizard;
+package com.mstrust.client.teacher.controller.wizard;
 
-import com.mstrust.client. teacher.api.SubjectApiClient;
-import com. mstrust.client.teacher. api.ExamManagementApiClient;
+import com.mstrust.client.teacher.api.SubjectApiClient;
+import com.mstrust.client.teacher.api.ExamManagementApiClient;
 import com.mstrust.client.teacher.dto.ExamWizardData;
-import com.mstrust. client.teacher.dto.ClassDTO;
+import com.mstrust.client.teacher.dto.ClassDTO;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx. application.Platform;
+import javafx.application.Platform;
+import javafx.stage.Window;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 /* ---------------------------------------------------
  * Controller cho Step 4 của Exam Creation Wizard
  * Xử lý việc assign classes cho đề thi
  * @author: K24DTCN210-NVMANH (30/11/2025 13:58)
- * EditBy: K24DTCN210-NVMANH (30/11/2025 13:58) - Recreate corrupted file
+ * EditBy: K24DTCN210-NVMANH (30/11/2025) - Load classes từ API thực tế, thêm loading spinner
  * --------------------------------------------------- */
 public class Step4ClassAssignmentController {
 
@@ -28,6 +28,7 @@ public class Step4ClassAssignmentController {
     @FXML private Label availableCountLabel;
     @FXML private Label assignedCountLabel;
     @FXML private Label errorLabel;
+    @FXML private ProgressIndicator loadingIndicator;
 
     private ExamWizardData wizardData;
     private ExamCreationWizardController parentController;
@@ -37,6 +38,9 @@ public class Step4ClassAssignmentController {
     // Observable Lists để quản lý dữ liệu ListView
     private ObservableList<ClassDTO> availableClasses = FXCollections.observableArrayList();
     private ObservableList<ClassDTO> assignedClasses = FXCollections.observableArrayList();
+    
+    // Cache để tránh load lại từ API mỗi lần
+    private boolean classesLoaded = false;
 
     /* ---------------------------------------------------
      * Khởi tạo controller
@@ -45,6 +49,7 @@ public class Step4ClassAssignmentController {
     @FXML
     public void initialize() {
         hideError();
+        hideLoading();
         setupListViews();
         updateCountLabels();
     }
@@ -58,7 +63,7 @@ public class Step4ClassAssignmentController {
         if (availableClassesList != null) {
             availableClassesList.setItems(availableClasses);
             // Custom cell factory to display class name
-            availableClassesList. setCellFactory(listView -> new ListCell<ClassDTO>() {
+            availableClassesList.setCellFactory(listView -> new ListCell<ClassDTO>() {
                 @Override
                 protected void updateItem(ClassDTO item, boolean empty) {
                     super.updateItem(item, empty);
@@ -92,6 +97,7 @@ public class Step4ClassAssignmentController {
      * Set wizard data từ parent controller
      * @param wizardData Đối tượng chứa dữ liệu wizard
      * @author: K24DTCN210-NVMANH (30/11/2025 13:58)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Restore assignedClasses và chỉ load API nếu chưa load
      * --------------------------------------------------- */
     public void setWizardData(ExamWizardData wizardData) {
         this.wizardData = wizardData;
@@ -100,20 +106,28 @@ public class Step4ClassAssignmentController {
         System.out.println("=== STEP 4 DEBUG: setWizardData() ===");
         if (wizardData != null) {
             System.out.println("Title: " + wizardData.getTitle());
-            System.out. println("Start Time: " + wizardData.getStartTime());
+            System.out.println("Start Time: " + wizardData.getStartTime());
             System.out.println("End Time: " + wizardData.getEndTime());
             System.out.println("Subject Class ID: " + wizardData.getSubjectClassId());
             System.out.println("Subject Class Name: " + wizardData.getSubjectClassName());
-            System.out.println("Exam Purpose: " + wizardData. getExamPurpose());
+            System.out.println("Exam Purpose: " + wizardData.getExamPurpose());
             System.out.println("Exam Format: " + wizardData.getExamFormat());
             System.out.println("Assigned Classes Count: " + wizardData.getAssignedClassIds().size());
         } else {
-            System.out. println("WizardData is null!");
+            System.out.println("WizardData is null!");
         }
         System.out.println("=====================================");
         
-        // Load available classes when wizard data is set
-        loadAvailableClasses();
+        // Restore assignedClasses từ wizardData trước
+        restoreAssignedClasses();
+        
+        // Chỉ load classes từ API nếu chưa load hoặc cần refresh
+        if (!classesLoaded && wizardData != null && examApiClient != null) {
+            tryLoadAvailableClasses();
+        } else if (classesLoaded) {
+            // Đã load rồi, chỉ cần filter lại available classes
+            filterAvailableClasses();
+        }
     }
 
     /* ---------------------------------------------------
@@ -138,9 +152,13 @@ public class Step4ClassAssignmentController {
      * Set API client (required by ExamCreationWizardController)
      * @param examApiClient Exam management API client
      * @author: K24DTCN210-NVMANH (30/11/2025 13:58)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Tự động load classes sau khi set client
      * --------------------------------------------------- */
     public void setApiClient(ExamManagementApiClient examApiClient) {
         this.examApiClient = examApiClient;
+        
+        // Tự động load classes khi client đã được set và wizardData đã sẵn sàng
+        tryLoadAvailableClasses();
     }
 
     /* ---------------------------------------------------
@@ -152,11 +170,11 @@ public class Step4ClassAssignmentController {
         
         if (wizardData != null) {
             // Save assigned class IDs to wizard data
-            wizardData. getAssignedClassIds().clear();
+            wizardData.getAssignedClassIds().clear();
             List<Long> classIds = assignedClasses.stream()
-                . map(ClassDTO::getId)
+                .map(ClassDTO::getId)
                 .collect(Collectors.toList());
-            wizardData. getAssignedClassIds().addAll(classIds);
+            wizardData.getAssignedClassIds().addAll(classIds);
             
             System.out.println("Saved " + classIds.size() + " assigned classes to wizard data");
         }
@@ -165,53 +183,84 @@ public class Step4ClassAssignmentController {
     }
     
     /* ---------------------------------------------------
-     * Load available classes - Enhanced with real DB data lookup
-     * TODO: Replace with proper API call when backend endpoints available
-     * @author: K24DTCN210-NVMANH (30/11/2025 13:58)
+     * Kiểm tra và load classes nếu đủ điều kiện
+     * @author: K24DTCN210-NVMANH (30/11/2025)
      * --------------------------------------------------- */
-    private void loadAvailableClasses() {
-        System.out. println("=== STEP4: loadAvailableClasses() CALLED ===");
-        
-        // FUTURE: Backend should provide:
-        // GET /api/subject-classes - get all classes 
-        // GET /api/subject-classes/by-subject/{subjectId} - filter by subject
-        
-        // For now: Use realistic mock data based on database structure
-        List<ClassDTO> mockClasses = createRealisticMockClasses();
-        
-        Platform.runLater(() -> {
-            availableClasses.clear();
-            availableClasses. addAll(mockClasses);
-            
-            // Remove already assigned classes from available list
-            if (wizardData != null) {
-                List<Long> assignedIds = wizardData.getAssignedClassIds();
-                availableClasses.removeIf(cls -> assignedIds. contains(cls.getId()));
-            }
-            
-            updateCountLabels();
-            hideError();
-            System.out.println("=== STEP4: Loaded " + availableClasses. size() + " classes (mock data) ===");
-        });
+    private void tryLoadAvailableClasses() {
+        // Chỉ load khi cả wizardData và examApiClient đều đã sẵn sàng
+        if (wizardData != null && examApiClient != null) {
+            loadAvailableClasses();
+        } else {
+            System.out.println("=== STEP4: Chưa thể load classes - wizardData: " + 
+                (wizardData != null ? "OK" : "NULL") + 
+                ", examApiClient: " + 
+                (examApiClient != null ? "OK" : "NULL") + " ===");
+        }
     }
     
     /* ---------------------------------------------------
-     * Create realistic mock class data based on database schema
-     * Uses subject_classes table structure: id, code, subject_id, semester, teacher_id, max_students
-     * @author: K24DTCN210-NVMANH (30/11/2025 13:58)
+     * Load available classes from API
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Load từ API thực tế thay vì mock data
      * --------------------------------------------------- */
-    private List<ClassDTO> createRealisticMockClasses() {
-        List<ClassDTO> mockClasses = new ArrayList<>();
+    private void loadAvailableClasses() {
+        if (examApiClient == null) {
+            showError("Exam API Client chưa được khởi tạo");
+            return;
+        }
         
-        // Mock data matching database structure from MCP query results
-        // Database has: CS101_DHTI15A1HN_1, semester: 2024-2025-1, max_students: 40
-        mockClasses.add(new ClassDTO(1L, "CS101_DHTI15A1HN_1", "Lập Trình Java Updated", "DHTI15A1HN", "2024-2025-1", "GV Nguyễn Văn A", 40));
-        mockClasses.add(new ClassDTO(2L, "CS102_DHTI15A2HN_1", "Lập Trình Python", "DHTI15A2HN", "2024-2025-1", "GV Trần Thị B", 35));
-        mockClasses.add(new ClassDTO(3L, "CS103_DHTI15B1HN_1", "Cơ sở dữ liệu", "DHTI15B1HN", "2024-2025-1", "GV Lê Văn C", 42));
-        mockClasses.add(new ClassDTO(4L, "CS104_DHTI15B2HN_1", "Mạng máy tính", "DHTI15B2HN", "2024-2025-1", "GV Phạm Thị D", 38));
-        mockClasses.add(new ClassDTO(5L, "CS105_DHTI15C1HN_1", "An toàn thông tin", "DHTI15C1HN", "2024-2025-1", "GV Hoàng Văn E", 45));
+        System.out.println("=== STEP4: loadAvailableClasses() CALLED ===");
         
-        return mockClasses;
+        // Hiển thị loading spinner
+        showLoading();
+        
+        // Run API call in background thread
+        Task<List<ClassDTO>> loadTask = new Task<List<ClassDTO>>() {
+            @Override
+            protected List<ClassDTO> call() throws Exception {
+                // Call API để lấy danh sách lớp học
+                return examApiClient.getAllClasses();
+            }
+        };
+        
+        loadTask.setOnSucceeded(e -> {
+            Platform.runLater(() -> {
+                try {
+                    List<ClassDTO> allClasses = loadTask.getValue();
+                    
+                    availableClasses.clear();
+                    availableClasses.addAll(allClasses);
+                    classesLoaded = true;
+                    
+                    // Restore assignedClasses sau khi load availableClasses
+                    restoreAssignedClasses();
+                    
+                    // Remove already assigned classes from available list
+                    filterAvailableClasses();
+                    
+                    updateCountLabels();
+                    hideError();
+                    hideLoading();
+                    System.out.println("=== STEP4: Loaded " + availableClasses.size() + " available classes from API ===");
+                } catch (Exception ex) {
+                    hideLoading();
+                    showError("Lỗi khi xử lý dữ liệu: " + ex.getMessage());
+                    System.err.println("Error processing classes: " + ex.getMessage());
+                }
+            });
+        });
+        
+        loadTask.setOnFailed(e -> {
+            Platform.runLater(() -> {
+                hideLoading();
+                Throwable exception = loadTask.getException();
+                System.err.println("Failed to load classes: " + exception.getMessage());
+                showError("Không thể tải danh sách lớp học: " + exception.getMessage());
+            });
+        });
+        
+        // Run task in background
+        new Thread(loadTask).start();
     }
     
     /* ---------------------------------------------------
@@ -233,20 +282,20 @@ public class Step4ClassAssignmentController {
      * --------------------------------------------------- */
     @FXML
     private void handleAssign() {
-        System.out. println("=== STEP4: handleAssign() CALLED ===");
+        System.out.println("=== STEP4: handleAssign() CALLED ===");
         hideError();
         
-        ClassDTO selectedClass = availableClassesList.getSelectionModel(). getSelectedItem();
+        ClassDTO selectedClass = availableClassesList.getSelectionModel().getSelectedItem();
         if (selectedClass != null) {
             // Check if already assigned
             boolean alreadyAssigned = assignedClasses.stream()
-                . anyMatch(cls -> cls.getId().equals(selectedClass.getId()));
+                .anyMatch(cls -> cls.getId().equals(selectedClass.getId()));
                 
             if (!alreadyAssigned) {
                 availableClasses.remove(selectedClass);
-                assignedClasses. add(selectedClass);
+                assignedClasses.add(selectedClass);
                 updateCountLabels();
-                System.out.println("Assigned class: " + selectedClass. getClassName());
+                System.out.println("Assigned class: " + selectedClass.getClassName());
             } else {
                 showError("Lớp học này đã được gán rồi!");
             }
@@ -261,13 +310,13 @@ public class Step4ClassAssignmentController {
      * --------------------------------------------------- */
     @FXML
     private void handleAssignAll() {
-        System. out.println("=== STEP4: handleAssignAll() CALLED ===");
+        System.out.println("=== STEP4: handleAssignAll() CALLED ===");
         hideError();
         
         int assignedCount = 0;
         for (ClassDTO classDto : List.copyOf(availableClasses)) {
             boolean alreadyAssigned = assignedClasses.stream()
-                . anyMatch(cls -> cls.getId().equals(classDto.getId()));
+                .anyMatch(cls -> cls.getId().equals(classDto.getId()));
                 
             if (!alreadyAssigned) {
                 availableClasses.remove(classDto);
@@ -292,9 +341,9 @@ public class Step4ClassAssignmentController {
         ClassDTO selectedClass = assignedClassesList.getSelectionModel().getSelectedItem();
         if (selectedClass != null) {
             assignedClasses.remove(selectedClass);
-            availableClasses. add(selectedClass);
+            availableClasses.add(selectedClass);
             updateCountLabels();
-            System. out.println("Unassigned class: " + selectedClass.getClassName());
+            System.out.println("Unassigned class: " + selectedClass.getClassName());
         } else {
             showError("Vui lòng chọn một lớp học để bỏ gán!");
         }
@@ -309,8 +358,8 @@ public class Step4ClassAssignmentController {
         System.out.println("=== STEP4: handleUnassignAll() CALLED ===");
         hideError();
         
-        for (ClassDTO classDto : List. copyOf(assignedClasses)) {
-            assignedClasses. remove(classDto);
+        for (ClassDTO classDto : List.copyOf(assignedClasses)) {
+            assignedClasses.remove(classDto);
             availableClasses.add(classDto);
         }
         
@@ -341,14 +390,137 @@ public class Step4ClassAssignmentController {
             errorLabel.setManaged(false);
         }
     }
+    
+    /* ---------------------------------------------------
+     * Hiển thị loading spinner
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void showLoading() {
+        if (loadingIndicator != null) {
+            loadingIndicator.setVisible(true);
+            loadingIndicator.setManaged(true);
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Ẩn loading spinner
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void hideLoading() {
+        if (loadingIndicator != null) {
+            loadingIndicator.setVisible(false);
+            loadingIndicator.setManaged(false);
+        }
+    }
+
+    /* ---------------------------------------------------
+     * Restore assignedClasses từ wizardData
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void restoreAssignedClasses() {
+        if (wizardData == null || wizardData.getAssignedClassIds().isEmpty()) {
+            assignedClasses.clear();
+            return;
+        }
+        
+        // Nếu availableClasses chưa load, sẽ restore sau khi load xong
+        if (availableClasses.isEmpty()) {
+            System.out.println("=== STEP4: availableClasses chưa load, sẽ restore sau ===");
+            return;
+        }
+        
+        // Restore assigned classes từ wizardData
+        assignedClasses.clear();
+        for (Long classId : wizardData.getAssignedClassIds()) {
+            ClassDTO foundClass = availableClasses.stream()
+                .filter(c -> c.getId().equals(classId))
+                .findFirst()
+                .orElse(null);
+            
+            if (foundClass != null) {
+                assignedClasses.add(foundClass);
+            } else {
+                // Nếu không tìm thấy trong availableClasses, có thể đã bị xóa hoặc không có quyền
+                System.out.println("WARNING: Class ID " + classId + " not found in available classes");
+            }
+        }
+        
+        updateCountLabels();
+        System.out.println("=== STEP4: Restored " + assignedClasses.size() + " assigned classes ===");
+    }
+    
+    /* ---------------------------------------------------
+     * Filter available classes: Remove already assigned
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void filterAvailableClasses() {
+        if (wizardData != null && !wizardData.getAssignedClassIds().isEmpty()) {
+            List<Long> assignedIds = wizardData.getAssignedClassIds();
+            availableClasses.removeIf(cls -> assignedIds.contains(cls.getId()));
+        }
+        
+        // Also remove from assignedClasses observable list
+        List<Long> assignedIds = assignedClasses.stream()
+            .map(ClassDTO::getId)
+            .collect(Collectors.toList());
+        
+        availableClasses.removeIf(cls -> assignedIds.contains(cls.getId()));
+    }
+    
+    /* ---------------------------------------------------
+     * Validate form data
+     * @return true nếu hợp lệ, false nếu có lỗi
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public boolean validateForm() {
+        hideError();
+        
+        // Lưu dữ liệu trước khi validate
+        saveFormToWizardData();
+        
+        // Validate sử dụng wizardData.validateStep4()
+        List<String> errors = wizardData.validateStep4();
+        
+        if (!errors.isEmpty()) {
+            showValidationError(String.join("\n", errors));
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /* ---------------------------------------------------
+     * Hiển thị validation error bằng Alert dialog
+     * @param message Nội dung lỗi
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void showValidationError(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Cảnh báo");
+        alert.setHeaderText("Vui lòng kiểm tra lại thông tin");
+        alert.setContentText(message);
+        
+        // Set owner window từ parent controller
+        if (parentController != null && parentController.getWizardPane() != null) {
+            Window owner = parentController.getWizardPane().getScene().getWindow();
+            if (owner != null) {
+                alert.initOwner(owner);
+            }
+        }
+        
+        alert.showAndWait();
+    }
 
     /* ---------------------------------------------------
      * Xử lý nút Next
      * @author: K24DTCN210-NVMANH (30/11/2025 13:58)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Thêm validation trước khi next
      * --------------------------------------------------- */
     @FXML
     private void handleNext() {
-        if (parentController != null) {
+        boolean isValid = validateForm();
+        
+        if (isValid && parentController != null) {
             parentController.nextStep();
         }
     }

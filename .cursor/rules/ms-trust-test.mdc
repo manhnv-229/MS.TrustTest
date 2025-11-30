@@ -1,0 +1,161 @@
+---
+alwaysApply: true
+---
+# MS.TrustTest Project Rules
+
+## 🚨 CRITICAL RULES - KHÔNG ĐƯỢC VI PHẠM
+
+### 1. Spring Boot Context Path Rule
+**APPLICATION.YML ĐÃ CẤU HÌNH:**
+```yaml
+server:
+  servlet:
+    context-path: /api
+```
+
+**⚠️ QUAN TRỌNG:**
+- TẤT CẢ Controllers KHÔNG ĐƯỢC có `/api` trong `@RequestMapping`
+- Base path trong Controller chỉ cần: `@RequestMapping("/resource-name")`
+- URL cuối cùng sẽ là: `http://localhost:8080/api/resource-name`
+
+**✅ ĐÚNG:**
+```java
+@RestController
+@RequestMapping("/exams")  // ✓ Correct
+public class ExamController { }
+```
+
+**❌ SAI:**
+```java
+@RestController
+@RequestMapping("/api/exams")  // ✗ WRONG - Tạo ra /api/api/exams
+public class ExamController { }
+```
+
+### 2. Comment Format Rules
+
+**Java/TypeScript:**
+```java
+/* ---------------------------------------------------
+ * (Mục đích hàm)
+ * @param paramName (Ý nghĩa tham số, kiểu dữ liệu)
+ * @returns Dữ liệu trả về (nếu có)
+ * @author: K24DTCN210-NVMANH (ngày/tháng/năm giờ:phút)
+ * EditBy: K24DTCN210-NVMANH (ngày/tháng/năm giờ:phút) - (Lý do)
+ * --------------------------------------------------- */
+```
+
+**C#:**
+```csharp
+/// <summary>
+/// (Mục đích hàm)
+/// </summary>
+/// <param name="param1">(Tham số 1 là gì)</param>
+/// <returns>(Dữ liệu trả về - nếu có)</returns>
+/// CreatedBy: K24DTCN210-NVMANH (ngày/tháng/năm giờ:phút)
+/// UpdateBy: K24DTCN210-NVMANH (ngày/tháng/năm giờ:phút) - (Lý do)
+```
+
+### 3. Entity Technical Notes
+
+**SubjectClass Entity:**
+- ❌ KHÔNG có field `name` (chỉ có `code`)
+- ❌ KHÔNG có method `getClassEntity()`
+- ✅ Sử dụng `getCode()` thay vì `getName()`
+
+**Current User Helper:**
+```java
+private Long getCurrentUserId() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    String email = auth.getName();
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+    return user.getId();
+}
+```
+
+**Question Count:**
+```java
+// Repository returns long, cần cast to int
+int questionCount = (int) examQuestionRepository.countByExamId(examId);
+```
+
+### 4. Soft Delete Pattern
+- Sử dụng `deletedAt` field
+- KHÔNG xóa vật lý records
+- Check `deletedAt IS NULL` trong queries
+
+### 5. Vietnamese Language
+- Gọi user là "cụ Mạnh"
+- Tự xưng là "con"
+- Code comments bằng tiếng Việt có dấu
+
+## 📋 Common Patterns
+
+### Controller Standard Structure:
+```java
+@RestController
+@RequestMapping("/resource-name")  // NO /api prefix!
+@RequiredArgsConstructor
+public class ResourceController {
+    private final ResourceService service;
+    private final UserRepository userRepository;
+    
+    @PostMapping
+    @PreAuthorize("hasAnyRole('TEACHER', 'DEPT_MANAGER', 'ADMIN')")
+    public ResponseEntity<ResourceDTO> create(@Valid @RequestBody CreateRequest request) {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(service.create(request, userId));
+    }
+}
+```
+
+### Service Layer Pattern:
+```java
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class ResourceService {
+    private final ResourceRepository repository;
+    
+    public ResourceDTO create(CreateRequest request, Long userId) {
+        // Validation
+        // Business logic
+        // Save
+        // Return DTO
+    }
+}
+```
+
+## 🔧 Build & Run Commands
+
+```bash
+# Clean compile
+cd backend; mvn clean compile
+
+# Run server
+cd backend; mvn spring-boot:run
+
+# Stop server
+cd backend; mvn spring-boot:stop
+```
+
+## 📝 Documentation Requirements
+
+Mỗi feature completion cần:
+1. Technical documentation (MD file)
+2. Thunder Client test collection
+3. API test cases
+4. Update memory bank
+
+## ⚠️ Lỗi Thường Gặp
+
+1. **Context-path conflict** → Check @RequestMapping không có /api
+2. **SubjectClass.getName()** → Dùng getCode()
+3. **Question count type** → Cast long to int
+4. **CustomUserDetails** → Dùng Authentication directly
+
+---
+*Last Updated: 19/11/2025 09:44*
+*By: K24DTCN210-NVMANH*

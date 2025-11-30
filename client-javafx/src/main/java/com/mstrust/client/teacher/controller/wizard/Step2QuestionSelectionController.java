@@ -8,11 +8,13 @@ import com.mstrust.client.teacher.dto.Difficulty;
 import com.mstrust.client.exam.dto.QuestionType;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.concurrent.Task;
 import javafx.application.Platform;
+import javafx.stage.Window;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,6 +40,7 @@ public class Step2QuestionSelectionController {
     @FXML private Label questionCountLabel;
     @FXML private Label totalPointsLabel;
     @FXML private Label errorLabel;
+    @FXML private StackPane loadingPane;
 
     private ExamWizardData wizardData;
     private ExamCreationWizardController parentController;
@@ -47,6 +50,12 @@ public class Step2QuestionSelectionController {
     // Observable Lists để quản lý dữ liệu tables
     private ObservableList<QuestionBankDTO> availableQuestions = FXCollections.observableArrayList();
     private ObservableList<QuestionBankDTO> selectedQuestions = FXCollections.observableArrayList();
+    
+    // Cache để tránh load lại từ API mỗi lần
+    private boolean questionsLoaded = false;
+    
+    // Lưu tất cả questions ban đầu để có thể restore khi xóa
+    private List<QuestionBankDTO> allQuestionsCache = new java.util.ArrayList<>();
 
     /* ---------------------------------------------------
      * Khởi tạo controller
@@ -120,6 +129,7 @@ public class Step2QuestionSelectionController {
      * Set wizard data từ parent controller
      * @param wizardData Đối tượng chứa dữ liệu wizard
      * @author: K24DTCN210-NVMANH (30/11/2025 00:00)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Restore selectedQuestions và chỉ load API nếu chưa load
      * --------------------------------------------------- */
     public void setWizardData(ExamWizardData wizardData) {
         this.wizardData = wizardData;
@@ -140,8 +150,16 @@ public class Step2QuestionSelectionController {
         }
         System.out.println("=====================================");
         
-        // Load questions when wizard data is set
-        loadAvailableQuestions();
+        // Restore selectedQuestions từ wizardData trước
+        restoreSelectedQuestions();
+        
+        // Chỉ load questions từ API nếu chưa load hoặc cần refresh
+        if (!questionsLoaded && wizardData != null && questionBankApiClient != null) {
+            tryLoadAvailableQuestions();
+        } else if (questionsLoaded) {
+            // Đã load rồi, chỉ cần filter lại available questions
+            filterAvailableQuestions();
+        }
     }
 
     /* ---------------------------------------------------
@@ -166,9 +184,13 @@ public class Step2QuestionSelectionController {
      * Set QuestionBank API client
      * @param questionBankApiClient Question bank API client
      * @author: K24DTCN210-NVMANH (30/11/2025 00:00)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Tự động load questions sau khi set client
      * --------------------------------------------------- */
     public void setQuestionBankApiClient(QuestionBankApiClient questionBankApiClient) {
         this.questionBankApiClient = questionBankApiClient;
+        
+        // Tự động load questions khi client đã được set và wizardData đã sẵn sàng
+        tryLoadAvailableQuestions();
     }
 
     /* ---------------------------------------------------
@@ -193,21 +215,45 @@ public class Step2QuestionSelectionController {
                 wizardData.getSelectedQuestions().add(mapping);
             }
             
+            // Tính toán totalPoints sau khi lưu questions
+            wizardData.calculateTotalPoints();
+            
             System.out.println("Saved " + selectedQuestions.size() + " selected questions to wizard data");
+            System.out.println("Total points: " + wizardData.getTotalPoints());
         }
         
         System.out.println("=== STEP2: saveFormToWizardData() COMPLETED ===");
     }
     
     /* ---------------------------------------------------
+     * Kiểm tra và load questions nếu đủ điều kiện
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void tryLoadAvailableQuestions() {
+        // Chỉ load khi cả wizardData và questionBankApiClient đều đã sẵn sàng
+        if (wizardData != null && questionBankApiClient != null) {
+            loadAvailableQuestions();
+        } else {
+            System.out.println("=== STEP2: Chưa thể load questions - wizardData: " + 
+                (wizardData != null ? "OK" : "NULL") + 
+                ", questionBankApiClient: " + 
+                (questionBankApiClient != null ? "OK" : "NULL") + " ===");
+        }
+    }
+    
+    /* ---------------------------------------------------
      * Load available questions from API
      * @author: K24DTCN210-NVMANH (30/11/2025 00:00)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Thêm loading indicator
      * --------------------------------------------------- */
     private void loadAvailableQuestions() {
         if (questionBankApiClient == null) {
             showError("Question Bank API Client chưa được khởi tạo");
             return;
         }
+        
+        // Hiển thị loading indicator
+        showLoading(true);
         
         // Run API call in background thread
         Task<List<QuestionBankDTO>> loadTask = new Task<List<QuestionBankDTO>>() {
@@ -237,8 +283,25 @@ public class Step2QuestionSelectionController {
         
         loadTask.setOnSucceeded(e -> {
             Platform.runLater(() -> {
+                List<QuestionBankDTO> loadedQuestions = loadTask.getValue();
+                
+                // Lưu cache tất cả questions ban đầu
+                allQuestionsCache.clear();
+                allQuestionsCache.addAll(loadedQuestions);
+                
                 availableQuestions.clear();
-                availableQuestions.addAll(loadTask.getValue());
+                availableQuestions.addAll(loadedQuestions);
+                questionsLoaded = true;
+                
+                // Restore selectedQuestions sau khi load availableQuestions
+                restoreSelectedQuestions();
+                
+                // Filter out already selected questions
+                filterAvailableQuestions();
+                
+                // Ẩn loading indicator
+                showLoading(false);
+                
                 hideError();
                 System.out.println("=== STEP2: Loaded " + availableQuestions.size() + " available questions ===");
             });
@@ -248,6 +311,10 @@ public class Step2QuestionSelectionController {
             Platform.runLater(() -> {
                 Throwable exception = loadTask.getException();
                 System.err.println("Failed to load questions: " + exception.getMessage());
+                
+                // Ẩn loading indicator
+                showLoading(false);
+                
                 showError("Không thể tải danh sách câu hỏi: " + exception.getMessage());
             });
         });
@@ -257,13 +324,77 @@ public class Step2QuestionSelectionController {
     }
 
     /* ---------------------------------------------------
+     * Restore selectedQuestions từ wizardData
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Tìm từ allQuestionsCache thay vì availableQuestions
+     * --------------------------------------------------- */
+    private void restoreSelectedQuestions() {
+        if (wizardData == null || wizardData.getSelectedQuestions().isEmpty()) {
+            selectedQuestions.clear();
+            updateSummaryLabels();
+            return;
+        }
+        
+        // Nếu chưa load questions, sẽ restore sau khi load xong
+        if (allQuestionsCache.isEmpty() && availableQuestions.isEmpty()) {
+            System.out.println("=== STEP2: Questions chưa load, sẽ restore sau ===");
+            return;
+        }
+        
+        // Tìm từ allQuestionsCache (chứa tất cả questions ban đầu) hoặc availableQuestions
+        List<QuestionBankDTO> sourceList = allQuestionsCache.isEmpty() ? availableQuestions : allQuestionsCache;
+        
+        // Restore selected questions từ wizardData
+        selectedQuestions.clear();
+        for (com.mstrust.client.teacher.dto.ExamQuestionMapping mapping : wizardData.getSelectedQuestions()) {
+            QuestionBankDTO question = sourceList.stream()
+                .filter(q -> q.getId().equals(mapping.getQuestionId()))
+                .findFirst()
+                .orElse(null);
+            
+            if (question != null) {
+                selectedQuestions.add(question);
+            } else {
+                // Nếu không tìm thấy, có thể question đã bị xóa hoặc không có quyền
+                System.out.println("WARNING: Question ID " + mapping.getQuestionId() + " not found in questions list");
+            }
+        }
+        
+        updateSummaryLabels();
+        System.out.println("=== STEP2: Restored " + selectedQuestions.size() + " selected questions ===");
+    }
+    
+    /* ---------------------------------------------------
+     * Filter available questions: Remove already selected
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void filterAvailableQuestions() {
+        if (wizardData != null && !wizardData.getSelectedQuestions().isEmpty()) {
+            List<Long> selectedIds = wizardData.getSelectedQuestions().stream()
+                .map(com.mstrust.client.teacher.dto.ExamQuestionMapping::getQuestionId)
+                .collect(java.util.stream.Collectors.toList());
+            
+            availableQuestions.removeIf(q -> selectedIds.contains(q.getId()));
+        }
+        
+        // Also remove from selectedQuestions observable list
+        List<Long> selectedIds = selectedQuestions.stream()
+            .map(QuestionBankDTO::getId)
+            .collect(java.util.stream.Collectors.toList());
+        
+        availableQuestions.removeIf(q -> selectedIds.contains(q.getId()));
+    }
+    
+    /* ---------------------------------------------------
      * Xử lý nút Refresh
      * @author: K24DTCN210-NVMANH (30/11/2025 00:00)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Reset cache và load lại
      * --------------------------------------------------- */
     @FXML
     private void handleRefresh() {
         System.out.println("=== STEP2: handleRefresh() CALLED ===");
         hideError();
+        questionsLoaded = false; // Reset cache
         loadAvailableQuestions();
     }
 
@@ -284,6 +415,8 @@ public class Step2QuestionSelectionController {
                 
             if (!alreadyAdded) {
                 selectedQuestions.add(selectedQuestion);
+                // Remove from available questions immediately
+                availableQuestions.remove(selectedQuestion);
                 updateSummaryLabels();
                 System.out.println("Added question: " + selectedQuestion.getQuestionText());
             } else {
@@ -303,13 +436,18 @@ public class Step2QuestionSelectionController {
         System.out.println("=== STEP2: handleAddAllQuestions() CALLED ===");
         hideError();
         
+        // Create a copy of availableQuestions to iterate (since we'll be removing items)
+        List<QuestionBankDTO> questionsToAdd = new java.util.ArrayList<>(availableQuestions);
+        
         int addedCount = 0;
-        for (QuestionBankDTO question : availableQuestions) {
+        for (QuestionBankDTO question : questionsToAdd) {
             boolean alreadyAdded = selectedQuestions.stream()
                 .anyMatch(q -> q.getId().equals(question.getId()));
                 
             if (!alreadyAdded) {
                 selectedQuestions.add(question);
+                // Remove from available questions immediately
+                availableQuestions.remove(question);
                 addedCount++;
             }
         }
@@ -330,6 +468,23 @@ public class Step2QuestionSelectionController {
         QuestionBankDTO selectedQuestion = selectedQuestionsTable.getSelectionModel().getSelectedItem();
         if (selectedQuestion != null) {
             selectedQuestions.remove(selectedQuestion);
+            
+            // Thêm lại vào availableQuestions nếu chưa có
+            boolean alreadyInAvailable = availableQuestions.stream()
+                .anyMatch(q -> q.getId().equals(selectedQuestion.getId()));
+            
+            if (!alreadyInAvailable) {
+                // Tìm trong cache để đảm bảo có đầy đủ thông tin
+                QuestionBankDTO questionToAdd = allQuestionsCache.stream()
+                    .filter(q -> q.getId().equals(selectedQuestion.getId()))
+                    .findFirst()
+                    .orElse(selectedQuestion);
+                
+                availableQuestions.add(questionToAdd);
+                // Sort lại để giữ thứ tự (nếu cần)
+                availableQuestions.sort((q1, q2) -> Long.compare(q1.getId(), q2.getId()));
+            }
+            
             updateSummaryLabels();
             System.out.println("Removed question: " + selectedQuestion.getQuestionText());
         } else {
@@ -345,8 +500,33 @@ public class Step2QuestionSelectionController {
     private void handleRemoveAllQuestions() {
         System.out.println("=== STEP2: handleRemoveAllQuestions() CALLED ===");
         hideError();
+        
+        // Lưu danh sách câu hỏi sẽ xóa để thêm lại vào available
+        List<QuestionBankDTO> questionsToRestore = new java.util.ArrayList<>(selectedQuestions);
+        
         selectedQuestions.clear();
+        
+        // Thêm lại tất cả câu hỏi đã xóa vào availableQuestions
+        for (QuestionBankDTO question : questionsToRestore) {
+            boolean alreadyInAvailable = availableQuestions.stream()
+                .anyMatch(q -> q.getId().equals(question.getId()));
+            
+            if (!alreadyInAvailable) {
+                // Tìm trong cache để đảm bảo có đầy đủ thông tin
+                QuestionBankDTO questionToAdd = allQuestionsCache.stream()
+                    .filter(q -> q.getId().equals(question.getId()))
+                    .findFirst()
+                    .orElse(question);
+                
+                availableQuestions.add(questionToAdd);
+            }
+        }
+        
+        // Sort lại để giữ thứ tự (nếu cần)
+        availableQuestions.sort((q1, q2) -> Long.compare(q1.getId(), q2.getId()));
+        
         updateSummaryLabels();
+        System.out.println("Removed all questions, restored " + questionsToRestore.size() + " to available");
     }
 
     /* ---------------------------------------------------
@@ -391,12 +571,72 @@ public class Step2QuestionSelectionController {
     }
 
     /* ---------------------------------------------------
+     * Hiển thị/ẩn loading indicator
+     * @param show true để hiển thị, false để ẩn
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void showLoading(boolean show) {
+        if (loadingPane != null) {
+            loadingPane.setVisible(show);
+            loadingPane.setManaged(show);
+        }
+    }
+
+    /* ---------------------------------------------------
+     * Validate form data
+     * @return true nếu hợp lệ, false nếu có lỗi
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Hiển thị lỗi bằng Alert dialog
+     * --------------------------------------------------- */
+    public boolean validateForm() {
+        hideError();
+        
+        // Lưu dữ liệu trước khi validate
+        saveFormToWizardData();
+        
+        // Validate sử dụng wizardData.validateStep2()
+        List<String> errors = wizardData.validateStep2();
+        
+        if (!errors.isEmpty()) {
+            showValidationError(String.join("\n", errors));
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /* ---------------------------------------------------
+     * Hiển thị validation error bằng Alert dialog
+     * @param message Nội dung lỗi
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void showValidationError(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Cảnh báo");
+        alert.setHeaderText("Vui lòng kiểm tra lại thông tin");
+        alert.setContentText(message);
+        
+        // Set owner window từ parent controller
+        if (parentController != null && parentController.getWizardPane() != null) {
+            Window owner = parentController.getWizardPane().getScene().getWindow();
+            if (owner != null) {
+                alert.initOwner(owner);
+            }
+        }
+        
+        alert.showAndWait();
+    }
+
+    /* ---------------------------------------------------
      * Xử lý nút Next
      * @author: K24DTCN210-NVMANH (30/11/2025 00:00)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Thêm validation trước khi next
      * --------------------------------------------------- */
     @FXML
     private void handleNext() {
-        if (parentController != null) {
+        boolean isValid = validateForm();
+        
+        if (isValid && parentController != null) {
             parentController.nextStep();
         }
     }

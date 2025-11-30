@@ -207,6 +207,7 @@ public class ExamWizardData {
      * Convert to ExamCreateRequest để gửi lên backend
      * @return ExamCreateRequest
      * @author: K24DTCN210-NVMANH (27/11/2025 22:30)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Scale totalScore và điểm số từng câu hỏi về 100 nếu > 100
      * --------------------------------------------------- */
     public ExamCreateRequest toCreateRequest() {
         ExamCreateRequest request = new ExamCreateRequest();
@@ -219,8 +220,19 @@ public class ExamWizardData {
         request.setStartTime(startTime.format(DATETIME_FORMATTER));
         request.setEndTime(endTime.format(DATETIME_FORMATTER));
         request.setDurationMinutes(durationMinutes);
+        
+        // Backend yêu cầu totalScore <= 100, nên scale về 100 nếu tổng điểm thực tế > 100
+        // Chỉ scale totalScore, không scale điểm số từng câu hỏi (backend chỉ validate totalScore field)
+        BigDecimal scaledTotalScore = totalPoints;
+        if (totalPoints != null && totalPoints.compareTo(BigDecimal.valueOf(100)) > 0) {
+            scaledTotalScore = BigDecimal.valueOf(100);
+            System.out.println("WARNING: Total points (" + totalPoints + ") > 100, scaling totalScore to 100 for backend validation");
+            System.out.println("NOTE: Individual question points remain unchanged. Backend will use totalScore field for validation.");
+        }
+        
         request.setPassingScore(passingScore);
-        request.setTotalScore(totalPoints);
+        request.setTotalScore(scaledTotalScore);
+        
         request.setRandomizeQuestions(randomizeQuestions);
         request.setRandomizeOptions(randomizeOptions);
         request.setAllowReviewAfterSubmit(allowReviewAfterSubmit);

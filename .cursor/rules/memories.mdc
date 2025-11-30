@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+- Project memories are stored in the root directory `/memory-bank`.
+- Always create a plan before writing code.
+- Ask for confirmation before writing code.
+- Ask for confirmation before creating documentation or test files.

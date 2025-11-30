@@ -8,7 +8,8 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.mstrust.client.teacher.controller.wizard.ExamCreationWizardController"
             stylesheets="@../../css/teacher-styles.css"
-            prefWidth="1300" prefHeight="900">
+            prefWidth="1600" prefHeight="1000"
+            minWidth="1200" minHeight="700">
     
     <!-- Top: Progress Bar & Title -->
     <top>
@@ -36,15 +37,13 @@
         </VBox>
     </top>
     
-    <!-- Center: Step Content Container with ScrollPane -->
+    <!-- Center: Step Content Container -->
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
-            <StackPane fx:id="stepContainer" styleClass="wizard-content">
-                <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
-                </padding>
-            </StackPane>
-        </ScrollPane>
+        <StackPane fx:id="stepContainer" styleClass="wizard-content">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+        </StackPane>
     </center>
     
     <!-- Bottom: Navigation Buttons -->

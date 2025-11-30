@@ -115,9 +115,10 @@ public class ExamTakingService {
         
         // Check 2: Max attempts
         int attemptsMade = submissionRepository.countByStudentIdAndExamId(studentId, examId);
-        if (exam.getMaxAttempts() > 0 && attemptsMade >= exam.getMaxAttempts()) {
+        Integer maxAttempts = exam.getMaxAttempts();
+        if (maxAttempts != null && maxAttempts > 0 && attemptsMade >= maxAttempts) {
             result.put("isEligible", false);
-            result.put("reason", "Maximum attempts reached (" + exam.getMaxAttempts() + ")");
+            result.put("reason", "Maximum attempts reached (" + maxAttempts + ")");
             return result;
         }
         
@@ -134,8 +135,8 @@ public class ExamTakingService {
         
         result.put("isEligible", true);
         result.put("attemptsMade", attemptsMade);
-        result.put("remainingAttempts", exam.getMaxAttempts() > 0 ? 
-            exam.getMaxAttempts() - attemptsMade : null);
+        result.put("remainingAttempts", maxAttempts != null && maxAttempts > 0 ? 
+            maxAttempts - attemptsMade : null);
         
         return result;
     }
@@ -610,7 +611,7 @@ public class ExamTakingService {
             .randomizeOptions(exam.getRandomizeOptions())
             .maxAttempts(exam.getMaxAttempts())
             .attemptsMade(attemptsMade)
-            .remainingAttempts(exam.getMaxAttempts() > 0 ? 
+            .remainingAttempts(exam.getMaxAttempts() != null && exam.getMaxAttempts() > 0 ? 
                 exam.getMaxAttempts() - attemptsMade : null)
             .hasActiveSubmission(hasActiveSubmission)
             .hasPassed(hasPassed)

@@ -6,6 +6,7 @@ import com.mstrust.client.teacher.api.SubjectApiClient;
 import com.mstrust.client.teacher.dto.ExamWizardData;
 import com.mstrust.client.teacher.dto.SubjectDTO;
 import com.mstrust.client.exam.dto.LoginResponse;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -14,6 +15,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,6 +44,10 @@ public class ExamCreationWizardController {
     @FXML private javafx.scene.control.Label step4Label;
     @FXML private javafx.scene.control.Label step5Label;
     @FXML private javafx.scene.control.ProgressBar progressBar;
+    @FXML private javafx.scene.control.Button nextButton;
+    @FXML private javafx.scene.control.Button submitButton;
+    @FXML private javafx.scene.control.Button previousButton;
+    @FXML private javafx.scene.control.Button cancelButton;
 
     private ExamWizardData wizardData;
     private ExamManagementApiClient apiClient;
@@ -49,6 +55,7 @@ public class ExamCreationWizardController {
     private SubjectApiClient subjectApiClient;
     private LoginResponse loginResponse;
     private int currentStep = 1;
+    private Stage wizardStage; // Reference đến wizard stage
     
     // Step controllers
     private Step1BasicInfoController step1Controller;
@@ -81,6 +88,15 @@ public class ExamCreationWizardController {
         apiClient.setToken(loginResponse);
         questionBankApiClient.setAuthToken(loginResponse.getToken());
         subjectApiClient.setAuthToken(loginResponse.getToken());
+    }
+    
+    /* ---------------------------------------------------
+     * Set wizard stage reference
+     * @param stage Stage của wizard
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public void setWizardStage(Stage stage) {
+        this.wizardStage = stage;
     }
 
     /* ---------------------------------------------------
@@ -148,16 +164,16 @@ public class ExamCreationWizardController {
         step1Controller = loader.getController();
         step1Controller.setWizardData(wizardData);
         step1Controller.setParentController(this);
+        step1Controller.setApiClient(apiClient);
         
-        // Load subjects from backend
+        // Load subject classes from backend
         try {
-            List<SubjectDTO> subjects = subjectApiClient.getAllSubjects();
-            List<String> subjectNames = subjects.stream()
-                .map(SubjectDTO::getSubjectName)
-                .collect(java.util.stream.Collectors.toList());
-            step1Controller.loadSubjectClasses(subjectNames);
-        } catch (IOException e) {
-            showError("Không thể tải danh sách môn học: " + e.getMessage());
+            List<com.mstrust.client.teacher.dto.SubjectClassDTO> subjectClasses = apiClient.getAllSubjectClasses();
+            step1Controller.loadSubjectClasses(subjectClasses);
+        } catch (Exception e) {
+            showError("Không thể tải danh sách lớp học phần: " + e.getMessage());
+            System.err.println("Error loading subject classes: " + e.getMessage());
+            e.printStackTrace();
         }
         
         return view;
@@ -243,10 +259,52 @@ public class ExamCreationWizardController {
     /* ---------------------------------------------------
      * Handler cho nút Next trong FXML
      * @author: K24DTCN210-NVMANH (28/11/2025 11:00)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Thêm validation trước khi next
      * --------------------------------------------------- */
     @FXML
     private void handleNext() {
-        nextStep();
+        // Validate current step trước khi chuyển bước
+        if (validateCurrentStep()) {
+            nextStep();
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Validate current step
+     * @return true nếu hợp lệ, false nếu có lỗi
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private boolean validateCurrentStep() {
+        switch (currentStep) {
+            case 1:
+                if (step1Controller != null) {
+                    // Gọi validation của Step1
+                    return step1Controller.validateForm();
+                }
+                break;
+            case 2:
+                if (step2Controller != null) {
+                    // Gọi validation của Step2
+                    return step2Controller.validateForm();
+                }
+                break;
+            case 3:
+                if (step3Controller != null) {
+                    // Gọi validation của Step3
+                    return step3Controller.validateForm();
+                }
+                break;
+            case 4:
+                if (step4Controller != null) {
+                    // Gọi validation của Step4
+                    return step4Controller.validateForm();
+                }
+                break;
+            case 5:
+                // Step 5 không có validation ở đây (submit sẽ validate)
+                return true;
+        }
+        return true; // Default: cho phép next nếu không có controller
     }
 
     /* ---------------------------------------------------
@@ -271,17 +329,20 @@ public class ExamCreationWizardController {
      * Handler cho nút Submit trong FXML (Step 5)
      * Gọi submit logic từ Step5ReviewController
      * @author: K24DTCN210-NVMANH (28/11/2025 11:00)
-     * EditBy: K24DTCN210-NVMANH (28/11/2025 11:42) - Catch IOException và ApiException
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Gọi handleSubmit() thay vì submitExam() trực tiếp
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Lưu dữ liệu Step 4 trước khi submit
      * --------------------------------------------------- */
     @FXML
     private void handleSubmit() {
+        // CRITICAL: Lưu dữ liệu Step 4 trước khi validate và submit
+        if (step4Controller != null) {
+            System.out.println("=== Saving Step 4 data before submit ===");
+            step4Controller.saveFormToWizardData();
+        }
+        
         if (step5Controller != null) {
-            try {
-                step5Controller.submitExam();
-            } catch (IOException | ExamManagementApiClient.ApiException e) {
-                showError("Lỗi khi submit đề thi: " + e.getMessage());
-                e.printStackTrace();
-            }
+            // Gọi handleSubmit() từ Step5ReviewController để xử lý async và validation
+            step5Controller.handleSubmit();
         }
     }
 
@@ -333,16 +394,16 @@ public class ExamCreationWizardController {
                 break;
             case 3:
                 if (step3Controller != null) {
-                    // TODO: step3Controller.saveFormToWizardData(); // Force save
-                    System.out.println("TODO: Implement step3Controller.saveFormToWizardData()");
+                    System.out.println("Calling step3Controller.saveFormToWizardData()");
+                    step3Controller.saveFormToWizardData(); // Force save
                 } else {
                     System.out.println("WARNING: step3Controller is NULL!");
                 }
                 break;
             case 4:
                 if (step4Controller != null) {
-                    // TODO: step4Controller.saveFormToWizardData(); // Force save
-                    System.out.println("TODO: Implement step4Controller.saveFormToWizardData()");
+                    System.out.println("Calling step4Controller.saveFormToWizardData()");
+                    step4Controller.saveFormToWizardData(); // Force save
                 } else {
                     System.out.println("WARNING: step4Controller is NULL!");
                 }
@@ -384,26 +445,84 @@ public class ExamCreationWizardController {
     /* ---------------------------------------------------
      * Hủy wizard và đóng window
      * @author: K24DTCN210-NVMANH (28/11/2025 08:25)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Sửa logic xác nhận để đóng wizard đúng cách
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Dùng wizardStage reference được set từ bên ngoài
      * --------------------------------------------------- */
     public void cancelWizard() {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Xác nhận hủy");
-        confirmAlert.setHeaderText("Bạn có chắc muốn hủy tạo đề thi?  ");
+        confirmAlert.setHeaderText("Bạn có chắc muốn hủy tạo đề thi?");
         confirmAlert.setContentText("Tất cả dữ liệu đã nhập sẽ bị mất.");
         
+        // Lấy stage từ reference hoặc từ scene
+        Stage stageToClose = wizardStage;
+        if (stageToClose == null) {
+            if (cancelButton != null && cancelButton.getScene() != null && cancelButton.getScene().getWindow() != null) {
+                Window window = cancelButton.getScene().getWindow();
+                if (window instanceof Stage) {
+                    stageToClose = (Stage) window;
+                }
+            } else if (wizardPane != null && wizardPane.getScene() != null && wizardPane.getScene().getWindow() != null) {
+                Window window = wizardPane.getScene().getWindow();
+                if (window instanceof Stage) {
+                    stageToClose = (Stage) window;
+                }
+            }
+        }
+        
+        // Set owner cho dialog
+        if (stageToClose != null) {
+            confirmAlert.initOwner(stageToClose);
+        }
+        
+        // Hiển thị dialog và đợi kết quả
         Optional<ButtonType> result = confirmAlert.showAndWait();
+        
+        // Kiểm tra nếu user nhấn OK (xác nhận hủy)
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            closeWizard();
+            // Đóng stage trực tiếp
+            if (stageToClose != null) {
+                stageToClose.close();
+            } else {
+                // Fallback: thử lấy stage từ wizardPane hoặc cancelButton
+                closeWizard();
+            }
         }
     }
 
     /* ---------------------------------------------------
+     * Disable tất cả buttons trên wizard sau khi submit thành công
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public void disableAllButtons() {
+        if (nextButton != null) {
+            nextButton.setDisable(true);
+        }
+        if (submitButton != null) {
+            submitButton.setDisable(true);
+        }
+        if (previousButton != null) {
+            previousButton.setDisable(true);
+        }
+        if (cancelButton != null) {
+            cancelButton.setDisable(true);
+        }
+    }
+    
+    /* ---------------------------------------------------
      * Đóng wizard window
      * @author: K24DTCN210-NVMANH (28/11/2025 08:25)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Thêm kiểm tra null để tránh lỗi
      * --------------------------------------------------- */
     public void closeWizard() {
-        Stage stage = (Stage) wizardPane.getScene().getWindow();
-        stage.close();
+        if (wizardPane != null && wizardPane.getScene() != null) {
+            Window window = wizardPane.getScene().getWindow();
+            if (window instanceof Stage) {
+                ((Stage) window).close();
+            } else if (window != null) {
+                window.hide();
+            }
+        }
     }
 
     /* ---------------------------------------------------
@@ -424,11 +543,35 @@ public class ExamCreationWizardController {
      * @param message Nội dung thông báo
      * @author: K24DTCN210-NVMANH (28/11/2025 08:25)
      * --------------------------------------------------- */
+    /* ---------------------------------------------------
+     * Hiển thị dialog thông báo thành công
+     * @param message Nội dung thông báo
+     * @author: K24DTCN210-NVMANH (28/11/2025 08:25)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Thêm owner window và center dialog
+     * --------------------------------------------------- */
     public void showSuccess(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Thành công");
         alert.setHeaderText("Tạo đề thi thành công");
         alert.setContentText(message);
+        
+        // Set owner window
+        if (wizardPane != null && wizardPane.getScene() != null && wizardPane.getScene().getWindow() != null) {
+            alert.initOwner(wizardPane.getScene().getWindow());
+        }
+        
+        // Center dialog
+        alert.setOnShown(e -> {
+            if (alert.getDialogPane().getScene() != null && alert.getDialogPane().getScene().getWindow() != null) {
+                Window window = alert.getDialogPane().getScene().getWindow();
+                if (wizardPane != null && wizardPane.getScene() != null && wizardPane.getScene().getWindow() != null) {
+                    Window owner = wizardPane.getScene().getWindow();
+                    window.setX(owner.getX() + (owner.getWidth() - window.getWidth()) / 2);
+                    window.setY(owner.getY() + (owner.getHeight() - window.getHeight()) / 2);
+                }
+            }
+        });
+        
         alert.showAndWait();
     }
 
@@ -449,10 +592,20 @@ public class ExamCreationWizardController {
     public ExamManagementApiClient getApiClient() {
         return apiClient;
     }
+    
+    /* ---------------------------------------------------
+     * Get wizard pane (để các step controllers có thể access owner window)
+     * @return BorderPane wizard pane
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public javafx.scene.Node getWizardPane() {
+        return wizardPane;
+    }
 
     /* ---------------------------------------------------
      * Update progress indicator theo current step
      * @author: K24DTCN210-NVMANH (28/11/2025 15:40)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Update button visibility cho Step 5
      * --------------------------------------------------- */
     private void updateProgressIndicator() {
         // Reset all step labels
@@ -484,5 +637,31 @@ public class ExamCreationWizardController {
         // Update progress bar
         double progress = currentStep / 5.0;
         progressBar.setProgress(progress);
+        
+        // Update button visibility: Ở Step 5, ẩn Next và hiển thị Submit
+        if (currentStep == 5) {
+            if (nextButton != null) {
+                nextButton.setVisible(false);
+                nextButton.setManaged(false);
+            }
+            if (submitButton != null) {
+                submitButton.setVisible(true);
+                submitButton.setManaged(true);
+            }
+        } else {
+            if (nextButton != null) {
+                nextButton.setVisible(true);
+                nextButton.setManaged(true);
+            }
+            if (submitButton != null) {
+                submitButton.setVisible(false);
+                submitButton.setManaged(false);
+            }
+        }
+        
+        // Update Previous button: Disable ở Step 1
+        if (previousButton != null) {
+            previousButton.setDisable(currentStep == 1);
+        }
     }
 }

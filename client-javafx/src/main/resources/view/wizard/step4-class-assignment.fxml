@@ -22,6 +22,13 @@
     
     <Label text="Chọn các lớp học sẽ được làm đề thi này" styleClass="form-note" wrapText="true"/>
     
+    <!-- Loading Indicator -->
+    <ProgressIndicator fx:id="loadingIndicator" 
+                       visible="false" 
+                       managed="false"
+                       prefWidth="50" 
+                       prefHeight="50"/>
+    
     <!-- Main Content: Two Lists with Buttons -->
     <HBox spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER">
         

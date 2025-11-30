@@ -35,7 +35,6 @@ public class TeacherMainController {
     @FXML private Button questionBankButton;
     @FXML private Button subjectManagementButton;
     @FXML private Button examManagementButton;
-    @FXML private Button createExamButton;
     @FXML private Button gradingButton;
     @FXML private Button monitoringButton;
     @FXML private Button helpButton;
@@ -240,59 +239,33 @@ public class TeacherMainController {
     /* ---------------------------------------------------
      * Handle Exam Management menu click
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Set stage và apiClient cho ExamListController
      * --------------------------------------------------- */
     @FXML
     private void handleExamManagementClick() {
-        loadView("/view/exam-list.fxml", "Quản lý Đề thi");
-        highlightSelectedMenu(examManagementButton);
-    }
-    
-    /* ---------------------------------------------------
-     * Handle Create Exam Wizard menu click - Launch wizard trong modal window
-     * @author: K24DTCN210-NVMANH (28/11/2025 10:11)
-     * EditBy: K24DTCN210-NVMANH (28/11/2025 10:45) - Fix API client initialization
-     * --------------------------------------------------- */
-    @FXML
-    private void handleCreateExam() {
         try {
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/view/wizard/exam-creation-wizard.fxml")
-            );
-            Parent wizardView = loader.load();
+            // Load exam-management.fxml riêng cho teacher/admin
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/exam-management.fxml"));
+            Parent view = loader.load();
             
-            // Get controller và set login response (chứa token)
-            com.mstrust.client.teacher.controller.wizard.ExamCreationWizardController wizardController = 
-                loader.getController();
+            // Get controller và set ExamManagementApiClient + stage
+            com.mstrust.client.teacher.controller.ExamManagementController controller = loader.getController();
             
-            // Create LoginResponse với token từ apiClient
-            com.mstrust.client.exam.dto.LoginResponse loginResponse = 
-                new com.mstrust.client.exam.dto.LoginResponse();
-            loginResponse.setToken(apiClient.getAuthToken());
+            // Tạo ExamManagementApiClient với token từ apiClient
+            com.mstrust.client.teacher.api.ExamManagementApiClient examManagementApiClient = 
+                new com.mstrust.client.teacher.api.ExamManagementApiClient();
+            examManagementApiClient.setToken(apiClient.getAuthToken());
             
-            // Set login response cho wizard (wizard sẽ tự khởi tạo API client)
-            wizardController.setLoginResponse(loginResponse);
+            // Initialize với ExamManagementApiClient và stage
+            controller.initialize(examManagementApiClient, stage);
             
-            // Start wizard từ Step 1
-            wizardController.startWizard();
-            
-            // Create modal stage for wizard
-            Stage wizardStage = new Stage();
-            wizardStage.setTitle("Tạo đề thi mới - Wizard");
-            wizardStage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
-            wizardStage.initOwner(stage);
-            
-            Scene wizardScene = new Scene(wizardView, 900, 700);
-            wizardStage.setScene(wizardScene);
-            wizardStage.setResizable(false);
-            
-            // Show wizard và đợi đóng
-            wizardStage.showAndWait();
-            
-            System.out.println("Wizard đã đóng");
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(view);
+            highlightSelectedMenu(examManagementButton);
             
         } catch (IOException e) {
-            showError("Lỗi mở Wizard", 
-                    "Không thể mở wizard tạo đề thi.\n" +
+            showError("Lỗi tải View", 
+                    "Không thể tải Quản lý Đề thi.\n" +
                     "Lỗi: " + e.getMessage());
             e.printStackTrace();
         }

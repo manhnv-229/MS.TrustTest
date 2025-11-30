@@ -3,9 +3,12 @@ package com.mstrust.client.teacher.controller.wizard;
 import com.mstrust.client.teacher.dto.ExamFormat;
 import com.mstrust.client.teacher.dto.ExamPurpose;
 import com.mstrust.client.teacher.dto.ExamWizardData;
+import com.mstrust.client.teacher.dto.SubjectClassDTO;
+import com.mstrust.client.teacher.api.ExamManagementApiClient;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Window;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,7 +31,7 @@ public class Step1BasicInfoController {
     // Basic form fields
     @FXML private TextField titleField;
     @FXML private TextArea descriptionArea;
-    @FXML private ComboBox<String> subjectClassCombo;
+    @FXML private ComboBox<SubjectClassDTO> subjectClassCombo;
     @FXML private ComboBox<ExamPurpose> examPurposeCombo;
     @FXML private ComboBox<ExamFormat> examFormatCombo;
     
@@ -46,6 +49,7 @@ public class Step1BasicInfoController {
 
     private ExamWizardData wizardData;
     private ExamCreationWizardController parentController;
+    private ExamManagementApiClient examApiClient;
 
     /* ---------------------------------------------------
      * Initialize method được gọi sau khi FXML load
@@ -63,8 +67,25 @@ public class Step1BasicInfoController {
     /* ---------------------------------------------------
      * Initialize combo boxes with proper display formatters
      * @author: K24DTCN210-NVMANH (29/11/2025 15:35)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Add SubjectClassDTO ComboBox setup
      * --------------------------------------------------- */
     private void initializeComboBoxes() {
+        // Setup SubjectClass ComboBox
+        subjectClassCombo.setCellFactory(lv -> new ListCell<SubjectClassDTO>() {
+            @Override
+            protected void updateItem(SubjectClassDTO item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item.getDisplayName());
+            }
+        });
+        subjectClassCombo.setButtonCell(new ListCell<SubjectClassDTO>() {
+            @Override
+            protected void updateItem(SubjectClassDTO item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : item.getDisplayName());
+            }
+        });
+        
         // Setup ExamPurpose ComboBox
         examPurposeCombo.setItems(FXCollections.observableArrayList(ExamPurpose.values()));
         examPurposeCombo.setCellFactory(lv -> new ListCell<ExamPurpose>() {
@@ -186,13 +207,23 @@ public class Step1BasicInfoController {
     public void setParentController(ExamCreationWizardController parentController) {
         this.parentController = parentController;
     }
+    
+    /* ---------------------------------------------------
+     * Set API client để load SubjectClass từ API
+     * @param examApiClient Exam management API client
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public void setApiClient(ExamManagementApiClient examApiClient) {
+        this.examApiClient = examApiClient;
+    }
 
     /* ---------------------------------------------------
      * Load danh sách subject classes vào ComboBox
-     * @param subjectClasses Danh sách tên các subject class
+     * @param subjectClasses Danh sách SubjectClassDTO
      * @author: K24DTCN210-NVMANH (28/11/2025 08:24)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Change từ List<String> sang List<SubjectClassDTO>
      * --------------------------------------------------- */
-    public void loadSubjectClasses(List<String> subjectClasses) {
+    public void loadSubjectClasses(List<SubjectClassDTO> subjectClasses) {
         subjectClassCombo.setItems(FXCollections.observableArrayList(subjectClasses));
     }
 
@@ -211,8 +242,26 @@ public class Step1BasicInfoController {
         if (wizardData.getDescription() != null) {
             descriptionArea.setText(wizardData.getDescription());
         }
-        if (wizardData.getSubjectClassName() != null) {
-            subjectClassCombo.setValue(wizardData.getSubjectClassName());
+        // Load SubjectClass từ ID hoặc code
+        if (wizardData.getSubjectClassId() != null) {
+            // Tìm SubjectClassDTO từ ID
+            SubjectClassDTO found = subjectClassCombo.getItems().stream()
+                .filter(sc -> sc.getId().equals(wizardData.getSubjectClassId()))
+                .findFirst()
+                .orElse(null);
+            if (found != null) {
+                subjectClassCombo.setValue(found);
+            }
+        } else if (wizardData.getSubjectClassName() != null) {
+            // Fallback: tìm theo code hoặc display name
+            SubjectClassDTO found = subjectClassCombo.getItems().stream()
+                .filter(sc -> sc.getCode().equals(wizardData.getSubjectClassName()) || 
+                             sc.getDisplayName().equals(wizardData.getSubjectClassName()))
+                .findFirst()
+                .orElse(null);
+            if (found != null) {
+                subjectClassCombo.setValue(found);
+            }
         }
         if (wizardData.getExamPurpose() != null) {
             examPurposeCombo.setValue(wizardData.getExamPurpose());
@@ -272,17 +321,23 @@ public class Step1BasicInfoController {
     private void saveFormToData() {
         wizardData.setTitle(titleField.getText().trim());
         wizardData.setDescription(descriptionArea.getText().trim());
-        wizardData.setSubjectClassName(subjectClassCombo.getValue());
+        
+        // Lấy SubjectClassDTO từ ComboBox và resolve ID
+        SubjectClassDTO selectedSubjectClass = subjectClassCombo.getValue();
+        if (selectedSubjectClass != null) {
+            wizardData.setSubjectClassId(selectedSubjectClass.getId());
+            wizardData.setSubjectClassName(selectedSubjectClass.getDisplayName());
+        } else {
+            wizardData.setSubjectClassId(null);
+            wizardData.setSubjectClassName(null);
+        }
+        
         wizardData.setExamPurpose(examPurposeCombo.getValue());
         wizardData.setExamFormat(examFormatCombo.getValue());
         
         // Combine DatePicker + Spinners
         wizardData.setStartTime(combineDateAndTime(startDatePicker, startHourSpinner, startMinuteSpinner));
         wizardData.setEndTime(combineDateAndTime(endDatePicker, endHourSpinner, endMinuteSpinner));
-        
-        // TODO: Cần resolve subjectClassId từ subjectClassName
-        // Tạm thời set null, sẽ implement sau khi có API
-        wizardData.setSubjectClassId(null);
     }
 
     /* ---------------------------------------------------
@@ -321,15 +376,16 @@ public class Step1BasicInfoController {
      * Validate form data
      * @return true nếu hợp lệ, false nếu có lỗi
      * @author: K24DTCN210-NVMANH (28/11/2025 08:24)
+     * EditBy: K24DTCN210-NVMANH (30/11/2025) - Đổi thành public để wizard controller có thể gọi
      * --------------------------------------------------- */
-    private boolean validateForm() {
+    public boolean validateForm() {
         hideError();
         
         saveFormToData();
         List<String> errors = wizardData.validateStep1();
         
         if (! errors.isEmpty()) {
-            showError(String.join("\n", errors));
+            showValidationError(String.join("\n", errors));
             return false;
         }
         
@@ -337,7 +393,29 @@ public class Step1BasicInfoController {
     }
 
     /* ---------------------------------------------------
-     * Hiển thị thông báo lỗi
+     * Hiển thị validation error bằng Alert dialog
+     * @param message Nội dung lỗi
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    private void showValidationError(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Cảnh báo");
+        alert.setHeaderText("Vui lòng kiểm tra lại thông tin");
+        alert.setContentText(message);
+        
+        // Set owner window từ parent controller
+        if (parentController != null && parentController.getWizardPane() != null) {
+            Window owner = parentController.getWizardPane().getScene().getWindow();
+            if (owner != null) {
+                alert.initOwner(owner);
+            }
+        }
+        
+        alert.showAndWait();
+    }
+
+    /* ---------------------------------------------------
+     * Hiển thị thông báo lỗi (giữ lại cho tương thích)
      * @param message Nội dung lỗi
      * @author: K24DTCN210-NVMANH (28/11/2025 08:24)
      * --------------------------------------------------- */

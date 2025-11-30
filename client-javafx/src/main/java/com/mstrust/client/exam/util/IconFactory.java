@@ -206,6 +206,51 @@ public class IconFactory {
     }
     
     /* ---------------------------------------------------
+     * Tạo icon view/eye cho xem chi tiết
+     * @returns FontIcon với icon eye, size 18px
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public static FontIcon createViewIcon() {
+        return createIcon(FontAwesomeSolid.EYE, SIZE_MEDIUM, COLOR_PRIMARY);
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo icon publish/bullhorn cho xuất bản
+     * @returns FontIcon với icon bullhorn, size 18px
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public static FontIcon createPublishIcon() {
+        return createIcon(FontAwesomeSolid.BULLHORN, SIZE_MEDIUM, COLOR_SUCCESS);
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo icon lock cho ẩn/unpublish
+     * @returns FontIcon với icon lock, size 18px
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public static FontIcon createLockIconForButton() {
+        return createIcon(FontAwesomeSolid.LOCK, SIZE_MEDIUM, COLOR_WARNING);
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo icon edit cho button, size 18px
+     * @returns FontIcon với icon pencil-alt
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public static FontIcon createEditIconForButton() {
+        return createIcon(FontAwesomeSolid.PENCIL_ALT, SIZE_MEDIUM, COLOR_PRIMARY);
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo icon delete cho button, size 18px
+     * @returns FontIcon với icon trash
+     * @author: K24DTCN210-NVMANH (30/11/2025)
+     * --------------------------------------------------- */
+    public static FontIcon createDeleteIconForButton() {
+        return createIcon(FontAwesomeSolid.TRASH, SIZE_MEDIUM, COLOR_DANGER);
+    }
+    
+    /* ---------------------------------------------------
      * Tạo FontIcon từ Ikon với size và color tùy chỉnh
      * @param icon Ikon instance (từ FontAwesome, MaterialDesign, Bootstrap)
      * @param size Kích thước icon (pixels)

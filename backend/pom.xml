@@ -158,8 +158,6 @@
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
-                    <fork>true</fork>
-                    <executable>${JAVA_HOME}/bin/javac</executable>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>

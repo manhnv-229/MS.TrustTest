@@ -10,6 +10,7 @@
   Màn hình hiển thị danh sách đề thi available cho student
   @author: K24DTCN210-NVMANH (23/11/2025 12:04)
   EditBy: K24DTCN210-NVMANH (25/11/2025 11:02) - Added loading overlay
+  EditBy: K24DTCN210-NVMANH (01/12/2025 00:30) - Added top bar with user info and logout
 -->
 
 <StackPane xmlns="http://javafx.com/javafx"
@@ -21,9 +22,27 @@
     <!-- Main Content -->
     <BorderPane>
         
-        <!-- Header -->
+        <!-- Top Section: Top Bar + Header -->
         <top>
-            <VBox styleClass="header-section">
+            <VBox>
+                <!-- Top Bar - User Info & Logout -->
+                <HBox styleClass="top-bar" alignment="CENTER_LEFT" spacing="10">
+                    <padding>
+                        <Insets top="10" right="15" bottom="10" left="15"/>
+                    </padding>
+                    
+                    <Label text="MS.TrustTest - Student Dashboard" styleClass="app-title"/>
+                    
+                    <Region HBox.hgrow="ALWAYS"/>
+                    
+                    <Label fx:id="userLabel" text="Student Name" styleClass="user-label"/>
+                    <Label fx:id="roleLabel" text="[STUDENT]" styleClass="role-badge"/>
+                    <Button fx:id="logoutButton" text="Đăng xuất" styleClass="logout-button" 
+                            onAction="#handleLogout"/>
+                </HBox>
+                
+                <!-- Header Section -->
+                <VBox styleClass="header-section">
                 <padding>
                     <Insets top="20" right="20" bottom="20" left="20"/>
                 </padding>
@@ -64,6 +83,7 @@
                             onAction="#onRefresh"
                             styleClass="secondary-button"/>
                 </HBox>
+                </VBox>
             </VBox>
         </top>
         

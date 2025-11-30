@@ -40,16 +40,25 @@
         <VBox spacing="10" HBox.hgrow="ALWAYS">
             <Label text="Câu hỏi khả dụng" styleClass="section-title"/>
             
-            <TableView fx:id="availableQuestionsTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="availableContentCol" text="Nội dung" prefWidth="500" minWidth="300"/>
-                    <TableColumn fx:id="availableTypeCol" text="Loại" prefWidth="120" minWidth="100"/>
-                    <TableColumn fx:id="availableDifficultyCol" text="Độ khó" prefWidth="120" minWidth="100"/>
-                </columns>
-                <placeholder>
-                    <Label text="Không có câu hỏi nào"/>
-                </placeholder>
-            </TableView>
+            <!-- Table View with Loading Overlay -->
+            <StackPane VBox.vgrow="ALWAYS">
+                <TableView fx:id="availableQuestionsTable">
+                    <columns>
+                        <TableColumn fx:id="availableContentCol" text="Nội dung" prefWidth="500" minWidth="300"/>
+                        <TableColumn fx:id="availableTypeCol" text="Loại" prefWidth="120" minWidth="100"/>
+                        <TableColumn fx:id="availableDifficultyCol" text="Độ khó" prefWidth="120" minWidth="100"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="Không có câu hỏi nào"/>
+                    </placeholder>
+                </TableView>
+                
+                <!-- Loading Overlay -->
+                <StackPane fx:id="loadingPane" visible="false" managed="false" 
+                           style="-fx-background-color: rgba(0,0,0,0.3);">
+                    <ProgressIndicator style="-fx-progress-color: white; -fx-background-color: transparent; -fx-background-radius: 0; -fx-padding: 0;"/>
+                </StackPane>
+            </StackPane>
             
             <HBox spacing="10" alignment="CENTER">
                 <Button text="Thêm câu hỏi →" 

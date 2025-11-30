@@ -1,9 +1,11 @@
 com\mstrust\client\exam\service\AnswerQueue.class
 com\mstrust\client\monitoring\AlertDetectionService.class
+com\mstrust\client\teacher\api\ExamManagementApiClient$3.class
 com\mstrust\client\teacher\controller\wizard\Step4ClassAssignmentController.class
 com\mstrust\client\teacher\dto\QuestionType.class
 com\mstrust\client\teacher\controller\wizard\Step4ClassAssignmentController$1.class
 com\mstrust\client\teacher\api\SubjectApiClient$PageResponse.class
+com\mstrust\client\teacher\controller\wizard\Step1BasicInfoController$8.class
 com\mstrust\client\exam\component\TimerComponent.class
 com\mstrust\client\teacher\controller\wizard\Step1BasicInfoController$5.class
 com\mstrust\client\teacher\dto\Difficulty.class
@@ -53,10 +55,13 @@ com\mstrust\client\exam\dto\ExamInfoDTO.class
 com\mstrust\client\exam\service\AnswerQueue$1.class
 com\mstrust\client\teacher\controller\wizard\Step5ReviewController.class
 module-info.class
+com\mstrust\client\teacher\controller\wizard\Step4ClassAssignmentController$3.class
 com\mstrust\client\teacher\controller\SubjectEditDialogController.class
 com\mstrust\client\dto\AlertCreateRequest.class
 com\mstrust\client\exam\service\NetworkMonitor.class
 com\mstrust\client\exam\dto\StartExamResponse.class
+com\mstrust\client\teacher\api\ExamManagementApiClient$4.class
+com\mstrust\client\teacher\controller\wizard\Step1BasicInfoController$7.class
 com\mstrust\client\teacher\api\ExamManagementApiClient$AddQuestionRequest.class
 com\mstrust\client\util\ProcessDetector.class
 com\mstrust\client\teacher\controller\SubjectEditDialogController$1.class
@@ -91,6 +96,7 @@ com\mstrust\client\api\MonitoringApiClient$LocalDateTimeAdapter.class
 com\mstrust\client\dto\ActivityData.class
 com\mstrust\client\teacher\api\ExamManagementApiClient$ApiException.class
 com\mstrust\client\teacher\controller\SubjectManagementController.class
+com\mstrust\client\teacher\controller\ExamManagementController.class
 com\mstrust\client\teacher\dto\ExamFormat.class
 com\mstrust\client\exam\component\AnswerInputFactory$1.class
 com\mstrust\client\teacher\controller\QuestionEditDialogController.class
@@ -106,6 +112,7 @@ com\mstrust\client\teacher\controller\SubjectEditDialogController$2.class
 com\mstrust\client\teacher\controller\wizard\Step1BasicInfoController$6.class
 com\mstrust\client\teacher\controller\wizard\Step4ClassAssignmentController$2.class
 com\mstrust\client\teacher\dto\UpdateSubjectRequest.class
+com\mstrust\client\teacher\dto\SubjectClassDTO.class
 com\mstrust\client\exam\util\IconFactory.class
 com\mstrust\client\exam\ExamClientApplication.class
 com\mstrust\client\monitoring\ScreenshotCaptureService.class

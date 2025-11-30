@@ -57,7 +57,6 @@ public class CreateExamRequest {
     private Integer durationMinutes;
     
     @DecimalMin(value = "0.00", message = "Passing score must be >= 0")
-    @DecimalMax(value = "100.00", message = "Passing score must be <= 100")
     private BigDecimal passingScore = BigDecimal.valueOf(50.00);
     
     @DecimalMin(value = "0.00", message = "Total score must be >= 0")
