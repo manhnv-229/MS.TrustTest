@@ -95,7 +95,7 @@ public class QuestionBankApiClient {
             Type responseType = new TypeToken<QuestionBankResponse>(){}.getType();
             return gson.fromJson(response.body(), responseType);
         } else {
-            throw new IOException("Failed to get questions. Status: " + response.statusCode() + ", Body: " + response.body());
+            throw new IOException("Failed to get questions.Status: " + response.statusCode() + ", Body: " + response.body());
         }
     }
     
@@ -120,7 +120,7 @@ public class QuestionBankApiClient {
         if (response.statusCode() == 200) {
             return gson.fromJson(response.body(), QuestionBankDTO.class);
         } else {
-            throw new IOException("Failed to get question. Status: " + response.statusCode());
+            throw new IOException("Failed to get question.Status: " + response.statusCode());
         }
     }
     
@@ -146,7 +146,7 @@ public class QuestionBankApiClient {
         if (response.statusCode() == 200 || response.statusCode() == 201) {
             return gson.fromJson(response.body(), QuestionBankDTO.class);
         } else {
-            throw new IOException("Failed to create question. Status: " + response.statusCode() + ", Body: " + response.body());
+            throw new IOException("Failed to create question.Status: " + response.statusCode() + ", Body: " + response.body());
         }
     }
     
@@ -173,7 +173,7 @@ public class QuestionBankApiClient {
         if (response.statusCode() == 200) {
             return gson.fromJson(response.body(), QuestionBankDTO.class);
         } else {
-            throw new IOException("Failed to update question. Status: " + response.statusCode() + ", Body: " + response.body());
+            throw new IOException("Failed to update question.Status: " + response.statusCode() + ", Body: " + response.body());
         }
     }
     
@@ -195,7 +195,7 @@ public class QuestionBankApiClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         
         if (response.statusCode() != 200) {
-            throw new IOException("Failed to delete question. Status: " + response.statusCode());
+            throw new IOException("Failed to delete question.Status: " + response.statusCode());
         }
     }
     

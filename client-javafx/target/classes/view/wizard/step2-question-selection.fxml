@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mstrust.client.teacher.controller.wizard.Step2QuestionSelectionController"
+      styleClass="wizard-step"
+      stylesheets="@../../css/teacher-styles.css"
+      spacing="15"
+      alignment="TOP_CENTER">
+    
+    <padding>
+        <Insets top="20" right="30" bottom="20" left="30"/>
+    </padding>
+    
+    <!-- Header -->
+    <Label text="Bước 2: Chọn câu hỏi" styleClass="wizard-step-title"/>
+    <Separator/>
+    
+    <!-- Filters & Search -->
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label text="Tìm kiếm:"/>
+        <TextField fx:id="searchField" promptText="Tìm theo nội dung câu hỏi..." prefWidth="300"/>
+        
+        <Label text="Độ khó:"/>
+        <ComboBox fx:id="difficultyFilter" promptText="Tất cả" prefWidth="150"/>
+        
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <Button text="Làm mới" styleClass="btn,btn-secondary" onAction="#handleRefresh"/>
+    </HBox>
+    
+    <!-- Main Content: Two Tables Side by Side -->
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+        
+        <!-- Left: Available Questions -->
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <Label text="Câu hỏi khả dụng" styleClass="section-title"/>
+            
+            <TableView fx:id="availableQuestionsTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="availableContentCol" text="Nội dung" prefWidth="500" minWidth="300"/>
+                    <TableColumn fx:id="availableTypeCol" text="Loại" prefWidth="120" minWidth="100"/>
+                    <TableColumn fx:id="availableDifficultyCol" text="Độ khó" prefWidth="120" minWidth="100"/>
+                </columns>
+                <placeholder>
+                    <Label text="Không có câu hỏi nào"/>
+                </placeholder>
+            </TableView>
+            
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="Thêm câu hỏi →" 
+                        styleClass="btn,btn-primary"
+                        onAction="#handleAddQuestion"/>
+                <Button text="Thêm tất cả →" 
+                        styleClass="btn,btn-secondary"
+                        onAction="#handleAddAllQuestions"/>
+            </HBox>
+        </VBox>
+        
+        <!-- Right: Selected Questions -->
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <Label text="Câu hỏi đã chọn" styleClass="section-title"/>
+            
+            <TableView fx:id="selectedQuestionsTable" VBox.vgrow="ALWAYS" editable="true">
+                <columns>
+                    <TableColumn fx:id="selectedOrderCol" text="STT" prefWidth="60" minWidth="50" maxWidth="70"/>
+                    <TableColumn fx:id="selectedContentCol" text="Nội dung" prefWidth="380" minWidth="250"/>
+                    <TableColumn fx:id="selectedPointsCol" text="Điểm" prefWidth="100" minWidth="80"/>
+                </columns>
+                <placeholder>
+                    <Label text="Chưa chọn câu hỏi nào"/>
+                </placeholder>
+            </TableView>
+            
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="← Xóa câu hỏi" 
+                        styleClass="btn,btn-warning"
+                        onAction="#handleRemoveQuestion"/>
+                <Button text="← Xóa tất cả" 
+                        styleClass="btn,btn-secondary"
+                        onAction="#handleRemoveAllQuestions"/>
+            </HBox>
+        </VBox>
+        
+    </HBox>
+    
+    <!-- Summary -->
+    <HBox spacing="30" alignment="CENTER" styleClass="summary-panel">
+        <padding>
+            <Insets top="15" right="20" bottom="15" left="20"/>
+        </padding>
+        
+        <Label fx:id="questionCountLabel" 
+               text="Số câu hỏi: 0" 
+               styleClass="info-label"/>
+        
+        <Separator orientation="VERTICAL"/>
+        
+        <Label fx:id="totalPointsLabel" 
+               text="Tổng điểm: 0.0" 
+               styleClass="success-label"/>
+    </HBox>
+    
+    <!-- Error Message -->
+    <Label fx:id="errorLabel" 
+           styleClass="error-label" 
+           wrapText="true" 
+           maxWidth="800"
+           visible="false" 
+           managed="false"/>
+    
+    <!-- Note -->
+    <Label text="* Phải chọn ít nhất 1 câu hỏi. Có thể chỉnh sửa điểm số trong cột 'Điểm' của bảng bên phải." 
+           styleClass="form-note" 
+           wrapText="true" 
+           maxWidth="800"/>
+    
+</VBox>

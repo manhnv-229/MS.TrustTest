@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson. datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mstrust.client.teacher.dto.CreateSubjectRequest;
 import com.mstrust.client.teacher.dto.DepartmentDTO;
 import com.mstrust.client.teacher.dto.UpdateSubjectRequest;
@@ -39,7 +39,7 @@ public class SubjectApiClient {
         this.baseUrl = baseUrl;
         this.objectMapper = new ObjectMapper();
         // Register JavaTimeModule để hỗ trợ Java 8 Date/Time (LocalDateTime, LocalDate, ...)
-        this.objectMapper. registerModule(new JavaTimeModule());
+        this.objectMapper.registerModule(new JavaTimeModule());
         // Disable WRITE_DATES_AS_TIMESTAMPS để serialize dates as ISO-8601 strings
         this.objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         

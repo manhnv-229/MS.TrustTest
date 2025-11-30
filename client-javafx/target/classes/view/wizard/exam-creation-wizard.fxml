@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mstrust.client.teacher.controller.wizard.ExamCreationWizardController"
+            stylesheets="@../../css/teacher-styles.css"
+            prefWidth="1300" prefHeight="900">
+    
+    <!-- Top: Progress Bar & Title -->
+    <top>
+        <VBox styleClass="wizard-header" spacing="10">
+            <padding>
+                <Insets top="20" right="30" bottom="20" left="30"/>
+            </padding>
+            
+            <Label text="Tạo đề thi mới" styleClass="wizard-title"/>
+            
+            <!-- Progress Indicator -->
+            <HBox alignment="CENTER" spacing="10">
+                <Label fx:id="step1Label" text="1. Thông tin" styleClass="step-label,step-active"/>
+                <Label text="→" styleClass="step-arrow"/>
+                <Label fx:id="step2Label" text="2. Câu hỏi" styleClass="step-label"/>
+                <Label text="→" styleClass="step-arrow"/>
+                <Label fx:id="step3Label" text="3. Cài đặt" styleClass="step-label"/>
+                <Label text="→" styleClass="step-arrow"/>
+                <Label fx:id="step4Label" text="4. Lớp học" styleClass="step-label"/>
+                <Label text="→" styleClass="step-arrow"/>
+                <Label fx:id="step5Label" text="5. Xem trước" styleClass="step-label"/>
+            </HBox>
+            
+            <ProgressBar fx:id="progressBar" progress="0.2" maxWidth="Infinity"/>
+        </VBox>
+    </top>
+    
+    <!-- Center: Step Content Container with ScrollPane -->
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+            <StackPane fx:id="stepContainer" styleClass="wizard-content">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+            </StackPane>
+        </ScrollPane>
+    </center>
+    
+    <!-- Bottom: Navigation Buttons -->
+    <bottom>
+        <HBox styleClass="wizard-footer" spacing="15" alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="15" right="30" bottom="15" left="30"/>
+            </padding>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <Button fx:id="cancelButton" text="Hủy bỏ" 
+                    styleClass="btn,btn-secondary"
+                    onAction="#handleCancel"/>
+            
+            <Button fx:id="previousButton" text="← Quay lại" 
+                    styleClass="btn,btn-secondary"
+                    onAction="#handlePrevious"
+                    disable="true"/>
+            
+            <Button fx:id="nextButton" text="Tiếp theo →" 
+                    styleClass="btn,btn-primary"
+                    onAction="#handleNext"
+                    defaultButton="true"/>
+            
+            <Button fx:id="submitButton" text="Tạo đề thi" 
+                    styleClass="btn,btn-success"
+                    onAction="#handleSubmit"
+                    visible="false"/>
+        </HBox>
+    </bottom>
+    
+</BorderPane>

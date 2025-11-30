@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mstrust.client.teacher.controller.wizard.Step4ClassAssignmentController"
+      styleClass="wizard-step"
+      stylesheets="@../../css/teacher-styles.css"
+      spacing="20"
+      alignment="TOP_CENTER">
+    
+    <padding>
+        <Insets top="30" right="40" bottom="30" left="40"/>
+    </padding>
+    
+    <!-- Header -->
+    <Label text="Bước 4: Gán lớp học" styleClass="wizard-step-title"/>
+    <Separator/>
+    
+    <Label text="Chọn các lớp học sẽ được làm đề thi này" styleClass="form-note" wrapText="true"/>
+    
+    <!-- Main Content: Two Lists with Buttons -->
+    <HBox spacing="20" VBox.vgrow="ALWAYS" alignment="CENTER">
+        
+        <!-- Left: Available Classes -->
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <Label text="Lớp học khả dụng" styleClass="section-title"/>
+            
+            <ListView fx:id="availableClassesList" 
+                      VBox.vgrow="ALWAYS" 
+                      prefHeight="400"/>
+            
+            <Label fx:id="availableCountLabel"
+                   text="Có sẵn: 0" 
+                   styleClass="info-label"/>
+        </VBox>
+        
+        <!-- Center: Action Buttons -->
+        <VBox spacing="15" alignment="CENTER">
+            <Button text="Gán →" 
+                    styleClass="btn,btn-primary"
+                    onAction="#handleAssign"
+                    prefWidth="120"/>
+            
+            <Button text="Gán tất cả →" 
+                    styleClass="btn,btn-secondary"
+                    onAction="#handleAssignAll"
+                    prefWidth="120"/>
+            
+            <Separator prefWidth="120"/>
+            
+            <Button text="← Bỏ gán" 
+                    styleClass="btn,btn-warning"
+                    onAction="#handleUnassign"
+                    prefWidth="120"/>
+            
+            <Button text="← Bỏ tất cả" 
+                    styleClass="btn,btn-secondary"
+                    onAction="#handleUnassignAll"
+                    prefWidth="120"/>
+        </VBox>
+        
+        <!-- Right: Assigned Classes -->
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+            <Label text="Lớp học đã gán" styleClass="section-title"/>
+            
+            <ListView fx:id="assignedClassesList" 
+                      VBox.vgrow="ALWAYS" 
+                      prefHeight="400"/>
+            
+            <Label fx:id="assignedCountLabel" 
+                   text="Đã gán: 0 lớp" 
+                   styleClass="success-label"/>
+        </VBox>
+        
+    </HBox>
+    
+    <!-- Spacer -->
+    <Region VBox.vgrow="ALWAYS"/>
+    
+    <!-- Error Message -->
+    <Label fx:id="errorLabel" 
+           styleClass="error-label" 
+           wrapText="true"
+           visible="false"
+           managed="false"/>
+    
+    <!-- Note -->
+    <Label text="* Phải gán ít nhất 1 lớp học" styleClass="form-note"/>
+    
+</VBox>

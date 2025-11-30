@@ -1,15 +1,15 @@
-package com.mstrust.client. teacher.controller;
+package com.mstrust.client.teacher.controller;
 
-import com. mstrust.client.teacher. api.SubjectApiClient;
-import com.mstrust.client. teacher.dto.SubjectDTO;
+import com.mstrust.client.teacher.api.SubjectApiClient;
+import com.mstrust.client.teacher.dto.SubjectDTO;
 import com.mstrust.client.teacher.dto.DepartmentDTO;
-import com. mstrust.client.teacher. dto.CreateSubjectRequest;
-import com. mstrust.client.teacher. dto.UpdateSubjectRequest;
+import com.mstrust.client.teacher.dto.CreateSubjectRequest;
+import com.mstrust.client.teacher.dto.UpdateSubjectRequest;
 import javafx.application.Platform;
-import javafx. collections.FXCollections;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx. fxml.FXML;
+import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -75,7 +75,7 @@ public class SubjectEditDialogController {
      * @author: K24DTCN210-NVMANH (26/11/2025 02:00)
      * --------------------------------------------------- */
     private void setupSemesterCombo() {
-        ObservableList<String> semesters = FXCollections. observableArrayList(
+        ObservableList<String> semesters = FXCollections.observableArrayList(
             "Học kỳ 1",
             "Học kỳ 2", 
             "Học kỳ 3 (Hè)"
@@ -110,7 +110,7 @@ public class SubjectEditDialogController {
             
             // Chỉ show warning nếu thực sự không có departments
             if (departments.isEmpty()) {
-                showError("Cảnh báo", "Chưa có departments.  Vui lòng tạo departments trước.");
+                showError("Cảnh báo", "Chưa có departments.Vui lòng tạo departments trước.");
             }
         });
         
@@ -119,7 +119,7 @@ public class SubjectEditDialogController {
             System.err.println("[ERROR SubjectEditDialogController] Load departments failed:");
             if (ex != null) {
                 System.err.println("[ERROR] Exception: " + ex.getClass().getName());
-                System.err.println("[ERROR] Message: " + ex. getMessage());
+                System.err.println("[ERROR] Message: " + ex.getMessage());
                 ex.printStackTrace();
             }
             showError("Lỗi tải danh sách departments", 
@@ -135,7 +135,7 @@ public class SubjectEditDialogController {
      * --------------------------------------------------- */
     private void setupValidation() {
         // Validate on focus lost
-        codeField.focusedProperty(). addListener((obs, wasFocused, isNowFocused) -> {
+        codeField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
             if (!isNowFocused) {
                 validateCode();
             }
@@ -181,11 +181,11 @@ public class SubjectEditDialogController {
      * Nếu allDepartments chưa load xong, sẽ được gọi lại từ loadDepartments()
      * @param department Department cần set
      * @author: K24DTCN210-NVMANH (27/11/2025 08:07)
-     * EditBy: K24DTCN210-NVMANH (27/11/2025 08:15) - Use SelectionModel. select(index) instead of setValue()
+     * EditBy: K24DTCN210-NVMANH (27/11/2025 08:15) - Use SelectionModel.select(index) instead of setValue()
      * --------------------------------------------------- */
     private void setDepartmentById(Long departmentId) {
         if (departmentId == null) {
-            System. out.println("[DEBUG SubjectEditDialogController] DepartmentId is null, skipping");
+            System.out.println("[DEBUG SubjectEditDialogController] DepartmentId is null, skipping");
             return;
         }
         
@@ -205,7 +205,7 @@ public class SubjectEditDialogController {
                 
                 // Null safety checks
                 if (dept == null) {
-                    System.out. println("[DEBUG SubjectEditDialogController]   [" + i + "] NULL DEPARTMENT OBJECT!");
+                    System.out.println("[DEBUG SubjectEditDialogController]   [" + i + "] NULL DEPARTMENT OBJECT!");
                     continue;
                 }
                 
@@ -218,16 +218,16 @@ public class SubjectEditDialogController {
                 
                 // Check nếu ID match
                 if (deptId != null && deptId.equals(departmentId)) {
-                    // Dùng SelectionModel. select(index) thay vì setValue()
+                    // Dùng SelectionModel.select(index) thay vì setValue()
                     departmentCombo.getSelectionModel().select(i);
-                    System. out.println("[DEBUG SubjectEditDialogController] ✓ Department selected at index " + i + 
+                    System.out.println("[DEBUG SubjectEditDialogController] ✓ Department selected at index " + i + 
                                       ": " + deptName);
                     return;
                 }
             } catch (Exception e) {
                 System.err.println("[ERROR SubjectEditDialogController] Error processing department at index " + i);
                 System.err.println("[ERROR] Exception: " + e.getClass().getName());
-                System.err.println("[ERROR] Message: " + e. getMessage());
+                System.err.println("[ERROR] Message: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -260,7 +260,7 @@ public class SubjectEditDialogController {
      * --------------------------------------------------- */
     private boolean validateName() {
         String name = nameField.getText();
-        if (name == null || name.trim(). isEmpty()) {
+        if (name == null || name.trim().isEmpty()) {
             nameErrorLabel.setVisible(true);
             nameField.getStyleClass().add("error-field");
             return false;
@@ -359,7 +359,7 @@ public class SubjectEditDialogController {
             showError("Không thể tạo môn học", userMessage);
         });
         
-        new Thread(task). start();
+        new Thread(task).start();
     }
     
     /* ---------------------------------------------------
@@ -384,7 +384,7 @@ public class SubjectEditDialogController {
         
         task.setOnFailed(event -> {
             saveButton.setDisable(false);
-            Throwable ex = task. getException();
+            Throwable ex = task.getException();
             String errorMsg = ex != null ? ex.getMessage() : "Unknown error";
             
             // Parse user-friendly error messages
@@ -409,7 +409,7 @@ public class SubjectEditDialogController {
         
         String description = descriptionArea.getText();
         if (description != null && !description.trim().isEmpty()) {
-            request.setDescription(description. trim());
+            request.setDescription(description.trim());
         }
         
         return request;
@@ -424,11 +424,11 @@ public class SubjectEditDialogController {
         UpdateSubjectRequest request = new UpdateSubjectRequest();
         request.setSubjectName(nameField.getText().trim());
         request.setCredits(creditsSpinner.getValue());
-        request.setDepartmentId(departmentCombo.getValue(). getId());
+        request.setDepartmentId(departmentCombo.getValue().getId());
         
         String description = descriptionArea.getText();
         if (description != null && ! description.trim().isEmpty()) {
-            request.setDescription(description. trim());
+            request.setDescription(description.trim());
         }
         
         return request;
@@ -462,7 +462,7 @@ public class SubjectEditDialogController {
     private void showError(String title, String message) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert. setTitle(title);
+            alert.setTitle(title);
             alert.setHeaderText(null);
             alert.setContentText(message);
             alert.showAndWait();
@@ -477,7 +477,7 @@ public class SubjectEditDialogController {
      * --------------------------------------------------- */
     private void showInfo(String title, String message) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(Alert.AlertType. INFORMATION);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle(title);
             alert.setHeaderText(null);
             alert.setContentText(message);
@@ -493,7 +493,7 @@ public class SubjectEditDialogController {
      * --------------------------------------------------- */
     private String parseErrorMessage(String errorMsg) {
         if (errorMsg == null || errorMsg.trim().isEmpty()) {
-            return "Đã xảy ra lỗi không xác định.  Vui lòng thử lại.";
+            return "Đã xảy ra lỗi không xác định. Vui lòng thử lại.";
         }
         
         // Handle HTTP status codes
@@ -504,7 +504,7 @@ public class SubjectEditDialogController {
         
         if (errorMsg.contains("401")) {
             return "Phiên đăng nhập đã hết hạn.\n" +
-                   "Vui lòng đăng nhập lại. ";
+                   "Vui lòng đăng nhập lại.";
         }
         
         if (errorMsg.contains("400")) {
@@ -512,7 +512,7 @@ public class SubjectEditDialogController {
                    "Vui lòng kiểm tra lại thông tin đã nhập.";
         }
         
-        if (errorMsg. contains("409") || 
+        if (errorMsg.contains("409") || 
             errorMsg.contains("already exists") || 
             errorMsg.contains("đã tồn tại")) {
             return "Mã môn học đã tồn tại trong hệ thống.\n" +
@@ -526,14 +526,14 @@ public class SubjectEditDialogController {
         
         // Check for network errors
         if (errorMsg.toLowerCase().contains("connection") || 
-            errorMsg.toLowerCase(). contains("timeout")) {
+            errorMsg.toLowerCase().contains("timeout")) {
             return "Không thể kết nối đến máy chủ.\n" +
                    "Vui lòng kiểm tra kết nối mạng.";
         }
         
         // Default: return a cleaned up message
         // Extract JSON message if present
-        if (errorMsg. contains("\"message\":")) {
+        if (errorMsg.contains("\"message\":")) {
             try {
                 int start = errorMsg.indexOf("\"message\":\"") + 11;
                 int end = errorMsg.indexOf("\"", start);
@@ -553,7 +553,7 @@ public class SubjectEditDialogController {
         
         // Return truncated error for very long messages
         if (errorMsg.length() > 200) {
-            return "Đã xảy ra lỗi.  Vui lòng thử lại sau.\n" +
+            return "Đã xảy ra lỗi. Vui lòng thử lại sau.\n" +
                    "Nếu vấn đề vẫn tiếp diễn, hãy liên hệ quản trị viên.";
         }
         

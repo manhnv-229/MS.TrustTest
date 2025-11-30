@@ -87,6 +87,19 @@
                     </graphic>
                 </Button>
                 
+                <!-- Create Exam Wizard Menu Item -->
+                <Button fx:id="createExamButton" 
+                        text="Tạo đề thi" 
+                        styleClass="menu-item"
+                        onAction="#handleCreateExam"
+                        maxWidth="Infinity"
+                        contentDisplay="LEFT"
+                        graphicTextGap="8">
+                    <graphic>
+                        <Label text="✨" styleClass="menu-icon"/>
+                    </graphic>
+                </Button>
+                
                 <!-- Grading Menu Item -->
                 <Button fx:id="gradingButton" 
                         text="Chấm bài" 

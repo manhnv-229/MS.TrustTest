@@ -1,6 +1,6 @@
-package com.mstrust.client. teacher.dto;
+package com.mstrust.client.teacher.dto;
 
-import com. fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;

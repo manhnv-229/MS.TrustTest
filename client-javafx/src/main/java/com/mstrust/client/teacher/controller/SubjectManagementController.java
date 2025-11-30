@@ -105,7 +105,7 @@ public class SubjectManagementController {
             new SimpleStringProperty(String.valueOf(data.getValue().getCredits())));
         
         departmentColumn.setCellValueFactory(data -> {
-            SubjectDTO subject = data. getValue();
+            SubjectDTO subject = data.getValue();
             String deptName = subject.getDepartmentName();
             return new SimpleStringProperty(deptName != null ? deptName : "N/A");
         });
@@ -177,7 +177,7 @@ public class SubjectManagementController {
         Task<List<DepartmentDTO>> task = new Task<>() {
             @Override
             protected List<DepartmentDTO> call() throws Exception {
-                return apiClient. getAllDepartments();
+                return apiClient.getAllDepartments();
             }
         };
         
@@ -212,11 +212,11 @@ public class SubjectManagementController {
             System.err.println("[ERROR] Task failed in loadDepartments:");
             if (ex != null) {
                 System.err.println("[ERROR] Exception: " + ex.getClass().getName());
-                System.err.println("[ERROR] Message: " + ex. getMessage());
+                System.err.println("[ERROR] Message: " + ex.getMessage());
                 ex.printStackTrace();
             }
             showError("Lỗi tải danh sách môn học", 
-                ex != null ? ex. getMessage() : "Unknown error");
+                ex != null ? ex.getMessage() : "Unknown error");
         });
         
         new Thread(task).start();
@@ -238,17 +238,17 @@ public class SubjectManagementController {
                 String keyword = searchField.getText();
                 
                 // Check nếu có department được chọn VÀ không phải option "Tất cả" (ID != null)
-                if (selectedDept != null && selectedDept. getId() != null) {
+                if (selectedDept != null && selectedDept.getId() != null) {
                     // Filter by department
                     List<SubjectDTO> subjects = apiClient.getSubjectsByDepartment(selectedDept.getId());
                     PageResponse<SubjectDTO> response = new PageResponse<>();
                     response.setContent(subjects);
-                    response. setTotalElements(subjects.size());
+                    response.setTotalElements(subjects.size());
                     response.setTotalPages(1);
                     response.setNumber(0);
                     response.setSize(subjects.size());
                     return response;
-                } else if (keyword != null && !keyword.trim(). isEmpty()) {
+                } else if (keyword != null && !keyword.trim().isEmpty()) {
                     // Search by keyword
                     return apiClient.searchSubjects(keyword.trim(), page, pageSize);
                 } else {
@@ -268,7 +268,7 @@ public class SubjectManagementController {
         task.setOnFailed(event -> {
             showLoading(false);
             showError("Lỗi tải danh sách môn học", 
-                task. getException().getMessage());
+                task.getException().getMessage());
         });
         
         new Thread(task).start();
@@ -420,8 +420,8 @@ public class SubjectManagementController {
     @FXML
     private void handleResetFilters() {
         // Reset về option "Tất cả" (item đầu tiên trong list)
-        if (departmentFilter. getItems().size() > 0) {
-            departmentFilter. setValue(departmentFilter.getItems(). get(0));
+        if (departmentFilter.getItems().size() > 0) {
+            departmentFilter.setValue(departmentFilter.getItems().get(0));
         }
         searchField.clear();
         currentPage = 0;
