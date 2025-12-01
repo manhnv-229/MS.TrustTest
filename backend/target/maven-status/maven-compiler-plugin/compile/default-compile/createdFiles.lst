@@ -67,6 +67,7 @@ com\mstrust\exam\dto\PauseExamRequest.class
 com\mstrust\exam\dto\StartExamResponse.class
 com\mstrust\exam\dto\CreateExamRequest.class
 com\mstrust\exam\dto\websocket\ConnectionStatusMessage.class
+com\mstrust\exam\dto\grading\FinalizeGradingResponse.class
 com\mstrust\exam\dto\AnswerForGradingDTO$AnswerForGradingDTOBuilder.class
 com\mstrust\exam\security\CustomUserDetailsService.class
 com\mstrust\exam\dto\CreateClassRequest.class
@@ -85,6 +86,7 @@ com\mstrust\exam\dto\UpdateExamQuestionRequest$UpdateExamQuestionRequestBuilder.
 com\mstrust\exam\entity\Subject$SubjectBuilder.class
 com\mstrust\exam\service\ActivityLogService.class
 com\mstrust\exam\entity\SubjectClass$SubjectClassBuilder.class
+com\mstrust\exam\dto\grading\GradeAnswerResponse.class
 com\mstrust\exam\dto\grading\GradingSubmissionListDTO.class
 com\mstrust\exam\dto\DepartmentDTO.class
 com\mstrust\exam\config\WebSocketConfig.class
@@ -137,6 +139,7 @@ com\mstrust\exam\entity\MonitoringLevel.class
 com\mstrust\exam\controller\ExamSessionWebSocketController.class
 com\mstrust\exam\controller\SubjectClassController.class
 com\mstrust\exam\dto\grading\GradingDetailDTO$GradingDetailDTOBuilder.class
+com\mstrust\exam\dto\grading\FinalizeGradingResponse$FinalizeGradingResponseBuilder.class
 com\mstrust\exam\dto\CreateDepartmentRequest$CreateDepartmentRequestBuilder.class
 com\mstrust\exam\dto\monitoring\ActivityLogDTO$ActivityLogDTOBuilder.class
 com\mstrust\exam\dto\QuestionDTO.class
@@ -190,6 +193,7 @@ com\mstrust\exam\dto\AvailableExamDTO$AvailableExamDTOBuilder.class
 com\mstrust\exam\dto\grading\AnswerForGradingDTO.class
 com\mstrust\exam\repository\ClassRepository.class
 com\mstrust\exam\repository\ScreenshotRepository.class
+com\mstrust\exam\dto\grading\GradeAnswerResponse$GradeAnswerResponseBuilder.class
 com\mstrust\exam\entity\ExamQuestion.class
 com\mstrust\exam\dto\UserSearchCriteria.class
 com\mstrust\exam\controller\UserController.class

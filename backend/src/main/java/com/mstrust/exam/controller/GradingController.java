@@ -87,12 +87,13 @@ public class GradingController {
      * POST /api/grading/answers/{answerId}/grade
      * @param answerId ID của câu trả lời
      * @param request Request chứa điểm và feedback
-     * @returns StudentAnswer đã được cập nhật
+     * @returns GradeAnswerResponse chứa thông tin đã chấm
      * @author: K24DTCN210-NVMANH (21/11/2025 14:34)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 15:37) - Return DTO thay vì entity
      * --------------------------------------------------- */
     @PostMapping("/answers/{answerId}/grade")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<StudentAnswer> gradeAnswer(
+    public ResponseEntity<GradeAnswerResponse> gradeAnswer(
             @PathVariable Long answerId,
             @Valid @RequestBody GradeAnswerRequest request,
             Authentication auth) {
@@ -101,11 +102,11 @@ public class GradingController {
         log.info("POST /api/grading/answers/{}/grade - teacherId: {}, score: {}", 
                 answerId, teacherId, request.getScore());
         
-        StudentAnswer answer = gradingService.gradeAnswer(answerId, request, teacherId);
+        GradeAnswerResponse response = gradingService.gradeAnswer(answerId, request, teacherId);
         
         log.info("Answer graded successfully - answerId: {}, score: {}/{}", 
-                answerId, answer.getPointsEarned(), answer.getMaxPoints());
-        return ResponseEntity.ok(answer);
+                answerId, response.getCurrentScore(), response.getMaxScore());
+        return ResponseEntity.ok(response);
     }
     
     /* ---------------------------------------------------
@@ -113,12 +114,13 @@ public class GradingController {
      * POST /api/grading/submissions/{id}/finalize
      * @param id ID của bài nộp
      * @param request Request chứa nhận xét chung
-     * @returns ExamSubmission đã hoàn tất chấm điểm
+     * @returns FinalizeGradingResponse chứa thông tin hoàn tất
      * @author: K24DTCN210-NVMANH (21/11/2025 14:36)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 16:22) - Return DTO thay vì entity
      * --------------------------------------------------- */
     @PostMapping("/submissions/{id}/finalize")
     @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-    public ResponseEntity<ExamSubmission> finalizeGrading(
+    public ResponseEntity<FinalizeGradingResponse> finalizeGrading(
             @PathVariable Long id,
             @Valid @RequestBody FinalizeGradingRequest request,
             Authentication auth) {
@@ -126,11 +128,11 @@ public class GradingController {
         Long teacherId = getCurrentUserId(auth);
         log.info("POST /api/grading/submissions/{}/finalize - teacherId: {}", id, teacherId);
         
-        ExamSubmission submission = gradingService.finalizeGrading(id, request, teacherId);
+        FinalizeGradingResponse response = gradingService.finalizeGrading(id, request, teacherId);
         
         log.info("Grading finalized successfully - submissionId: {}, totalScore: {}/{}, status: {}", 
-                id, submission.getTotalScore(), submission.getMaxScore(), submission.getStatus());
-        return ResponseEntity.ok(submission);
+                id, response.getTotalScore(), response.getMaxScore(), response.getStatus());
+        return ResponseEntity.ok(response);
     }
     
     /* ---------------------------------------------------
@@ -157,20 +159,24 @@ public class GradingController {
     
     /* ---------------------------------------------------
      * Lấy ID của user hiện tại từ Authentication
-     * JWT token có sub field chứa userId, auth.getName() trả về sub
+     * JWT token có sub field chứa email, auth.getName() trả về email
      * @param auth Authentication object
      * @returns userId
      * @author: K24DTCN210-NVMANH (21/11/2025 14:42)
      * EditBy: K24DTCN210-NVMANH (21/11/2025 15:56) - Fix lỗi: auth.getName() trả về userId chứ không phải email
+     * EditBy: K24DTCN210-NVMANH (01/12/2025) - Fix: JWT sub field là email, cần query user từ email
      * --------------------------------------------------- */
     private Long getCurrentUserId(Authentication auth) {
-        // auth.getName() trả về giá trị của "sub" field trong JWT = userId (as String)
-        String userIdStr = auth.getName();
+        String subject = auth.getName();
+        
+        // Try parse as Long first (if JWT has userId in "sub")
         try {
-            return Long.parseLong(userIdStr);
+            return Long.parseLong(subject);
         } catch (NumberFormatException e) {
-            log.error("Cannot parse userId from token: {}", userIdStr);
-            throw new RuntimeException("Invalid user ID in token");
+            // If not a number, it's email - fallback to query by email
+            User user = userRepository.findByEmail(subject)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + subject));
+            return user.getId();
         }
     }
 }

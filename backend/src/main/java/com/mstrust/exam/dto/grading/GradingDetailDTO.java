@@ -2,6 +2,7 @@ package com.mstrust.exam.dto.grading;
 
 import com.mstrust.exam.dto.exam.ExamDTO;
 import com.mstrust.exam.dto.user.UserDTO;
+import com.mstrust.exam.entity.SubmissionStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,6 +15,7 @@ import java.util.List;
  * DTO chi tiết bài nộp để giáo viên chấm điểm
  * Chứa thông tin đầy đủ về bài thi, học sinh và tất cả các câu trả lời
  * @author: K24DTCN210-NVMANH (21/11/2025 13:54)
+ * EditBy: K24DTCN210-NVMANH (01/12/2025 15:40) - Thêm field status
  * --------------------------------------------------- */
 @Data
 @Builder
@@ -22,6 +24,9 @@ import java.util.List;
 public class GradingDetailDTO {
     /* ID của bài nộp */
     private Long submissionId;
+    
+    /* Trạng thái bài nộp (SUBMITTED, GRADED) */
+    private SubmissionStatus status;
     
     /* Thông tin đề thi */
     private ExamDTO exam;

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
+<?import java.lang.String?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+             xmlns:fx="http://javafx.com/fxml"
+             fx:controller="com.mstrust.client.teacher.controller.grading.GradingController"
+             styleClass="grading-container"
+             stylesheets="@../css/exam-common.css, @../css/grading-styles.css">
+    
+    <!-- Top Header -->
+    <top>
+        <HBox styleClass="grading-header" alignment="CENTER_LEFT" spacing="20">
+            <padding>
+                <Insets top="15" right="20" bottom="15" left="20"/>
+            </padding>
+            
+            <!-- Back button -->
+            <Button fx:id="backButton" text="← Quay lại" 
+                   styleClass="classic-button" 
+                   onAction="#handleBack"
+                   minWidth="120" prefWidth="120"/>
+            
+            <Separator orientation="VERTICAL"/>
+            
+            <VBox spacing="3">
+                <Label text="Học sinh:" styleClass="header-label"/>
+                <Label fx:id="studentNameLabel" text="Nguyễn Văn A (SV001)" styleClass="header-value"/>
+            </VBox>
+            
+            <Separator orientation="VERTICAL"/>
+            
+            <VBox spacing="3">
+                <Label text="Đề thi:" styleClass="header-label"/>
+                <Label fx:id="examTitleLabel" text="Java OOP Midterm" styleClass="header-value"/>
+            </VBox>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <VBox spacing="3" alignment="CENTER_RIGHT">
+                <Label fx:id="currentScoreLabel" text="Điểm: 0 / 100" styleClass="score-label"/>
+                <Label fx:id="statusLabel" text="" styleClass="status-badge-graded" visible="false"/>
+            </VBox>
+        </HBox>
+    </top>
+    
+    <!-- Main Content -->
+    <center>
+        <SplitPane dividerPositions="0.3" styleClass="grading-split">
+            
+            <!-- Left: Questions List -->
+            <VBox styleClass="questions-panel" spacing="10">
+                <padding>
+                    <Insets top="15" right="10" bottom="15" left="15"/>
+                </padding>
+                
+                <Label text="Danh sách Câu hỏi" styleClass="panel-title"/>
+                <Separator/>
+                
+                <StackPane VBox.vgrow="ALWAYS">
+                    <ListView fx:id="questionsList" styleClass="questions-list"/>
+                    
+                    <!-- Loading indicator for questions list -->
+                    <VBox fx:id="questionsLoadingPane" visible="false" alignment="CENTER" spacing="8"
+                          style="-fx-background-color: rgba(255,255,255,0.95);">
+                        <ProgressIndicator prefWidth="40" prefHeight="40" styleClass="loading-spinner"/>
+                        <Label text="Đang tải câu hỏi..." styleClass="loading-text"/>
+                    </VBox>
+                </StackPane>
+                
+                <VBox spacing="5" styleClass="legend-box">
+                    <Label text="Chú thích:" styleClass="legend-title"/>
+                    <HBox spacing="10">
+                        <Label text="✓ Đã chấm" styleClass="legend-item"/>
+                        <Label text="⏳ Chờ chấm" styleClass="legend-item"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+            
+            <!-- Right: Answer Display -->
+            <VBox styleClass="answer-panel">
+                <padding>
+                    <Insets top="20" right="20" bottom="10" left="20"/>
+                </padding>
+                
+                <!-- Question Info (Fixed Header) -->
+                <VBox spacing="8">
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <Label fx:id="questionNumberLabel" text="Câu 1" styleClass="question-number"/>
+                        <Label fx:id="questionTypeLabel" text="Loại: ESSAY" styleClass="question-type"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="autoGradedLabel" text="⏳ Cần chấm thủ công" styleClass="auto-graded-label"/>
+                    </HBox>
+                    <Separator/>
+                </VBox>
+                
+                <!-- Scrollable Content Area -->
+                <ScrollPane fitToWidth="true" styleClass="main-content-scroll" VBox.vgrow="ALWAYS">
+                    <VBox spacing="15" styleClass="scrollable-content">
+                        <padding>
+                            <Insets top="10" right="5" bottom="10" left="5"/>
+                        </padding>
+                        
+                        <!-- Question Content -->
+                        <VBox spacing="8">
+                            <Label text="Nội dung câu hỏi:" styleClass="section-label"/>
+                            <ScrollPane fitToWidth="true" styleClass="content-scroll-pane" 
+                                       prefHeight="150" maxHeight="200">
+                                <TextFlow fx:id="questionContentArea" styleClass="content-area question-content"/>
+                            </ScrollPane>
+                        </VBox>
+                        
+                        <!-- Student Answer -->
+                        <VBox spacing="8">
+                            <Label text="Câu trả lời của học sinh:" styleClass="section-label"/>
+                            <ScrollPane fitToWidth="true" styleClass="content-scroll-pane student-answer-scroll" 
+                                       prefHeight="120" minHeight="80">
+                                <TextFlow fx:id="studentAnswerArea" styleClass="content-area student-answer"/>
+                            </ScrollPane>
+                        </VBox>
+                        
+                        <!-- Correct Answer (Reference) -->
+                        <VBox spacing="8" fx:id="correctAnswerBox">
+                            <Label text="Đáp án đúng (tham khảo):" styleClass="section-label"/>
+                            <ScrollPane fitToWidth="true" styleClass="content-scroll-pane" 
+                                       prefHeight="100" maxHeight="130">
+                                <TextFlow fx:id="correctAnswerArea" styleClass="content-area correct-answer"/>
+                            </ScrollPane>
+                        </VBox>
+                        
+                        <!-- Grading Input -->
+                        <VBox spacing="10" styleClass="grading-input-box">
+                            <Label text="Chấm điểm:" styleClass="section-label"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Label text="Điểm:"/>
+                                <TextField fx:id="pointsInput" prefWidth="120" promptText="0.0"/>
+                                <Label fx:id="maxPointsLabel" text="/ 10.0"/>
+                            </HBox>
+                            
+                            <Label text="Nhận xét (tùy chọn):" styleClass="section-label">
+                                <VBox.margin>
+                                    <Insets top="8"/>
+                                </VBox.margin>
+                            </Label>
+                            <TextArea fx:id="feedbackArea" prefRowCount="3" maxHeight="80"
+                                     promptText="Nhập nhận xét cho học sinh..." 
+                                     styleClass="feedback-textarea"/>
+                        </VBox>
+                    </VBox>
+                </ScrollPane>
+                
+                <!-- Fixed Action Buttons -->
+                <VBox spacing="8" styleClass="action-buttons-container">
+                    <padding>
+                        <Insets top="10" right="0" bottom="10" left="0"/>
+                    </padding>
+                    <Separator/>
+                    <HBox spacing="10" alignment="CENTER_RIGHT">
+                        <Button fx:id="previousQuestionButton" text="← Trước" 
+                               styleClass="classic-button" 
+                               onAction="#handlePreviousQuestion"
+                               minWidth="120" prefWidth="120"/>
+                        <Button fx:id="saveButton" text="💾 Lưu điểm" 
+                               styleClass="classic-button" 
+                               onAction="#handleSave"
+                               minWidth="130" prefWidth="130"/>
+                        <Button fx:id="nextQuestionButton" text="Sau →" 
+                               styleClass="classic-button" 
+                               onAction="#handleNextQuestion"
+                               minWidth="120" prefWidth="120"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+            
+        </SplitPane>
+    </center>
+    
+    <!-- Bottom Navigation -->
+    <bottom>
+        <HBox styleClass="grading-footer" alignment="CENTER_RIGHT" spacing="10">
+            <padding>
+                <Insets top="10" right="20" bottom="10" left="20"/>
+            </padding>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <Button fx:id="previousStudentButton" text="← Sinh viên trước" 
+                   styleClass="classic-button" 
+                   onAction="#handlePreviousStudent"
+                   minWidth="160" prefWidth="160"/>
+            <Button fx:id="finalizeButton" text="✓ Hoàn tất" 
+                   styleClass="classic-button" 
+                   onAction="#handleFinalize"
+                   minWidth="120" prefWidth="120"/>
+            <Button fx:id="nextStudentButton" text="Sinh viên sau →" 
+                   styleClass="classic-button" 
+                   onAction="#handleNextStudent"
+                   minWidth="160" prefWidth="160"/>
+        </HBox>
+    </bottom>
+    
+    <!-- Loading Overlay -->
+    <StackPane fx:id="loadingPane" visible="false" styleClass="loading-overlay">
+        <VBox alignment="CENTER" spacing="10">
+            <ProgressIndicator styleClass="loading-spinner"/>
+            <Label fx:id="loadingMessage" text="Đang tải..." styleClass="loading-message"/>
+        </VBox>
+    </StackPane>
+</BorderPane>
+

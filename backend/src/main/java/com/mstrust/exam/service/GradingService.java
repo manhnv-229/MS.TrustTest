@@ -35,6 +35,7 @@ public class GradingService {
     private final ExamRepository examRepository;
     private final QuestionBankRepository questionBankRepository;
     private final UserRepository userRepository;
+    private final ExamQuestionRepository examQuestionRepository;
     
     /* ---------------------------------------------------
      * Lấy danh sách bài nộp cần chấm cho giáo viên
@@ -56,6 +57,16 @@ public class GradingService {
             Exam exam = examRepository.findById(examId)
                     .orElseThrow(() -> new ResourceNotFoundException("Exam not found"));
             
+            log.info("Exam found: id={}, title={}, subjectClass.teacher.id={}", 
+                    exam.getId(), exam.getTitle(), 
+                    exam.getSubjectClass() != null && exam.getSubjectClass().getTeacher() != null 
+                        ? exam.getSubjectClass().getTeacher().getId() : "NULL");
+            
+            if (exam.getSubjectClass() == null || exam.getSubjectClass().getTeacher() == null) {
+                log.warn("Exam {} has no subjectClass or teacher assigned", examId);
+                return Collections.emptyList();
+            }
+            
             if (!exam.getSubjectClass().getTeacher().getId().equals(teacherId)) {
                 throw new BadRequestException("You can only grade submissions from your own classes");
             }
@@ -68,15 +79,53 @@ public class GradingService {
         } else {
             if (status != null) {
                 submissions = submissionRepository.findByStatusAndTeacherId(status, teacherId);
+                log.info("Query findByStatusAndTeacherId returned {} submissions", submissions.size());
             } else {
                 submissions = submissionRepository.findByTeacherId(teacherId);
+                log.info("Query findByTeacherId returned {} submissions for teacherId: {}", 
+                        submissions.size(), teacherId);
+                
+                // Debug: Check if there are any submissions at all
+                long totalSubmissions = submissionRepository.count();
+                log.info("Total submissions in DB: {}", totalSubmissions);
+                
+                // Debug: Check submissions with their exam/teacher info
+                if (totalSubmissions > 0 && submissions.isEmpty()) {
+                    List<ExamSubmission> allSubs = submissionRepository.findAll();
+                    log.info("Sample submission check - First submission: id={}, examId={}, status={}", 
+                            allSubs.get(0).getId(),
+                            allSubs.get(0).getExam() != null ? allSubs.get(0).getExam().getId() : "NULL",
+                            allSubs.get(0).getStatus());
+                    if (allSubs.get(0).getExam() != null && allSubs.get(0).getExam().getSubjectClass() != null) {
+                        log.info("  -> SubjectClass.teacher.id: {}", 
+                                allSubs.get(0).getExam().getSubjectClass().getTeacher() != null 
+                                    ? allSubs.get(0).getExam().getSubjectClass().getTeacher().getId() 
+                                    : "NULL");
+                    }
+                }
             }
         }
         
-        submissions = submissions.stream()
-                .filter(s -> s.getStatus() == SubmissionStatus.SUBMITTED 
-                        || s.getStatus() == SubmissionStatus.GRADED)
-                .collect(Collectors.toList());
+        log.info("Found {} submissions from repository (before status filter)", submissions.size());
+        if (!submissions.isEmpty()) {
+            log.info("Submission statuses: {}", submissions.stream()
+                    .map(s -> s.getId() + ":" + s.getStatus())
+                    .collect(Collectors.joining(", ")));
+        }
+        
+        // Filter: Chỉ lấy SUBMITTED hoặc GRADED (bỏ IN_PROGRESS)
+        // Nếu có status filter thì không cần filter thêm
+        if (status == null) {
+            int beforeSize = submissions.size();
+            submissions = submissions.stream()
+                    .filter(s -> s.getStatus() == SubmissionStatus.SUBMITTED 
+                            || s.getStatus() == SubmissionStatus.GRADED)
+                    .collect(Collectors.toList());
+            log.info("Filtered {} submissions (removed {} IN_PROGRESS)", 
+                    submissions.size(), beforeSize - submissions.size());
+        }
+        
+        log.info("Final result: {} submissions for grading", submissions.size());
         
         return submissions.stream()
                 .map(this::convertToListDTO)
@@ -109,10 +158,12 @@ public class GradingService {
      * @param answerId ID của câu trả lời
      * @param request Request chứa điểm và feedback
      * @param teacherId ID của giáo viên
-     * @returns StudentAnswer đã được cập nhật
+     * @returns GradeAnswerResponse chứa thông tin đã chấm
      * @author: K24DTCN210-NVMANH (21/11/2025 14:12)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 22:20) - Fix: Xử lý maxPoints null bằng cách lấy từ ExamQuestion
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 15:36) - Fix: Return DTO thay vì entity để tránh Hibernate proxy error
      * --------------------------------------------------- */
-    public StudentAnswer gradeAnswer(Long answerId, GradeAnswerRequest request, Long teacherId) {
+    public GradeAnswerResponse gradeAnswer(Long answerId, GradeAnswerRequest request, Long teacherId) {
         log.info("Grading answer - answerId: {}, score: {}, teacherId: {}", 
                 answerId, request.getScore(), teacherId);
         
@@ -125,9 +176,62 @@ public class GradingService {
             throw new BadRequestException("Cannot grade already finalized submission");
         }
         
+        // Lấy maxPoints từ answer, nếu null thì lấy từ ExamQuestion
         BigDecimal maxPoints = answer.getMaxPoints();
+        log.debug("Answer {} - maxPoints from StudentAnswer: {}", answerId, maxPoints);
+        
+        if (maxPoints == null) {
+            // Lấy từ ExamQuestion nếu maxPoints null
+            ExamSubmission submission = answer.getSubmission();
+            Long examId = submission.getExam() != null ? submission.getExam().getId() : null;
+            QuestionBank question = answer.getQuestion();
+            Long questionId = question != null ? question.getId() : null;
+            
+            if (examId != null && questionId != null) {
+                log.debug("Trying to get maxPoints from ExamQuestion - examId: {}, questionId: {}", examId, questionId);
+                
+                ExamQuestion examQuestion = examQuestionRepository
+                    .findByExamIdAndQuestionId(examId, questionId)
+                    .orElse(null);
+                
+                if (examQuestion != null) {
+                    maxPoints = examQuestion.getPoints();
+                    
+                    // Kiểm tra xem examQuestion.getPoints() có null không (có thể do data cũ)
+                    if (maxPoints == null) {
+                        log.warn("ExamQuestion.points is null for examId: {}, questionId: {}. Using default 1.0", 
+                            examId, questionId);
+                        maxPoints = BigDecimal.ONE; // Default 1.0 điểm
+                    }
+                    
+                    log.info("MaxPoints was null, got from ExamQuestion: {} for questionId: {}, examId: {}", 
+                        maxPoints, questionId, examId);
+                    
+                    // Cập nhật maxPoints vào answer để lần sau không phải query lại
+                    answer.setMaxPoints(maxPoints);
+                } else {
+                    log.warn("ExamQuestion not found for examId: {}, questionId: {}", examId, questionId);
+                }
+            } else {
+                log.warn("Cannot get maxPoints - examId: {}, questionId: {}", examId, questionId);
+            }
+        }
+        
+        // Nếu vẫn null sau khi tìm, throw exception
+        if (maxPoints == null) {
+            throw new BadRequestException(
+                    String.format("Cannot determine maximum points for answer %d. Please check exam configuration.", 
+                            answerId));
+        }
+        
+        // Validate score không được null
+        if (request.getScore() == null) {
+            throw new BadRequestException("Score cannot be null");
+        }
+        
         BigDecimal newScore = BigDecimal.valueOf(request.getScore());
         
+        // Validate score không vượt quá maxPoints
         if (newScore.compareTo(maxPoints) > 0) {
             throw new BadRequestException(
                     String.format("Score %.2f exceeds maximum score %.2f", 
@@ -137,18 +241,30 @@ public class GradingService {
         User teacher = userRepository.findById(teacherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
         
+        Timestamp gradedTimestamp = new Timestamp(System.currentTimeMillis());
+        
         answer.setPointsEarned(newScore.setScale(2, RoundingMode.HALF_UP));
         answer.setTeacherFeedback(request.getFeedback());
         answer.setIsCorrect(newScore.compareTo(maxPoints) == 0);
         answer.setGradedBy(teacher);
-        answer.setGradedAt(new Timestamp(System.currentTimeMillis()));
+        answer.setGradedAt(gradedTimestamp);
         
-        studentAnswerRepository.save(answer);
+        StudentAnswer savedAnswer = studentAnswerRepository.save(answer);
         
         log.info("Answer graded successfully - answerId: {}, score: {}/{}", 
                 answerId, newScore, maxPoints);
         
-        return answer;
+        // Build response DTO để tránh Hibernate proxy serialization error
+        return GradeAnswerResponse.builder()
+                .answerId(savedAnswer.getId())
+                .currentScore(savedAnswer.getPointsEarned().doubleValue())
+                .maxScore(maxPoints.doubleValue())
+                .isCorrect(savedAnswer.getIsCorrect())
+                .feedback(savedAnswer.getTeacherFeedback())
+                .gradedByName(teacher.getFullName())
+                .gradedAt(gradedTimestamp.toLocalDateTime())
+                .submissionId(savedAnswer.getSubmission().getId())
+                .build();
     }
     
     /* ---------------------------------------------------
@@ -156,10 +272,11 @@ public class GradingService {
      * @param submissionId ID của bài nộp
      * @param request Request chứa nhận xét chung
      * @param teacherId ID của giáo viên
-     * @returns ExamSubmission đã hoàn tất chấm điểm
+     * @returns FinalizeGradingResponse chứa thông tin hoàn tất
      * @author: K24DTCN210-NVMANH (21/11/2025 14:12)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 16:21) - Return DTO thay vì entity
      * --------------------------------------------------- */
-    public ExamSubmission finalizeGrading(Long submissionId, FinalizeGradingRequest request, Long teacherId) {
+    public FinalizeGradingResponse finalizeGrading(Long submissionId, FinalizeGradingRequest request, Long teacherId) {
         log.info("Finalizing grading - submissionId: {}, teacherId: {}", submissionId, teacherId);
         
         ExamSubmission submission = submissionRepository.findById(submissionId)
@@ -185,12 +302,31 @@ public class GradingService {
         BigDecimal passingScore = exam.getPassingScore() != null ? exam.getPassingScore() : BigDecimal.ZERO;
         submission.setPassed(submission.getTotalScore().compareTo(passingScore) >= 0);
         
-        submissionRepository.save(submission);
+        ExamSubmission savedSubmission = submissionRepository.save(submission);
         
         log.info("Grading finalized - submissionId: {}, totalScore: {}/{}", 
-                submissionId, submission.getTotalScore(), submission.getMaxScore());
+                submissionId, savedSubmission.getTotalScore(), savedSubmission.getMaxScore());
         
-        return submission;
+        // Build response DTO
+        Double percentage = null;
+        if (savedSubmission.getMaxScore() != null && savedSubmission.getMaxScore().compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal pct = savedSubmission.getTotalScore()
+                    .divide(savedSubmission.getMaxScore(), 4, RoundingMode.HALF_UP)
+                    .multiply(BigDecimal.valueOf(100.0));
+            percentage = pct.setScale(2, RoundingMode.HALF_UP).doubleValue();
+        }
+        
+        return FinalizeGradingResponse.builder()
+                .submissionId(savedSubmission.getId())
+                .status(savedSubmission.getStatus())
+                .totalScore(savedSubmission.getTotalScore().doubleValue())
+                .maxScore(savedSubmission.getMaxScore().doubleValue())
+                .percentage(percentage)
+                .passed(savedSubmission.getPassed())
+                .passingScore(passingScore.doubleValue())
+                .finalizedAt(java.time.LocalDateTime.now())
+                .message("Grading finalized successfully")
+                .build();
     }
     
     /* ---------------------------------------------------
@@ -416,9 +552,11 @@ public class GradingService {
     private GradingDetailDTO convertToDetailDTO(ExamSubmission submission, List<StudentAnswer> answers) {
         Exam exam = submission.getExam();
         User student = submission.getStudent();
+        Long examId = exam != null ? exam.getId() : null;
         
+        // Convert answers với examId để lấy maxScore
         List<AnswerForGradingDTO> answerDTOs = answers.stream()
-                .map(this::convertToAnswerForGradingDTO)
+                .map(answer -> convertToAnswerForGradingDTO(answer, examId))
                 .collect(Collectors.toList());
         
         BigDecimal currentScore = answers.stream()
@@ -431,6 +569,7 @@ public class GradingService {
         
         return GradingDetailDTO.builder()
                 .submissionId(submission.getId())
+                .status(submission.getStatus())
                 .exam(convertToExamDTO(exam))
                 .student(convertToUserDTO(student))
                 .startTime(submission.getStartedAt() != null ? submission.getStartedAt().toLocalDateTime() : null)
@@ -444,13 +583,36 @@ public class GradingService {
                 .build();
     }
     
-    private AnswerForGradingDTO convertToAnswerForGradingDTO(StudentAnswer answer) {
+    private AnswerForGradingDTO convertToAnswerForGradingDTO(StudentAnswer answer, Long examId) {
         QuestionBank question = answer.getQuestion();
         QuestionType type = question.getQuestionType();
         boolean isAutoGraded = !requiresManualGrading(type);
         
         String studentAnswerText = answer.getAnswerText() != null ? 
                 answer.getAnswerText() : answer.getAnswerJson();
+        
+        // Lấy maxScore từ answer, nếu null thì lấy từ ExamQuestion
+        BigDecimal maxScore = answer.getMaxPoints();
+        log.debug("Answer {} - maxPoints from StudentAnswer: {}", answer.getId(), maxScore);
+        
+        if (maxScore == null && examId != null) {
+            Long questionId = question.getId();
+            log.debug("Trying to get maxScore from ExamQuestion - examId: {}, questionId: {}", examId, questionId);
+            
+            ExamQuestion examQuestion = examQuestionRepository
+                .findByExamIdAndQuestionId(examId, questionId)
+                .orElse(null);
+            
+            if (examQuestion != null) {
+                maxScore = examQuestion.getPoints();
+                log.info("MaxScore was null, got from ExamQuestion: {} for questionId: {}, examId: {}", 
+                    maxScore, questionId, examId);
+            } else {
+                log.warn("ExamQuestion not found for examId: {}, questionId: {}", examId, questionId);
+            }
+        } else if (maxScore == null) {
+            log.warn("Cannot get maxScore - examId is null for answer {}", answer.getId());
+        }
         
         return AnswerForGradingDTO.builder()
                 .answerId(answer.getId())
@@ -460,11 +622,29 @@ public class GradingService {
                 .studentAnswer(studentAnswerText)
                 .correctAnswer(question.getCorrectAnswer())
                 .currentScore(answer.getPointsEarned() != null ? answer.getPointsEarned().doubleValue() : null)
-                .maxScore(answer.getMaxPoints() != null ? answer.getMaxPoints().doubleValue() : null)
+                .maxScore(maxScore != null ? maxScore.doubleValue() : null)
                 .isAutoGraded(isAutoGraded)
                 .feedback(answer.getTeacherFeedback())
                 .isCorrect(answer.getIsCorrect())
                 .build();
+    }
+    
+    // Overload method để backward compatibility
+    private AnswerForGradingDTO convertToAnswerForGradingDTO(StudentAnswer answer) {
+        // Try to get examId from submission
+        Long examId = null;
+        try {
+            ExamSubmission submission = answer.getSubmission();
+            if (submission != null) {
+                Exam exam = submission.getExam();
+                if (exam != null) {
+                    examId = exam.getId();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Error getting examId from answer submission: {}", e.getMessage());
+        }
+        return convertToAnswerForGradingDTO(answer, examId);
     }
     
     private AnswerResultDTO convertToAnswerResultDTO(StudentAnswer answer) {

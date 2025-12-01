@@ -274,12 +274,33 @@ public class TeacherMainController {
     /* ---------------------------------------------------
      * Handle Grading menu click
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025) - Implement grading UI
      * --------------------------------------------------- */
     @FXML
     private void handleGradingClick() {
-        showInfo("Chức năng Chấm bài", 
-                "Chức năng chấm bài sẽ được tích hợp từ Phase 7.\n" +
-                "Hiện tại đang trong quá trình phát triển.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/submissions-list.fxml"));
+            Parent submissionsListView = loader.load();
+            
+            // Get controller and initialize with API client
+            com.mstrust.client.teacher.controller.grading.SubmissionsListController controller = loader.getController();
+            
+            // Create GradingApiClient with same base URL and auth token
+            com.mstrust.client.teacher.api.GradingApiClient gradingApiClient = 
+                new com.mstrust.client.teacher.api.GradingApiClient();
+            gradingApiClient.setToken(apiClient.getAuthToken());
+            
+            controller.initialize(gradingApiClient, stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(submissionsListView);
+            highlightSelectedMenu(gradingButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Chấm bài: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /* ---------------------------------------------------

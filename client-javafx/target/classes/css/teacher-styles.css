@@ -640,7 +640,7 @@
 .save-button {
     -fx-background-color: #4CAF50;
     -fx-text-fill: white;
-    -fx-padding: 10 25;
+    -fx-padding: 4 12;
     -fx-background-radius: 5px;
     -fx-font-weight: bold;
     -fx-cursor: hand;

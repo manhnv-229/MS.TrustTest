@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mstrust.client.teacher.controller.grading.SubmissionsListController"
+      spacing="15" styleClass="content-container"
+      stylesheets="@../css/exam-common.css, @../css/grading-styles.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="Danh sách Bài nộp" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="refreshButton" text="↻ Làm mới" styleClass="secondary-button" 
+                onAction="#handleRefresh"/>
+        <Button fx:id="exportButton" text="📤 Xuất Excel" styleClass="secondary-button"
+                onAction="#handleExport"/>
+    </HBox>
+    
+    <!-- Filters Section -->
+    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="filter-bar">
+        <Label text="Bộ lọc:"/>
+        
+        <!-- Exam Filter -->
+        <VBox spacing="3">
+            <Label text="Đề thi" styleClass="filter-label"/>
+            <ComboBox fx:id="examFilter" promptText="Tất cả đề thi" prefWidth="200"/>
+        </VBox>
+        
+        <!-- Status Filter -->
+        <VBox spacing="3">
+            <Label text="Trạng thái" styleClass="filter-label"/>
+            <ComboBox fx:id="statusFilter" promptText="Tất cả" prefWidth="150"
+                     onAction="#handleFilterChange"/>
+        </VBox>
+    </HBox>
+    
+    <!-- Statistics Bar -->
+    <HBox spacing="20" alignment="CENTER_LEFT" styleClass="stats-bar">
+        <Label fx:id="totalSubmissionsLabel" text="Tổng số: 0" styleClass="stat-label"/>
+        <Separator orientation="VERTICAL"/>
+        <Label fx:id="averageScoreLabel" text="Điểm TB: -" styleClass="stat-label"/>
+        <Separator orientation="VERTICAL"/>
+        <Label fx:id="passRateLabel" text="Tỷ lệ đạt: -" styleClass="stat-label"/>
+        <Separator orientation="VERTICAL"/>
+        <Label fx:id="pendingCountLabel" text="Chờ chấm: 0" styleClass="stat-label"/>
+    </HBox>
+    
+    <!-- Table View with Loading Overlay -->
+    <StackPane VBox.vgrow="ALWAYS">
+        <TableView fx:id="submissionsTable" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="studentColumn" text="Học sinh" prefWidth="200"/>
+                <TableColumn fx:id="examColumn" text="Đề thi" prefWidth="250"/>
+                <TableColumn fx:id="scoreColumn" text="Điểm" prefWidth="120"/>
+                <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="120"/>
+                <TableColumn fx:id="submitTimeColumn" text="Thời gian nộp" prefWidth="150"/>
+                <TableColumn fx:id="progressColumn" text="Tiến độ" prefWidth="100"/>
+            </columns>
+        </TableView>
+        
+        <!-- Loading Overlay -->
+        <StackPane fx:id="loadingPane" visible="false" styleClass="loading-overlay">
+            <VBox alignment="CENTER" spacing="10">
+                <ProgressIndicator styleClass="loading-spinner"/>
+                <Label fx:id="loadingMessage" text="Đang tải..." styleClass="loading-message"/>
+            </VBox>
+        </StackPane>
+    </StackPane>
+</VBox>
+

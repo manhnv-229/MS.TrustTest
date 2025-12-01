@@ -57,7 +57,7 @@
 
 /* === BUTTONS === */
 .button {
-    -fx-background-color: -fx-primary;
+    -fx-background-color: #2196F3;
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
@@ -67,11 +67,17 @@
 }
 
 .button:hover {
-    -fx-background-color: -fx-primary-dark;
+    -fx-background-color: #1976D2;
 }
 
 .button:pressed {
-    -fx-background-color: derive(-fx-primary-dark, -10%);
+    -fx-background-color: #1565C0;
+}
+
+.button:focused {
+    -fx-background-color: #1976D2;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(33, 150, 243, 0.5), 8, 0, 0, 0);
 }
 
 .secondary-button {
@@ -91,19 +97,19 @@
 }
 
 .danger-button {
-    -fx-background-color: -fx-danger;
+    -fx-background-color: #F44336;
 }
 
 .danger-button:hover {
-    -fx-background-color: derive(-fx-danger, -10%);
+    -fx-background-color: #D32F2F;
 }
 
 .success-button {
-    -fx-background-color: -fx-success;
+    -fx-background-color: #4CAF50;
 }
 
 .success-button:hover {
-    -fx-background-color: derive(-fx-success, -10%);
+    -fx-background-color: #388E3C;
 }
 
 /* Primary Button - for exam management */
@@ -112,7 +118,7 @@
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-padding: 10 20;
+    -fx-padding: 4 12;
     -fx-background-radius: 6;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.3), 4, 0, 0, 2);
@@ -252,15 +258,15 @@
 
 /* === COMBO BOX === */
 .combo-box {
-    -fx-background-color: -fx-surface;
-    -fx-border-color: -fx-border;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
     -fx-border-width: 1;
     -fx-border-radius: 4;
     -fx-background-radius: 4;
 }
 
 .combo-box:focused {
-    -fx-border-color: -fx-primary;
+    -fx-border-color: #2196F3;
     -fx-border-width: 2;
 }
 
@@ -278,12 +284,12 @@
 }
 
 .scroll-pane .scroll-bar:vertical .thumb {
-    -fx-background-color: -fx-text-disabled;
+    -fx-background-color: #BDBDBD;
     -fx-background-radius: 4;
 }
 
 .scroll-pane .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: -fx-text-secondary;
+    -fx-background-color: #757575;
 }
 
 /* === TIMER COLORS === */
@@ -336,7 +342,7 @@
 
 /* === LABELS === */
 .label {
-    -fx-text-fill: -fx-text-primary;
+    -fx-text-fill: #212121;
 }
 
 .label-secondary {
@@ -355,8 +361,8 @@
 
 /* === TEXT FIELD === */
 .text-field {
-    -fx-background-color: -fx-surface;
-    -fx-border-color: -fx-border;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0E0E0;
     -fx-border-width: 1;
     -fx-border-radius: 4;
     -fx-background-radius: 4;
@@ -364,7 +370,7 @@
 }
 
 .text-field:focused {
-    -fx-border-color: -fx-primary;
+    -fx-border-color: #2196F3;
     -fx-border-width: 2;
 }
 
@@ -383,7 +389,7 @@
 }
 
 .text-area .content {
-    -fx-background-color: -fx-surface;
+    -fx-background-color: #FFFFFF;
 }
 
 /* === RADIO BUTTON === */
@@ -813,15 +819,11 @@
 }
 
 /* Focus Indicators - Accessibility */
-.button:focused {
-    -fx-border-color: -fx-primary;
-    -fx-border-width: 3;
-    -fx-border-style: solid;
-}
+/* Button focus handled in main button styles above */
 
 .text-field:focused,
 .text-area:focused {
-    -fx-border-color: -fx-primary;
+    -fx-border-color: #2196F3;
     -fx-border-width: 3;
     -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.4), 8, 0, 0, 0);
 }
@@ -834,7 +836,7 @@
 }
 
 .combo-box:focused {
-    -fx-border-color: -fx-primary;
+    -fx-border-color: #2196F3;
     -fx-border-width: 3;
     -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.4), 8, 0, 0, 0);
 }
