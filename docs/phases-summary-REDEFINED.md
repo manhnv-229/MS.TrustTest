@@ -10,12 +10,12 @@
 
 ## 🎯 EXECUTIVE SUMMARY
 
-### Current Status (01/12/2025)
+### Current Status (02/12/2025)
 - **Backend Progress**: 100% Complete ✅
-- **Frontend Progress**: 85% Complete ✅
-- **Overall Progress**: ~92% (Near completion)
-- **Time Spent**: ~45 hours (Phases 1-10 Complete)
-- **Estimated Remaining**: 1-2 tuần (Final phases)
+- **Frontend Progress**: 92% Complete ✅
+- **Overall Progress**: ~95% (Near completion)
+- **Time Spent**: ~52 hours (Phases 1-12 Complete)
+- **Estimated Remaining**: 1 tuần (Final phase)
 
 ### Key Achievements
 ✅ 118+ REST APIs hoạt động  
@@ -30,9 +30,9 @@
 ✅ **Grading Interface** → Teacher grading UI complete  
 
 ### Remaining Work
-🎯 **Phase 11**: Anti-Cheat Client Monitors (1.5 tuần)  
-🎯 **Phase 12**: Monitoring Dashboard (1 tuần)  
-🎯 **Phase 13**: Admin Dashboard (1 tuần)  
+✅ **Phase 11**: Anti-Cheat Client Monitors (COMPLETE)  
+✅ **Phase 12**: Monitoring Dashboard (COMPLETE)  
+🎯 **Phase 13**: Admin Dashboard (1 tuần) - NEXT  
 
 ---
 
@@ -1052,11 +1052,12 @@ PlatformUtil.java
 
 ---
 
-### Phase 12: Monitoring Dashboard (Teacher/Admin)
-**Status**: ⏳ PLANNED  
+### Phase 12: Monitoring Dashboard (Teacher/Admin) ✅
+**Status**: ✅ COMPLETED  
 **Duration**: 1 tuần  
 **Priority**: 🟡 High  
-**Dependencies**: Phase 11 ✅
+**Dependencies**: Phase 11 ✅  
+**Completed**: 02/12/2025
 
 #### Objectives
 Real-time monitoring dashboard for teachers/admins
@@ -1180,6 +1181,43 @@ MonitoringWebSocketClient.java
 - ✅ Performance: Handle 100+ students
 
 **Documentation**: TBD `docs/PHASE12-MONITORING-DASHBOARD.md`
+
+#### Phase 12 Achievements (02/12/2025)
+- ✅ Live Monitoring View với students table và alerts feed
+- ✅ Exam selector dropdown với status bar
+- ✅ Students TableView (compact design: Name, Code, Status, Alerts Count)
+- ✅ Real-time alerts list với severity color coding
+- ✅ Student detail dialog với activity logs và alerts
+- ✅ Screenshot Viewer với thumbnail grid (FlowPane layout)
+- ✅ Full-size image viewer với zoom (scroll wheel) và pan
+- ✅ Activity Logs viewer (all students)
+- ✅ Auto-refresh mechanism (every 5 seconds)
+- ✅ Button states management (enable/disable based on selection)
+- ✅ Clean image viewer (chỉ hiển thị ảnh + thời gian)
+- ✅ Vietnamese localization cho tất cả alerts và messages
+
+**Files Created/Modified:**
+- `monitoring-dashboard.fxml` - Main monitoring interface
+- `MonitoringDashboardController.java` - Dashboard logic (1500+ lines)
+- `monitoring-styles.css` - Comprehensive styling
+- `ScreenshotService.java` - Path conversion (DB path without /trusttest)
+
+**Key Features Implemented:**
+- **Students Table**: Compact TableView với 4 columns
+- **Alerts Feed**: Real-time list với custom ListCell
+- **Screenshot Thumbnails**: Grid layout (180x120px) với hover effects
+- **Image Viewer**: Full-size với zoom/pan, dark background
+- **Activity Logs**: Dialog với all students logs
+- **Student Details**: Dialog với alerts và activities per student
+
+**Technical Improvements:**
+- ✅ FlowPane cho thumbnail grid layout
+- ✅ ImageView với background loading và error handling
+- ✅ ScrollPane với zoom functionality
+- ✅ Dialog resizable với proper sizing
+- ✅ Lombok issues resolved (manual getters/setters)
+- ✅ Duration import conflicts resolved
+- ✅ Type conversion fixes (double → float)
 
 ---
 
@@ -1310,9 +1348,9 @@ Export formats: PDF, Excel, CSV
 ✅ Week 4-5: Phase 8 - Exam Taking UI ⭐ (COMPLETE)
 ✅ Week 6:   Phase 9 - Exam Management UI (COMPLETE)
 ✅ Week 7:   Phase 10 - Grading UI (COMPLETE)
-🎯 Week 8-9: Phase 11 - Anti-Cheat Monitors ⭐ (NEXT - 1.5 tuần)
-🎯 Week 9:   Phase 12 - Monitoring Dashboard (PLANNED)
-🎯 Week 10:  Phase 13 - Admin Dashboard + Integration Testing (PLANNED)
+✅ Week 8-9: Phase 11 - Anti-Cheat Monitors ⭐ (COMPLETE)
+✅ Week 9:   Phase 12 - Monitoring Dashboard (COMPLETE)
+🎯 Week 10:  Phase 13 - Admin Dashboard + Integration Testing (NEXT)
 ```
 
 ### Critical Path
@@ -1459,15 +1497,16 @@ Phase 6A ────────────────→ Phase 11 ⭐ MONITO
 5. ✅ Complete Phase 8 (Exam Taking UI)
 6. ✅ Complete Phase 9 (Exam Management UI)
 7. ✅ Complete Phase 10 (Grading UI)
-8. 🎯 **NEXT**: Begin Phase 11 (Anti-Cheat Client Monitors) ⭐
-9. 🎯 Update memory-bank with Phase 10 completion
-10. 🎯 Create detailed Phase 11 specification
+8. ✅ Complete Phase 11 (Anti-Cheat Client Monitors) ⭐
+9. ✅ Complete Phase 12 (Monitoring Dashboard)
+10. 🎯 **NEXT**: Begin Phase 13 (Admin Dashboard) ⭐
+11. ✅ Update memory-bank with Phase 12 completion
 
 ---
 
 **Document Status**: ACTIVE PLAN  
-**Last Updated**: 21/11/2025 01:35  
-**Next Review**: After Phase 5B completion  
+**Last Updated**: 02/12/2025 03:30  
+**Next Review**: After Phase 13 completion  
 **Author**: K24DTCN210-NVMANH with Cline AI
 
 ---

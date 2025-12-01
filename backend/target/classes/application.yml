@@ -51,4 +51,4 @@ ftp:
   port: 21
   username: u341775345.admin
   password: '!M@nh1989'
-  base-path: /screenshots
+  base-path: /trusttest

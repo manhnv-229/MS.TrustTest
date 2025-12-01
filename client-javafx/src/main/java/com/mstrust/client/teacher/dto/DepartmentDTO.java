@@ -39,9 +39,22 @@ public class DepartmentDTO {
      * @author: K24DTCN210-NVMANH (26/11/2025 01:45)
      * --------------------------------------------------- */
     public static DepartmentDTO allDepartments() {
-        return DepartmentDTO.builder()
-                .id(-1L)
-                .departmentName("Tất cả khoa")
-                .build();
+        DepartmentDTO dept = new DepartmentDTO();
+        dept.setId(-1L);
+        dept.setDepartmentName("Tất cả khoa");
+        return dept;
     }
+    
+    // Manual getters/setters (backup for Lombok issues)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    
+    public String getDepartmentCode() { return departmentCode; }
+    public void setDepartmentCode(String departmentCode) { this.departmentCode = departmentCode; }
+    
+    public String getDepartmentName() { return departmentName; }
+    public void setDepartmentName(String departmentName) { this.departmentName = departmentName; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

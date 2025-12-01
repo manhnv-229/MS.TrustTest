@@ -3,10 +3,10 @@
 ## Overall Status
 
 **Project Status**: 🚀 Active Development  
-**Overall Progress**: 77% (Phases 1-10 Complete)  
+**Overall Progress**: 92% (Phases 1-12 Complete)  
 **Start Date**: 13/11/2025  
-**Last Update**: 01/12/2025  
-**Target Completion**: Q1 2026 (2-3 tuần remaining)
+**Last Update**: 02/12/2025  
+**Target Completion**: Q1 2026 (1 tuần remaining)
 
 **Application Status**: ✅ Running successfully on port 8080  
 **MCP Server Status**: ✅ 4 MCP servers active (mysql-trusttest, ai-agent-mysql, ms-classhub-mysql, ms-trust-test)  
@@ -274,73 +274,55 @@
 **Duration**: 1 week  
 **Dependencies**: Phase 9 ✅
 
-#### Step 1: Question Bank Management UI (✅ COMPLETE)
+### ✅ Phase 11: Anti-Cheat Client Monitors (COMPLETE)
 **Status**: ✅ COMPLETED  
-**Deliverables**:
-- ✅ Teacher main layout với sidebar navigation
-- ✅ Question Bank list view với filters
-- ✅ Question editor dialog
-- ✅ CRUD operations cho questions
+**Started**: 01/12/2025  
+**Completed**: 01/12/2025  
+**Duration**: 1.5 weeks  
+**Dependencies**: Phase 6A ✅, Phase 8 ✅
 
-#### Step 2: Exam Creation Wizard (✅ COMPLETE)
+**Deliverables:**
+- ✅ 5 client-side monitors (ScreenCapture, WindowFocus, Process, Clipboard, Keystroke)
+- ✅ MonitoringCoordinator với lifecycle management
+- ✅ Monitor interface pattern
+- ✅ Cross-platform support (Windows, macOS, Linux)
+- ✅ Batch upload mechanism
+- ✅ Network resilience với queue + retry
+
+### ✅ Phase 12: Monitoring Dashboard (COMPLETE)
 **Status**: ✅ COMPLETED  
-**Deliverables**:
-- ✅ 5-step wizard container
-- ✅ Step 1: Basic Info
-- ✅ Step 2: Question Selection
-- ✅ Step 3: Settings
-- ✅ Step 4: Class Assignment
-- ✅ Step 5: Review & Submit
-- ✅ Data persistence across steps
-- ✅ Validation per step
+**Started**: 01/12/2025  
+**Completed**: 02/12/2025  
+**Duration**: 1 week  
+**Dependencies**: Phase 11 ✅
 
-#### Step 3: Exam List & Management (🚀 IN PROGRESS)
-**Status**: 🚀 IN PROGRESS  
-**Last Update**: 30/11/2025
+**Deliverables:**
+- ✅ Live Monitoring View với students table và alerts feed
+- ✅ Exam selector dropdown với status bar
+- ✅ Students TableView (compact design: Name, Code, Status, Alerts Count)
+- ✅ Real-time alerts list với severity color coding
+- ✅ Student detail dialog với activity logs và alerts
+- ✅ Screenshot Viewer với thumbnail grid (FlowPane layout)
+- ✅ Full-size image viewer với zoom (scroll wheel) và pan
+- ✅ Activity Logs viewer (all students)
+- ✅ Auto-refresh mechanism (every 5 seconds)
+- ✅ Clean image viewer (chỉ ảnh + thời gian, không có URL/metadata)
+- ✅ Vietnamese localization cho alerts và messages
 
-**Completed Features**:
-- ✅ Exam list view với filters (subject, status, published)
-- ✅ Compact exam card design (horizontal layout)
-- ✅ Icon buttons với FontIcon (thay emoji)
-- ✅ Status badges với gradient và shadow
-- ✅ Action buttons (View, Edit, Publish/Unpublish, Delete)
-- ✅ Wizard cancel logic (truyền stage reference)
-- ✅ CSS improvements (gradient, shadow, no focus border)
+**Phase 12 Files Created/Modified:**
+- `monitoring-dashboard.fxml` - Main monitoring interface
+- `MonitoringDashboardController.java` - Dashboard logic (1500+ lines)
+- `monitoring-styles.css` - Comprehensive styling
+- `ScreenshotService.java` - Path conversion (DB path without /trusttest)
 
-**UI Improvements (30/11/2025)**:
-- ✅ Compact exam cards với gradient backgrounds
-- ✅ Icon buttons với hover effects (không scale để tránh nhấp nháy)
-- ✅ Status badges với gradient colors và shadow
-- ✅ Border width cố định (2px) cho tất cả states
-- ✅ Bỏ focus border để tránh nhấp nháy
-- ✅ Màu sắc nổi bật, không bị chìm
-
-**Deliverables**:
-- ✅ Submissions List View với filters và sorting
-- ✅ Grading Interface với question-by-question navigation  
-- ✅ Student answer display (auto-graded + manual)
-- ✅ Points input với validation và feedback
-- ✅ Previous/Next student navigation
-- ✅ Finalize grading workflow
-- ✅ Results summary view
-- ✅ Responsive layout với proper scroll handling
-- ✅ Action buttons always visible
-- ✅ Improved content padding và spacing
-
-**Files Created/Modified**:
-- `grading-view.fxml` - Main grading interface layout
-- `submissions-list.fxml` - Submissions list view  
-- `grading-styles.css` - Comprehensive styling
-- `GradingController.java` - Grading logic và navigation
-- `SubmissionsController.java` - Submissions management
-
-**Technical Improvements**:
-- ✅ Restructured layout để buttons luôn hiển thị
-- ✅ Main content scroll với fixed header và footer
-- ✅ Increased padding (18-20px) cho better readability
-- ✅ Proper height constraints và VBox.vgrow optimization
-- ✅ CSS enhancements với gradient backgrounds
-- ✅ Action buttons container với separator
+**Phase 12 Technical Improvements:**
+- ✅ FlowPane cho thumbnail grid layout
+- ✅ ImageView với background loading và error handling
+- ✅ ScrollPane với zoom functionality (scroll wheel)
+- ✅ Dialog resizable với proper sizing
+- ✅ Lombok issues resolved (manual getters/setters)
+- ✅ Duration import conflicts resolved
+- ✅ Type conversion fixes (double → float)
 
 #### Part A: Monitoring Backend (COMPLETE ✅)
 **Deliverables:**
@@ -420,15 +402,10 @@
 - java.awt.Robot (Screenshots)
 - Apache Commons Net (FTP)
 
-### 📋 Phase 7: Grading System
-**Status**: ⏳ PENDING  
+### 🎯 Phase 13: Admin Dashboard & System Config
+**Status**: ⏳ NEXT  
 **Estimated Duration**: 1 tuần  
-**Dependencies**: Phase 9 ✅
-
-### 📋 Phase 8: Grading & Results
-**Status**: ⏳ NOT STARTED  
-**Estimated Duration**: 1 tuần  
-**Dependencies**: Phase 7
+**Dependencies**: Phase 12 ✅
 
 ---
 
@@ -480,12 +457,25 @@
 - ✅ Teacher grading UI
 - ✅ Submissions management
 
-### 🎯 M8: Anti-Cheat Client Monitors (NEXT)
-- [ ] Screenshot capture monitor
-- [ ] Window focus monitor
-- [ ] Process monitor
-- [ ] Clipboard monitor
-- [ ] Keystroke analyzer
+### ✅ M8: Anti-Cheat Client Monitors (COMPLETE)
+- ✅ Screenshot capture monitor
+- ✅ Window focus monitor
+- ✅ Process monitor
+- ✅ Clipboard monitor
+- ✅ Keystroke analyzer
+
+### ✅ M9: Monitoring Dashboard (COMPLETE)
+- ✅ Live monitoring view
+- ✅ Screenshot viewer với thumbnails
+- ✅ Student detail view
+- ✅ Activity logs viewer
+- ✅ Real-time alerts feed
+
+### 🎯 M10: Admin Dashboard (NEXT)
+- [ ] Dashboard overview
+- [ ] User management
+- [ ] System configuration
+- [ ] Reports & analytics
 
 ### ⏳ M6: Complete System (Future)
 - [ ] Grading system
@@ -610,28 +600,28 @@
 ## Metrics
 
 ### Code Metrics
-- **Total Files Created**: 180+ Java files + 25+ JavaFX files
-- **Lines of Code**: ~18,000+ lines
+- **Total Files Created**: 200+ Java files + 30+ JavaFX files
+- **Lines of Code**: ~22,000+ lines
 - **Test Coverage**: 0% (tests planned)
 - **API Endpoints**: 118 production APIs
 - **Database Tables**: 19 (16 original + 3 monitoring)
 - **Database Migrations**: 19 (V1-V19)
-- **Bug Fixes**: 14 (all resolved)
+- **Bug Fixes**: 20+ (all resolved)
 
 ### Project Metrics
-- **Phases Complete**: 10/13 (77%)
-- **Current Phase**: Ready for Phase 11 (Anti-Cheat Client Monitors)
+- **Phases Complete**: 12/13 (92%)
+- **Current Phase**: Ready for Phase 13 (Admin Dashboard)
 - **Planned Features**: 60+
-- **Completed Features**: 118+ APIs + Complete JavaFX UI
+- **Completed Features**: 118+ APIs + Complete JavaFX UI + Monitoring System
 - **Open Issues**: 0
-- **Closed Issues**: 14+ (bug fixes)
+- **Closed Issues**: 20+ (bug fixes)
 
 ### Time Metrics
 - **Estimated Total**: 8-12 tuần
-- **Time Spent**: ~45 hours (Phases 1-10 complete)
-- **Time Remaining**: ~1-2 tuần
-- **% Complete**: 77% (Phase 10 complete)
-- **Velocity**: Excellent (Phase 10 completed in 1 week)
+- **Time Spent**: ~52 hours (Phases 1-12 complete)
+- **Time Remaining**: ~1 tuần
+- **% Complete**: 92% (Phase 12 complete)
+- **Velocity**: Excellent (Phase 12 completed in 1 week)
 
 ### Bug Fix Statistics
 - **Total bugs found**: 14
@@ -645,23 +635,19 @@
 
 ## Next Steps
 
-### Immediate (01/12/2025)
-1. ✅ Phase 10: Grading UI complete
-2. ✅ Submissions list với filters
-3. ✅ Grading interface với navigation
-4. ✅ Layout improvements (scroll, padding, buttons)
-5. ✅ CSS enhancements
-6. 🎯 **NEXT**: Begin Phase 11 - Anti-Cheat Client Monitors ⭐
+### Immediate (02/12/2025)
+1. ✅ Phase 11: Anti-Cheat Client Monitors complete
+2. ✅ Phase 12: Monitoring Dashboard complete
+3. ✅ Screenshot viewer với thumbnails và zoom
+4. ✅ Students table và alerts feed
+5. ✅ Activity logs viewer
+6. ✅ Image viewer improvements (clean UI)
+7. 🎯 **NEXT**: Begin Phase 13 - Admin Dashboard ⭐
 
-### Short Term (Next 1-2 weeks)
-1. 🎯 **Phase 11**: Anti-Cheat Client Monitors (1.5 tuần)
-   - Screenshot capture monitor
-   - Window focus monitor  
-   - Process monitor
-   - Clipboard monitor
-   - Keystroke analyzer
-2. 🎯 **Phase 12**: Monitoring Dashboard (1 tuần)
-3. 🎯 **Phase 13**: Admin Dashboard (1 tuần)
+### Short Term (Next 1 week)
+1. ✅ **Phase 11**: Anti-Cheat Client Monitors (COMPLETE)
+2. ✅ **Phase 12**: Monitoring Dashboard (COMPLETE)
+3. 🎯 **Phase 13**: Admin Dashboard (1 tuần) - NEXT
 4. Integration testing
 5. Performance optimization
 
@@ -781,9 +767,9 @@
 
 ---
 
-**Last Updated**: 30/11/2025  
+**Last Updated**: 02/12/2025  
 **Updated By**: K24DTCN210-NVMANH  
-**Next Update**: Phase 9 completion or as directed by user
+**Next Update**: Phase 13 completion or as directed by user
 
 ---
 

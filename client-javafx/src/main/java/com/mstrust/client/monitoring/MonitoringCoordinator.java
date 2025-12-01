@@ -15,9 +15,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /* ---------------------------------------------------
- * Coordinator điều phối tất cả monitoring services
+ * Coordinator điều phối tất cả monitoring monitors
  * Single point of control cho monitoring system
+ * Quản lý lifecycle của 5 monitors: ScreenCapture, WindowFocus, Process, Clipboard, Keystroke
  * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
+ * EditBy: K24DTCN210-NVMANH (01/12/2025 11:00) - Refactor để sử dụng 5 monitors mới
  * --------------------------------------------------- */
 public class MonitoringCoordinator {
     private static final Logger logger = LoggerFactory.getLogger(MonitoringCoordinator.class);
@@ -25,16 +27,21 @@ public class MonitoringCoordinator {
     private final MonitoringApiClient apiClient;
     private final AppConfig config;
     
-    // Services
-    private final ScreenshotCaptureService screenshotService;
+    // 5 Monitors (Phase 11)
+    private final ScreenCaptureMonitor screenCaptureMonitor;
+    private final WindowFocusMonitor windowFocusMonitor;
+    private final ProcessMonitor processMonitor;
+    private final ClipboardMonitor clipboardMonitor;
+    private final KeystrokeAnalyzer keystrokeAnalyzer;
+    
+    // Alert Detection Service (giữ lại để xử lý alerts)
     private final AlertDetectionService alertService;
     
     // Activity buffer
     private final List<ActivityData> activityBuffer = new ArrayList<>();
     
-    // Schedulers
+    // Scheduler cho batch upload
     private ScheduledExecutorService activityUploadScheduler;
-    private ScheduledExecutorService processCheckScheduler;
     
     private Long currentSubmissionId;
     private boolean isRunning = false;
@@ -44,20 +51,61 @@ public class MonitoringCoordinator {
      * Constructor
      * @param apiClient API client
      * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 11:00) - Initialize 5 monitors
      * --------------------------------------------------- */
     public MonitoringCoordinator(MonitoringApiClient apiClient) {
         this.apiClient = apiClient;
         this.config = AppConfig.getInstance();
         
-        // Initialize services
-        this.screenshotService = new ScreenshotCaptureService(apiClient);
+        // Initialize 5 monitors với activity callback
+        this.screenCaptureMonitor = new ScreenCaptureMonitor(apiClient);
+        this.windowFocusMonitor = new WindowFocusMonitor(apiClient, this::onActivity);
+        this.processMonitor = new ProcessMonitor(apiClient, this::onActivity);
+        this.clipboardMonitor = new ClipboardMonitor(apiClient, this::onActivity);
+        this.keystrokeAnalyzer = new KeystrokeAnalyzer(apiClient, this::onActivity);
+        
+        // Initialize alert service
         this.alertService = new AlertDetectionService(apiClient);
         
-        // Schedulers will be created when monitoring starts
+        // Scheduler will be created when monitoring starts
         this.activityUploadScheduler = null;
-        this.processCheckScheduler = null;
         
-        logger.info("MonitoringCoordinator initialized");
+        logger.info("MonitoringCoordinator initialized with 5 monitors");
+    }
+    
+    /* ---------------------------------------------------
+     * Activity callback từ các monitors
+     * @param activity ActivityData từ monitor
+     * @author: K24DTCN210-NVMANH (01/12/2025 11:00)
+     * --------------------------------------------------- */
+    private synchronized void onActivity(ActivityData activity) {
+        if (!isRunning) {
+            return;
+        }
+        
+        activityBuffer.add(activity);
+        
+        // Forward to alert service nếu cần
+        switch (activity.getActivityType()) {
+            case WINDOW_FOCUS:
+                // Extract window title từ details
+                String windowTitle = activity.getDetails().replace("Window switched to: ", "");
+                alertService.recordWindowSwitch(windowTitle);
+                break;
+            case CLIPBOARD:
+                // Extract operation từ details
+                String operation = activity.getDetails().replace("Thao tác clipboard: ", "");
+                alertService.recordClipboardOperation(operation);
+                break;
+            case PROCESS_DETECTED:
+                // Process alert sẽ được tạo bởi ProcessMonitor
+                break;
+            case KEYSTROKE:
+                // Keystroke alerts được xử lý bởi KeystrokeAnalyzer
+                break;
+        }
+        
+        logger.debug("Activity recorded: {}", activity.getActivityType());
     }
 
     /* ---------------------------------------------------
@@ -65,6 +113,7 @@ public class MonitoringCoordinator {
      * @param submissionId ID bài làm
      * @param authToken JWT token
      * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 11:00) - Start 5 monitors
      * --------------------------------------------------- */
     public void startMonitoring(Long submissionId, String authToken) {
         if (isRunning) {
@@ -79,25 +128,25 @@ public class MonitoringCoordinator {
         // Set auth token
         apiClient.setAuthToken(authToken);
         
-        // Create new schedulers (in case they were shutdown before)
+        // Create activity upload scheduler
         this.activityUploadScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread thread = new Thread(r, "Activity-Upload-Thread");
             thread.setDaemon(true);
             return thread;
         });
         
-        this.processCheckScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread thread = new Thread(r, "Process-Check-Thread");
-            thread.setDaemon(true);
-            return thread;
-        });
+        // Start all 5 monitors
+        screenCaptureMonitor.start(submissionId);
+        windowFocusMonitor.start(submissionId);
+        processMonitor.start(submissionId);
+        clipboardMonitor.start(submissionId);
+        keystrokeAnalyzer.start(submissionId);
         
-        // Start services
-        screenshotService.start(submissionId);
+        // Start alert service
         alertService.start(submissionId);
         
-        // Schedule activity upload (every 60 seconds)
-        int activityInterval = config.getActivityBatchIntervalSeconds();
+        // Schedule activity upload (every 30 seconds - Phase 11 requirement)
+        int activityInterval = 30; // Phase 11: batch upload every 30s
         activityUploadScheduler.scheduleAtFixedRate(
             this::uploadActivityBatch,
             activityInterval,
@@ -105,21 +154,13 @@ public class MonitoringCoordinator {
             TimeUnit.SECONDS
         );
         
-        // Schedule process check (every 30 seconds)
-        processCheckScheduler.scheduleAtFixedRate(
-            alertService::checkBlacklistedProcesses,
-            30,
-            30,
-            TimeUnit.SECONDS
-        );
-        
-        logger.info("Monitoring started for submission: {}", submissionId);
+        logger.info("Monitoring started for submission: {} with 5 monitors", submissionId);
     }
 
     /* ---------------------------------------------------
      * Dừng monitoring
      * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
-     * EditBy: K24DTCN210-NVMANH (21/11/2025 12:46) - Shutdown schedulers khi stop
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 11:00) - Stop 5 monitors
      * --------------------------------------------------- */
     public void stopMonitoring() {
         if (!isRunning) {
@@ -131,11 +172,17 @@ public class MonitoringCoordinator {
         // Upload remaining activities
         uploadActivityBatch();
         
-        // Stop services
-        screenshotService.stop();
+        // Stop all 5 monitors
+        screenCaptureMonitor.stop();
+        windowFocusMonitor.stop();
+        processMonitor.stop();
+        clipboardMonitor.stop();
+        keystrokeAnalyzer.stop();
+        
+        // Stop alert service
         alertService.stop();
         
-        // Shutdown schedulers to stop all background tasks
+        // Shutdown scheduler
         if (activityUploadScheduler != null && !activityUploadScheduler.isShutdown()) {
             activityUploadScheduler.shutdown();
             try {
@@ -148,18 +195,6 @@ public class MonitoringCoordinator {
             }
         }
         
-        if (processCheckScheduler != null && !processCheckScheduler.isShutdown()) {
-            processCheckScheduler.shutdown();
-            try {
-                if (!processCheckScheduler.awaitTermination(5, TimeUnit.SECONDS)) {
-                    processCheckScheduler.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                processCheckScheduler.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-        }
-        
         logger.info("Monitoring stopped. Duration: {} minutes", 
             java.time.Duration.between(startTime, LocalDateTime.now()).toMinutes());
     }
@@ -167,73 +202,44 @@ public class MonitoringCoordinator {
     /* ---------------------------------------------------
      * Shutdown hoàn toàn
      * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
-     * EditBy: K24DTCN210-NVMANH (21/11/2025 12:46) - stopMonitoring đã shutdown schedulers
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 11:00) - Shutdown 5 monitors
      * --------------------------------------------------- */
     public void shutdown() {
-        // stopMonitoring already shuts down schedulers
+        // stopMonitoring already stops monitors
         stopMonitoring();
         
-        // Final cleanup
-        screenshotService.shutdown();
+        // Final cleanup - shutdown all monitors
+        screenCaptureMonitor.shutdown();
+        windowFocusMonitor.shutdown();
+        processMonitor.shutdown();
+        clipboardMonitor.shutdown();
+        keystrokeAnalyzer.shutdown();
         
         logger.info("MonitoringCoordinator shutdown complete");
     }
 
     /* ---------------------------------------------------
-     * Ghi nhận window switch event
-     * @param windowTitle Tiêu đề window
-     * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
+     * Get monitor instances (for external access nếu cần)
+     * @author: K24DTCN210-NVMANH (01/12/2025 11:00)
      * --------------------------------------------------- */
-    public synchronized void onWindowSwitch(String windowTitle) {
-        if (!isRunning) {
-            return;
-        }
-        
-        // Log activity
-        ActivityData activity = ActivityData.windowFocus(windowTitle);
-        activityBuffer.add(activity);
-        
-        // Alert detection
-        alertService.recordWindowSwitch(windowTitle);
-        
-        logger.debug("Window switch recorded: {}", windowTitle);
+    public ScreenCaptureMonitor getScreenCaptureMonitor() {
+        return screenCaptureMonitor;
     }
-
-    /* ---------------------------------------------------
-     * Ghi nhận clipboard operation
-     * @param operation "COPY" hoặc "PASTE"
-     * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
-     * --------------------------------------------------- */
-    public synchronized void onClipboardOperation(String operation) {
-        if (!isRunning) {
-            return;
-        }
-        
-        // Log activity
-        ActivityData activity = ActivityData.clipboard(operation);
-        activityBuffer.add(activity);
-        
-        // Alert detection
-        alertService.recordClipboardOperation(operation);
-        
-        logger.debug("Clipboard operation recorded: {}", operation);
+    
+    public WindowFocusMonitor getWindowFocusMonitor() {
+        return windowFocusMonitor;
     }
-
-    /* ---------------------------------------------------
-     * Ghi nhận process detected
-     * @param processName Tên process
-     * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
-     * --------------------------------------------------- */
-    public synchronized void onProcessDetected(String processName) {
-        if (!isRunning) {
-            return;
-        }
-        
-        // Log activity
-        ActivityData activity = ActivityData.processDetected(processName);
-        activityBuffer.add(activity);
-        
-        logger.info("Process detected: {}", processName);
+    
+    public ProcessMonitor getProcessMonitor() {
+        return processMonitor;
+    }
+    
+    public ClipboardMonitor getClipboardMonitor() {
+        return clipboardMonitor;
+    }
+    
+    public KeystrokeAnalyzer getKeystrokeAnalyzer() {
+        return keystrokeAnalyzer;
     }
 
     /* ---------------------------------------------------
@@ -267,6 +273,7 @@ public class MonitoringCoordinator {
      * Get monitoring stats
      * @returns String mô tả stats
      * @author: K24DTCN210-NVMANH (21/11/2025 11:35)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 11:00) - Include stats từ 5 monitors
      * --------------------------------------------------- */
     public String getStats() {
         if (!isRunning) {
@@ -279,8 +286,14 @@ public class MonitoringCoordinator {
         sb.append("Duration: ").append(
             java.time.Duration.between(startTime, LocalDateTime.now()).toMinutes()
         ).append(" minutes\n");
-        sb.append("Screenshots: ").append(screenshotService.getCaptureCount()).append("\n");
-        sb.append("Activity Buffer: ").append(activityBuffer.size()).append("\n");
+        sb.append("\n--- Monitors ---\n");
+        sb.append("ScreenCapture: ").append(screenCaptureMonitor.getCaptureCount()).append(" captures\n");
+        sb.append("WindowFocus: ").append(windowFocusMonitor.getSwitchCount()).append(" switches\n");
+        sb.append("Process: ").append(processMonitor.getTotalProcessesDetected()).append(" processes detected\n");
+        sb.append("Clipboard: ").append(clipboardMonitor.getOperationCount()).append(" operations\n");
+        sb.append("Keystroke: ").append(keystrokeAnalyzer.getTotalKeystrokes())
+          .append(" keystrokes, ").append(String.format("%.2f", keystrokeAnalyzer.getAverageWPM())).append(" WPM\n");
+        sb.append("\nActivity Buffer: ").append(activityBuffer.size()).append("\n");
         sb.append("Alert Stats: ").append(alertService.getStats()).append("\n");
         sb.append("=======================");
         

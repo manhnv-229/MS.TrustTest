@@ -306,12 +306,31 @@ public class TeacherMainController {
     /* ---------------------------------------------------
      * Handle Monitoring menu click
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 12:15) - Tích hợp Monitoring Dashboard
      * --------------------------------------------------- */
     @FXML
     private void handleMonitoringClick() {
-        showInfo("Chức năng Giám sát", 
-                "Chức năng giám sát thi sẽ được tích hợp từ Phase 6.\n" +
-                "Hiện tại đang trong quá trình phát triển.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/monitoring-dashboard.fxml"));
+            Parent monitoringView = loader.load();
+            
+            // Get controller and initialize
+            com.mstrust.client.teacher.controller.monitoring.MonitoringDashboardController controller = 
+                loader.getController();
+            
+            // Initialize với base URL và auth token
+            String baseUrl = apiClient.getBaseUrl();
+            controller.initialize(baseUrl, apiClient.getAuthToken(), stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(monitoringView);
+            highlightSelectedMenu(monitoringButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Giám sát Thi: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /* ---------------------------------------------------

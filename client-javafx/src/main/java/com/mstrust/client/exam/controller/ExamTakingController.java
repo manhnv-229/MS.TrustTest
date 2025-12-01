@@ -96,6 +96,9 @@ public class ExamTakingController {
     private Stage stage;
     private FullScreenLockService fullScreenLockService;
     
+    // Phase 11: Monitoring System
+    private com.mstrust.client.monitoring.MonitoringCoordinator monitoringCoordinator;
+    
     // State tracking
     private Map<Long, String> answersCache; // questionId -> answer
     private Map<Long, Boolean> markedForReview; // questionId -> marked
@@ -329,6 +332,12 @@ public class ExamTakingController {
             timerComponent.stop();
         }
         
+        // Phase 11: Stop monitoring
+        if (monitoringCoordinator != null) {
+            monitoringCoordinator.stopMonitoring();
+            System.out.println("[Phase 11] Monitoring stopped on exit");
+        }
+        
         System.out.println("[Phase 8.6] Exit cleanup completed");
     }
 
@@ -365,6 +374,7 @@ public class ExamTakingController {
                         initializeComponents(response);
                         initializeAutoSaveServices(); // Phase 8.4
                         initializeFullScreenSecurity(); // Phase 8.6
+                        startMonitoringSystem(response.getSubmissionId(), authToken); // Phase 11
                         displayCurrentQuestion();
                         isExamActive = true; // Mark exam as active
                         hideLoading();
@@ -600,6 +610,33 @@ public class ExamTakingController {
             // Don't throw - allow exam to continue without full-screen if it fails
             showAlert("Cảnh báo", "Không thể bật chế độ full-screen. " +
                      "Bạn vẫn có thể làm bài nhưng nên tránh chuyển cửa sổ.");
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Start monitoring system (Phase 11)
+     * @param submissionId ID của submission
+     * @param authToken JWT token
+     * @author: K24DTCN210-NVMANH (01/12/2025 22:55)
+     * --------------------------------------------------- */
+    private void startMonitoringSystem(Long submissionId, String authToken) {
+        try {
+            // Initialize MonitoringApiClient
+            com.mstrust.client.api.MonitoringApiClient apiClient = 
+                new com.mstrust.client.api.MonitoringApiClient();
+            apiClient.setAuthToken(authToken);
+            
+            // Create MonitoringCoordinator
+            monitoringCoordinator = new com.mstrust.client.monitoring.MonitoringCoordinator(apiClient);
+            
+            // Start monitoring với 5 monitors
+            monitoringCoordinator.startMonitoring(submissionId, authToken);
+            
+            System.out.println("[Phase 11] Monitoring system started for submission: " + submissionId);
+        } catch (Exception e) {
+            System.err.println("[Phase 11] Failed to start monitoring: " + e.getMessage());
+            e.printStackTrace();
+            // Don't throw - allow exam to continue even if monitoring fails
         }
     }
     
@@ -1010,6 +1047,12 @@ public class ExamTakingController {
                     if (timerComponent != null) {
                         timerComponent.stop();
                         System.out.println("[Phase 8.5] Timer stopped");
+                    }
+                    
+                    // Phase 11: Stop monitoring
+                    if (monitoringCoordinator != null) {
+                        monitoringCoordinator.stopMonitoring();
+                        System.out.println("[Phase 11] Monitoring stopped on submit");
                     }
                     
                     hideLoading();

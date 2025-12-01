@@ -2,11 +2,11 @@
 
 ## Current Work Focus
 
-**Status**: ✅ **Phase 10 COMPLETED** - Grading UI Development Complete  
-**Phase**: Phase 10 - Grading UI (All Steps Complete)  
-**Current Step**: Ready for Phase 11 - Anti-Cheat Client Monitors  
-**Last Update**: 01/12/2025  
-**Duration**: Phase 10 completed in 1 week
+**Status**: ✅ **Phase 12 COMPLETED** - Monitoring Dashboard Complete  
+**Phase**: Phase 12 - Monitoring Dashboard (All Features Complete)  
+**Current Step**: Ready for Phase 13 - Admin Dashboard  
+**Last Update**: 02/12/2025  
+**Duration**: Phase 12 completed in 1 week
 
 ## Phase 6 Final Summary
 
@@ -165,11 +165,11 @@ public void stop() {
 ## Project Status
 
 ### Overall Progress
-- **Phases Complete**: 10/13 (77%)
-- **Current Phase**: Ready for Phase 11 - Anti-Cheat Client Monitors
+- **Phases Complete**: 12/13 (92%)
+- **Current Phase**: Ready for Phase 13 - Admin Dashboard
 - **API Endpoints**: 118+ total
 - **Database Migrations**: 19 (V1-V19)
-- **Lines of Code**: ~20,000+ lines
+- **Lines of Code**: ~22,000+ lines
 - **Build Status**: ✅ SUCCESS
 
 ### Completed Phases
@@ -183,29 +183,33 @@ public void stop() {
 8. ✅ Phase 8: Exam Taking UI (1.5 weeks, 25+ files)
 9. ✅ Phase 9: Exam Management UI (1 week, 20+ files)
 10. ✅ Phase 10: Grading UI (1 week, 15+ files)
+11. ✅ Phase 11: Anti-Cheat Client Monitors (1.5 weeks, 15+ files)
+12. ✅ Phase 12: Monitoring Dashboard (1 week, 5+ files)
 
-### Recently Completed: Phase 10
-**Name**: Grading UI  
+### Recently Completed: Phase 12
+**Name**: Monitoring Dashboard  
 **Status**: ✅ COMPLETED  
-**Completed**: 01/12/2025  
+**Completed**: 02/12/2025  
 **Duration**: 1 week  
-**Achievement**: Full grading interface với improved UX
+**Achievement**: Complete monitoring dashboard với screenshot viewer, alerts feed, và activity logs
 
 **Completed Steps**:
 - ✅ Step 1: Question Bank Management UI
 - ✅ Step 2: Exam Creation Wizard (5-step wizard)
 - 🚀 Step 3: Exam List & Management (In Progress - UI improvements)
 
-**Phase 10 Achievements (01/12/2025)**:
-- ✅ Complete grading interface với submissions list
-- ✅ Question-by-question navigation system
-- ✅ Student answer display (auto-graded + manual)
-- ✅ Points input với validation và feedback
-- ✅ Previous/Next student navigation
-- ✅ Finalize grading workflow
-- ✅ Improved layout với fixed action buttons
-- ✅ Scrollable content với proper padding
-- ✅ Responsive design với better UX
+**Phase 12 Achievements (02/12/2025)**:
+- ✅ Live Monitoring View với students table và alerts feed
+- ✅ Exam selector dropdown với status bar
+- ✅ Students TableView (compact: Name, Code, Status, Alerts Count)
+- ✅ Real-time alerts list với severity color coding
+- ✅ Student detail dialog với activity logs và alerts
+- ✅ Screenshot Viewer với thumbnail grid (FlowPane)
+- ✅ Full-size image viewer với zoom (scroll wheel) và pan
+- ✅ Activity Logs viewer (all students)
+- ✅ Auto-refresh mechanism (every 5 seconds)
+- ✅ Clean image viewer (chỉ ảnh + thời gian)
+- ✅ Vietnamese localization cho alerts và messages
 
 **Scope**:
 - Auto-grading engine enhancement
@@ -275,8 +279,8 @@ ftp:
   port: 21
   username: u341775345.admin
   password: !M@nh1989
-  base-path: /screenshots
-  screenshot-path: /screenshots
+  base-path: /trusttest
+  screenshot-path: /trusttest
 ```
 
 ### Activity Types
@@ -376,5 +380,5 @@ ftp:
 
 **Document Status**: Current  
 **Author**: K24DTCN210-NVMANH with Cline AI  
-**Last Updated**: 30/11/2025  
-**Next Update**: Phase 9 completion or as directed by user
+**Last Updated**: 02/12/2025  
+**Next Update**: Phase 13 completion or as directed by user

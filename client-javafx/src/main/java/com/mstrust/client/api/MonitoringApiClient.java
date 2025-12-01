@@ -165,7 +165,8 @@ public class MonitoringApiClient {
             HttpResponse<String> response = httpClient.send(httpRequest, 
                     HttpResponse.BodyHandlers.ofString());
             
-            if (response.statusCode() == 200) {
+            // Backend returns 201 (CREATED) for successful activity log
+            if (response.statusCode() == 201 || response.statusCode() == 200) {
                 logger.info("Activities logged successfully. Count: {}", 
                         request.getActivities().size());
                 return true;

@@ -308,13 +308,15 @@
 
 /* === QUESTION PALETTE === */
 .question-button {
-    -fx-min-width: 40px;
+    -fx-min-width: 50px;
     -fx-min-height: 40px;
-    -fx-max-width: 40px;
+    -fx-max-width: 50px;
     -fx-max-height: 40px;
     -fx-background-radius: 4;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
+    -fx-padding: 0;
+    -fx-alignment: center;
 }
 
 .question-unanswered {

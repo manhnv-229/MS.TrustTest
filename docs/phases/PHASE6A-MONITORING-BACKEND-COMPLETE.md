@@ -213,8 +213,8 @@ backend/src/main/java/com/mstrust/exam/service/
 ```
 backend/src/main/java/com/mstrust/exam/controller/
 ├── MonitoringController.java (/api/monitoring)
-│   ├── POST   /screenshots              [STUDENT]
-│   ├── GET    /screenshots/{id}         [ALL]
+│   ├── POST   /trusttest              [STUDENT]
+│   ├── GET    /trusttest/{id}         [ALL]
 │   ├── POST   /activities               [STUDENT]
 │   ├── GET    /activities/{id}          [ALL]
 │   ├── POST   /alerts                   [STUDENT, ADMIN]
@@ -238,12 +238,12 @@ ftp:
   port: 21
   username: u341775345.admin
   password: '!M@nh1989'
-  base-path: /screenshots
+  base-path: /trusttest
 ```
 
 ### Directory Structure on FTP
 ```
-/screenshots/
+/trusttest/
 ├── 2025-11/                    # Tổ chức theo tháng
 │   ├── 1/                      # submission_id = 1
 │   │   ├── screenshot_20251121_101234_001.jpg
@@ -283,7 +283,7 @@ Response: 201 Created
 {
   "id": 1,
   "submissionId": 7,
-  "filePath": "/screenshots/2025-11/7/screenshot_20251121_101234_001.jpg",
+  "filePath": "/trusttest/2025-11/7/screenshot_20251121_101234_001.jpg",
   "fileSize": 245678,
   "timestamp": "2025-11-21T10:12:34",
   "screenResolution": "1920x1080",
@@ -383,7 +383,7 @@ Response: 200 OK
   },
   "latestScreenshot": {
     "id": 45,
-    "filePath": "/screenshots/2025-11/7/screenshot_20251121_103045_045.jpg",
+    "filePath": "/trusttest/2025-11/7/screenshot_20251121_103045_045.jpg",
     "timestamp": "2025-11-21T10:30:45",
     ...
   },

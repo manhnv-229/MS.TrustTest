@@ -27,13 +27,14 @@ public class ActivityData {
      * @param windowTitle Tiêu đề cửa sổ
      * @returns ActivityData instance
      * @author: K24DTCN210-NVMANH (21/11/2025 10:39)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 23:55) - Chuyển sang tiếng Việt
      * --------------------------------------------------- */
     public static ActivityData windowFocus(String windowTitle) {
-        return ActivityData.builder()
-                .activityType(ActivityType.WINDOW_FOCUS)
-                .details("Window switched to: " + windowTitle)
-                .timestamp(LocalDateTime.now())
-                .build();
+        ActivityData data = new ActivityData();
+        data.setActivityType(ActivityType.WINDOW_FOCUS);
+        data.setDetails("Chuyển cửa sổ sang: " + windowTitle);
+        data.setTimestamp(LocalDateTime.now());
+        return data;
     }
 
     /* ---------------------------------------------------
@@ -41,13 +42,14 @@ public class ActivityData {
      * @param processName Tên process
      * @returns ActivityData instance
      * @author: K24DTCN210-NVMANH (21/11/2025 10:39)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 23:55) - Chuyển sang tiếng Việt
      * --------------------------------------------------- */
     public static ActivityData processDetected(String processName) {
-        return ActivityData.builder()
-                .activityType(ActivityType.PROCESS_DETECTED)
-                .details("Suspicious process detected: " + processName)
-                .timestamp(LocalDateTime.now())
-                .build();
+        ActivityData data = new ActivityData();
+        data.setActivityType(ActivityType.PROCESS_DETECTED);
+        data.setDetails("Phát hiện ứng dụng đáng nghi: " + processName);
+        data.setTimestamp(LocalDateTime.now());
+        return data;
     }
 
     /* ---------------------------------------------------
@@ -55,13 +57,14 @@ public class ActivityData {
      * @param operation Thao tác (COPY/PASTE)
      * @returns ActivityData instance
      * @author: K24DTCN210-NVMANH (21/11/2025 10:39)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 23:55) - Chuyển sang tiếng Việt
      * --------------------------------------------------- */
     public static ActivityData clipboard(String operation) {
-        return ActivityData.builder()
-                .activityType(ActivityType.CLIPBOARD)
-                .details("Clipboard operation: " + operation)
-                .timestamp(LocalDateTime.now())
-                .build();
+        ActivityData data = new ActivityData();
+        data.setActivityType(ActivityType.CLIPBOARD);
+        data.setDetails("Thao tác clipboard: " + operation);
+        data.setTimestamp(LocalDateTime.now());
+        return data;
     }
 
     /* ---------------------------------------------------
@@ -69,12 +72,23 @@ public class ActivityData {
      * @param pattern Mô tả pattern
      * @returns ActivityData instance
      * @author: K24DTCN210-NVMANH (21/11/2025 10:39)
+     * EditBy: K24DTCN210-NVMANH (01/12/2025 23:55) - Chuyển sang tiếng Việt
      * --------------------------------------------------- */
     public static ActivityData keystroke(String pattern) {
-        return ActivityData.builder()
-                .activityType(ActivityType.KEYSTROKE)
-                .details("Keystroke pattern: " + pattern)
-                .timestamp(LocalDateTime.now())
-                .build();
+        ActivityData data = new ActivityData();
+        data.setActivityType(ActivityType.KEYSTROKE);
+        data.setDetails("Mẫu gõ phím: " + pattern);
+        data.setTimestamp(LocalDateTime.now());
+        return data;
     }
+    
+    // Manual getters/setters (backup for Lombok issues)
+    public ActivityType getActivityType() { return activityType; }
+    public void setActivityType(ActivityType activityType) { this.activityType = activityType; }
+    
+    public String getDetails() { return details; }
+    public void setDetails(String details) { this.details = details; }
+    
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }

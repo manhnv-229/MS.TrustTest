@@ -1,0 +1,119 @@
+/* Monitoring Dashboard Styles */
+/* Author: K24DTCN210-NVMANH (01/12/2025) */
+/* EditBy: K24DTCN210-NVMANH (02/12/2025 00:10) - Added table selection styles */
+
+.monitoring-header {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ddd;
+    -fx-border-width: 0 0 1 0;
+}
+
+.page-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.status-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #666;
+}
+
+.info-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #888;
+}
+
+.students-section {
+    -fx-background-color: white;
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.students-grid {
+    -fx-background-color: white;
+}
+
+.empty-state-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #999;
+}
+
+.empty-state-text {
+    -fx-font-size: 12px;
+    -fx-text-fill: #999;
+    -fx-text-alignment: center;
+}
+
+.alerts-section {
+    -fx-background-color: #fafafa;
+    -fx-border-color: #ddd;
+    -fx-border-width: 1 0 0 0;
+}
+
+.alerts-list {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+}
+
+.actions-bar {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ddd;
+    -fx-border-width: 1 0 0 0;
+}
+
+.auto-refresh-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #888;
+}
+
+/* Students Table Styles */
+.students-table {
+    -fx-background-color: white;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+}
+
+.students-table .table-row-cell {
+    -fx-background-color: white;
+    -fx-text-fill: #333;
+}
+
+.students-table .table-row-cell:hover {
+    -fx-background-color: #f0f7ff;
+}
+
+.students-table .table-row-cell:selected {
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+}
+
+.students-table .table-row-cell:focused {
+    -fx-background-color: #1976D2;
+    -fx-text-fill: white;
+}
+
+.students-table .table-row-cell:selected:focused {
+    -fx-background-color: #1565C0;
+    -fx-text-fill: white;
+}
+
+.students-table .table-cell {
+    -fx-text-fill: inherit;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 8 12;
+}
+
+.students-table .column-header {
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #333;
+    -fx-font-weight: bold;
+    -fx-border-color: #ddd;
+    -fx-border-width: 0 0 1 0;
+}
+

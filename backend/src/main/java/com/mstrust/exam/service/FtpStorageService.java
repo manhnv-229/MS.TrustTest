@@ -35,7 +35,7 @@ public class FtpStorageService {
     @Value("${ftp.password:!M@nh1989}")
     private String ftpPassword;
     
-    @Value("${ftp.base-path:/screenshots}")
+    @Value("${ftp.base-path:/trusttest/screenshots}")
     private String ftpBasePath;
     
     private static final int MAX_WIDTH = 1920;
@@ -73,9 +73,9 @@ public class FtpStorageService {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.enterLocalPassiveMode();
             
-            // Create directory structure: /screenshots/YYYY-MM/submission_id/
+            // Create directory structure: /trusttest/screenshots/YYYY-MM/submission_id/
             String dateFolder = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
-            String remoteDirPath = ftpBasePath + "/" + dateFolder + "/" + submissionId;
+            String remoteDirPath = ftpBasePath + "/screenshots/" + dateFolder + "/" + submissionId;
             
             createRemoteDirectory(ftpClient, remoteDirPath);
             

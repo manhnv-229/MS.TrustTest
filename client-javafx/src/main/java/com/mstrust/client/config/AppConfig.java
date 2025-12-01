@@ -161,4 +161,58 @@ public class AppConfig {
             .filter(p -> !p.trim().isEmpty())
             .anyMatch(blacklisted -> lowerProcessName.contains(blacklisted.toLowerCase().trim()));
     }
+    
+    /* ---------------------------------------------------
+     * Get API timeout in seconds
+     * @return API timeout seconds
+     * @author: K24DTCN210-NVMANH (02/12/2025 00:30)
+     * --------------------------------------------------- */
+    public int getApiTimeoutSeconds() {
+        return 30; // Default 30 seconds
+    }
+    
+    /* ---------------------------------------------------
+     * Get API base URL
+     * @return API base URL
+     * @author: K24DTCN210-NVMANH (02/12/2025 00:30)
+     * --------------------------------------------------- */
+    public String getApiBaseUrl() {
+        return apiBaseUrl;
+    }
+    
+    /* ---------------------------------------------------
+     * Get screenshot interval in seconds
+     * @return Screenshot interval seconds
+     * @author: K24DTCN210-NVMANH (02/12/2025 00:35)
+     * --------------------------------------------------- */
+    public int getScreenshotIntervalSeconds() {
+        return screenshotIntervalSeconds;
+    }
+    
+    /* ---------------------------------------------------
+     * Get screenshot max width
+     * @return Max width in pixels
+     * @author: K24DTCN210-NVMANH (02/12/2025 00:35)
+     * --------------------------------------------------- */
+    public int getScreenshotMaxWidth() {
+        return screenshotMaxWidth;
+    }
+    
+    /* ---------------------------------------------------
+     * Get screenshot max height
+     * @return Max height in pixels
+     * @author: K24DTCN210-NVMANH (02/12/2025 00:35)
+     * --------------------------------------------------- */
+    public int getScreenshotMaxHeight() {
+        return screenshotMaxHeight;
+    }
+    
+    /* ---------------------------------------------------
+     * Get screenshot JPEG quality
+     * @return JPEG quality (0.0-1.0)
+     * @author: K24DTCN210-NVMANH (02/12/2025 00:35)
+     * --------------------------------------------------- */
+    public float getScreenshotJpegQuality() {
+        return (float) screenshotJpegQuality;
+    }
 }

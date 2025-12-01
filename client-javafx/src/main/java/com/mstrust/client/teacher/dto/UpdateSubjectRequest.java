@@ -19,4 +19,17 @@ public class UpdateSubjectRequest {
     private String description;     // Mô tả (optional)
     private Integer credits;        // Số tín chỉ (required, >= 0)
     private Long departmentId;      // ID khoa (required)
+    
+    // Manual getters/setters (backup for Lombok issues)
+    public String getSubjectName() { return subjectName; }
+    public void setSubjectName(String subjectName) { this.subjectName = subjectName; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    
+    public Integer getCredits() { return credits; }
+    public void setCredits(Integer credits) { this.credits = credits; }
+    
+    public Long getDepartmentId() { return departmentId; }
+    public void setDepartmentId(Long departmentId) { this.departmentId = departmentId; }
 }

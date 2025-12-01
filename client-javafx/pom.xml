@@ -194,6 +194,18 @@
                         <option>--add-opens=com.mstrust.client/com.mstrust.client.teacher.dto=ALL-UNNAMED</option>
                     </options>
                 </configuration>
+                <executions>
+                    <!-- Execution cho Monitor Test Application -->
+                    <execution>
+                        <id>test-monitors</id>
+                        <configuration>
+                            <mainClass>com.mstrust.client.monitoring.test.MonitorTestApplication</mainClass>
+                            <options>
+                                <option>--add-reads=com.mstrust.client=ALL-UNNAMED</option>
+                            </options>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Maven Shade Plugin - Tạo executable JAR -->

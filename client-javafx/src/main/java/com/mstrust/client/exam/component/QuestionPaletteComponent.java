@@ -73,8 +73,7 @@ public class QuestionPaletteComponent extends VBox {
             final int questionIndex = i;
             
             Button btn = new Button(String.valueOf(i + 1));
-            btn.setPrefSize(45, 45);
-            btn.getStyleClass().add(CLASS_UNANSWERED);
+            btn.getStyleClass().addAll("question-button", CLASS_UNANSWERED);
             
             // Click handler
             btn.setOnAction(e -> handleQuestionClick(questionIndex));

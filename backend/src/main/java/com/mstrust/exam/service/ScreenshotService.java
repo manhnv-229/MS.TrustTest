@@ -68,10 +68,14 @@ public class ScreenshotService {
             // Upload to FTP
             String ftpPath = ftpStorageService.uploadScreenshot(file, submissionId);
             
+            // Convert FTP path to DB path (remove /trusttest prefix)
+            String dbPath = ftpPath.startsWith("/trusttest") ? 
+                ftpPath.substring("/trusttest".length()) : ftpPath;
+            
             // Save metadata to database
             Screenshot screenshot = Screenshot.builder()
                 .submission(submission)
-                .filePath(ftpPath)
+                .filePath(dbPath)
                 .fileSize(file.getSize())
                 .timestamp(LocalDateTime.now())
                 .screenResolution(screenResolution)
@@ -81,7 +85,7 @@ public class ScreenshotService {
             
             screenshot = screenshotRepository.save(screenshot);
             
-            log.info("Screenshot uploaded successfully for submission {}: {}", submissionId, ftpPath);
+            log.info("Screenshot uploaded successfully for submission {}: FTP={}, DB={}", submissionId, ftpPath, dbPath);
             
             return convertToDTO(screenshot);
             
