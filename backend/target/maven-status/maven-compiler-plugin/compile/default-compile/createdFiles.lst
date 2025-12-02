@@ -191,6 +191,7 @@ com\mstrust\exam\service\QuestionBankService$1.class
 com\mstrust\exam\controller\ClassController.class
 com\mstrust\exam\dto\AvailableExamDTO$AvailableExamDTOBuilder.class
 com\mstrust\exam\dto\grading\AnswerForGradingDTO.class
+com\mstrust\exam\dto\CreateUserRequest$CreateUserRequestBuilder.class
 com\mstrust\exam\repository\ClassRepository.class
 com\mstrust\exam\repository\ScreenshotRepository.class
 com\mstrust\exam\dto\grading\GradeAnswerResponse$GradeAnswerResponseBuilder.class
@@ -222,6 +223,7 @@ com\mstrust\exam\entity\ClassEntity$ClassEntityBuilder.class
 com\mstrust\exam\dto\ExamWithQuestionsDTO.class
 com\mstrust\exam\exception\DuplicateResourceException.class
 com\mstrust\exam\dto\monitoring\ScreenshotUploadRequest$ScreenshotUploadRequestBuilder.class
+com\mstrust\exam\dto\CreateUserRequest.class
 com\mstrust\exam\dto\grading\FinalizeGradingRequest.class
 com\mstrust\exam\dto\UpdateSubjectClassRequest$UpdateSubjectClassRequestBuilder.class
 com\mstrust\exam\dto\UpdateExamQuestionRequest.class

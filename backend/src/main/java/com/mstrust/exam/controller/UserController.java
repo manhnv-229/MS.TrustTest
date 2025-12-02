@@ -2,16 +2,21 @@ package com.mstrust.exam.controller;
 
 import com.mstrust.exam.dto.AssignRoleRequest;
 import com.mstrust.exam.dto.ChangePasswordRequest;
+import com.mstrust.exam.dto.CreateUserRequest;
 import com.mstrust.exam.dto.UserDTO;
 import com.mstrust.exam.dto.UserSearchCriteria;
 import com.mstrust.exam.dto.UserStatisticsDTO;
+import com.mstrust.exam.exception.DuplicateResourceException;
+import com.mstrust.exam.exception.ResourceNotFoundException;
 import com.mstrust.exam.service.UserService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -28,10 +33,43 @@ import java.util.Map;
 @RestController
 @RequestMapping("/users")
 @CrossOrigin(origins = "*", maxAge = 3600)
+@Slf4j
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    /* ---------------------------------------------------
+     * Tạo user mới (Admin only)
+     * POST /api/users
+     * @param request CreateUserRequest chứa thông tin user mới
+     * @returns ResponseEntity chứa UserDTO với status 201 Created
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody CreateUserRequest request) {
+        log.info("POST /users - Creating new user");
+        log.debug("Request data - Email: {}, FullName: {}, Roles: {}, DepartmentId: {}, ClassId: {}", 
+            request.getEmail(), request.getFullName(), request.getRoles(), 
+            request.getDepartmentId(), request.getClassId());
+        
+        try {
+            UserDTO createdUser = userService.createUser(request);
+            log.info("User created successfully with ID: {}, email: {}", 
+                createdUser.getId(), createdUser.getEmail());
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        } catch (DuplicateResourceException e) {
+            log.warn("Duplicate resource error: {}", e.getMessage());
+            throw e;
+        } catch (ResourceNotFoundException e) {
+            log.error("Resource not found: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error creating user: {}", e.getMessage(), e);
+            throw e;
+        }
+    }
 
     /* ---------------------------------------------------
      * Get all users endpoint (Admin only)

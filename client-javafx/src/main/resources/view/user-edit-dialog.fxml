@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" 
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mstrust.client.admin.controller.UserEditDialogController"
+            styleClass="user-dialog-container"
+            prefWidth="750" prefHeight="700">
+    
+    <!-- Header - Ẩn title không cần thiết -->
+    <top>
+        <VBox styleClass="dialog-header" visible="false" managed="false">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label fx:id="dialogTitle" styleClass="page-title" text="Tạo người dùng mới"/>
+        </VBox>
+    </top>
+    
+    <!-- Content với ScrollPane -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="user-dialog-scroll" vbarPolicy="AS_NEEDED">
+            <VBox spacing="20" styleClass="user-dialog-content">
+                <padding>
+                    <Insets top="25" right="30" bottom="25" left="30"/>
+                </padding>
+                
+                <!-- Basic Information Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Thông tin cơ bản" styleClass="section-title"/>
+                    
+                    <!-- Full Name -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Họ tên:" minWidth="120" styleClass="form-label"/>
+                        <TextField fx:id="fullNameField" promptText="Nhập họ và tên đầy đủ" 
+                                   styleClass="form-field" prefWidth="400"/>
+                        <Label text="*" styleClass="required-mark"/>
+                        <Label fx:id="fullNameErrorLabel" styleClass="error-label" visible="false" 
+                               text="Họ tên không được để trống"/>
+                    </HBox>
+                    
+                    <!-- Email -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Email:" minWidth="120" styleClass="form-label"/>
+                        <TextField fx:id="emailField" promptText="example@email.com" 
+                                   styleClass="form-field" prefWidth="400"/>
+                        <Label text="*" styleClass="required-mark"/>
+                        <Label fx:id="emailErrorLabel" styleClass="error-label" visible="false" 
+                               text="Email không hợp lệ"/>
+                    </HBox>
+                    
+                    <!-- Password (chỉ hiển thị khi tạo mới) -->
+                    <HBox spacing="10" alignment="CENTER_LEFT" fx:id="passwordContainer">
+                        <Label text="Mật khẩu:" minWidth="120" styleClass="form-label"/>
+                        <PasswordField fx:id="passwordField" promptText="Tối thiểu 6 ký tự" 
+                                       styleClass="form-field" prefWidth="300"/>
+                        <Label text="*" styleClass="required-mark"/>
+                        <Label fx:id="passwordErrorLabel" styleClass="error-label" visible="false" 
+                               text="Mật khẩu phải có ít nhất 6 ký tự"/>
+                    </HBox>
+                    
+                    <!-- Student Code -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Mã SV:" minWidth="120" styleClass="form-label"/>
+                        <TextField fx:id="studentCodeField" promptText="Ví dụ: SV001" 
+                                   styleClass="form-field" prefWidth="200"/>
+                        <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                    </HBox>
+                    
+                    <!-- Phone Number -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Số điện thoại:" minWidth="120" styleClass="form-label"/>
+                        <TextField fx:id="phoneNumberField" promptText="Ví dụ: 0123456789" 
+                                   styleClass="form-field" prefWidth="200"/>
+                        <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Personal Information Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Thông tin cá nhân" styleClass="section-title"/>
+                    
+                    <!-- Date of Birth -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Ngày sinh:" minWidth="120" styleClass="form-label"/>
+                        <DatePicker fx:id="dateOfBirthPicker" styleClass="form-field" prefWidth="200"/>
+                        <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                    </HBox>
+                    
+                    <!-- Gender -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Giới tính:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="genderCombo" promptText="-- Chọn giới tính --" 
+                                  styleClass="combo-box" prefWidth="200"/>
+                        <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                    </HBox>
+                    
+                    <!-- Address -->
+                    <VBox spacing="5">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Địa chỉ:" styleClass="form-label"/>
+                            <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                        </HBox>
+                        <TextArea fx:id="addressArea" 
+                                  promptText="Nhập địa chỉ chi tiết..." 
+                                  styleClass="form-field" prefHeight="80" wrapText="true"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Organization Information Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Thông tin tổ chức" styleClass="section-title"/>
+                    
+                    <!-- Department -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Khoa:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="departmentCombo" promptText="-- Chọn khoa --" 
+                                  styleClass="combo-box" prefWidth="300"/>
+                        <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                        <Label fx:id="departmentErrorLabel" styleClass="error-label" visible="false"/>
+                    </HBox>
+                    
+                    <!-- Class -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Lớp:" minWidth="120" styleClass="form-label"/>
+                        <ComboBox fx:id="classCombo" promptText="-- Chọn lớp --" 
+                                  styleClass="combo-box" prefWidth="300" disable="true"/>
+                        <Label text="(Tùy chọn)" styleClass="hint-text"/>
+                        <Label fx:id="classErrorLabel" styleClass="error-label" visible="false"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Role and Status Section -->
+                <VBox spacing="15" styleClass="form-section">
+                    <Label text="Vai trò và trạng thái" styleClass="section-title"/>
+                    
+                    <!-- Roles -->
+                    <VBox spacing="5">
+                        <Label text="Vai trò:" styleClass="form-label"/>
+                        <VBox fx:id="rolesContainer" spacing="5">
+                            <!-- Roles sẽ được thêm động -->
+                        </VBox>
+                    </VBox>
+                    
+                    <!-- Active Status -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="isActiveCheckBox" text="Tài khoản đang hoạt động" 
+                                  selected="true"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Validation Summary -->
+                <VBox fx:id="validationSummary" spacing="5" styleClass="validation-summary" 
+                      visible="false" managed="false">
+                    <Label text="⚠️ Vui lòng kiểm tra các lỗi sau:" styleClass="error-label"/>
+                    <Label fx:id="validationMessage" styleClass="hint-text" 
+                           text="- Các trường bắt buộc phải được điền đầy đủ"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <!-- Action Buttons -->
+    <bottom>
+        <HBox spacing="12" alignment="CENTER_RIGHT" styleClass="user-dialog-footer">
+            <padding>
+                <Insets top="20" right="30" bottom="25" left="30"/>
+            </padding>
+            
+            <Button text="Hủy" onAction="#handleCancel" styleClass="secondary-button" 
+                    prefWidth="110" prefHeight="38"/>
+            <Button fx:id="saveButton" text="Lưu" onAction="#handleSave" 
+                    styleClass="primary-button" prefWidth="110" prefHeight="38"/>
+        </HBox>
+    </bottom>
+</BorderPane>
+

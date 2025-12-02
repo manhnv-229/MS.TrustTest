@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mstrust.client.admin.controller.SystemConfigController"
+      spacing="15" styleClass="content-container"
+      stylesheets="@../css/admin-styles.css, @../css/teacher-styles.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="⚙️ Cấu hình Hệ thống" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="saveButton" text="💾 Lưu Tất cả" styleClass="primary-button" 
+                onAction="#handleSaveAll"/>
+        <Button fx:id="refreshButton" text="↻ Làm mới" styleClass="secondary-button" 
+                onAction="#handleRefresh"/>
+    </HBox>
+    
+    <!-- TabPane với 5 tabs -->
+    <TabPane fx:id="configTabPane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+        
+        <!-- Monitoring Settings Tab -->
+        <Tab text="📊 Giám sát" closable="false">
+            <ScrollPane fitToWidth="true" fitToHeight="true">
+                <VBox spacing="15" styleClass="config-tab-content">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <Label text="Cấu hình Giám sát" styleClass="section-title"/>
+                    <Separator/>
+                    
+                    <!-- Screenshot Settings -->
+                    <VBox spacing="10">
+                        <Label text="Cài đặt Screenshot" styleClass="subsection-title"/>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Khoảng thời gian chụp (giây):" prefWidth="250"/>
+                            <Spinner fx:id="screenshotIntervalSpinner" prefWidth="100" editable="true"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Chất lượng JPEG (0.0-1.0):" prefWidth="250"/>
+                            <Spinner fx:id="screenshotQualitySpinner" prefWidth="100" editable="true"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Độ phân giải tối đa (Width):" prefWidth="250"/>
+                            <TextField fx:id="screenshotMaxWidthField" prefWidth="100" text="1920"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Độ phân giải tối đa (Height):" prefWidth="250"/>
+                            <TextField fx:id="screenshotMaxHeightField" prefWidth="100" text="1080"/>
+                        </HBox>
+                    </VBox>
+                    
+                    <Separator/>
+                    
+                    <!-- Monitor Enable/Disable -->
+                    <VBox spacing="10">
+                        <Label text="Bật/Tắt Monitors" styleClass="subsection-title"/>
+                        
+                        <CheckBox fx:id="enableScreenCaptureCheck" text="Bật Screen Capture Monitor" selected="true"/>
+                        <CheckBox fx:id="enableWindowFocusCheck" text="Bật Window Focus Monitor" selected="true"/>
+                        <CheckBox fx:id="enableProcessCheck" text="Bật Process Monitor" selected="true"/>
+                        <CheckBox fx:id="enableClipboardCheck" text="Bật Clipboard Monitor" selected="true"/>
+                        <CheckBox fx:id="enableKeystrokeCheck" text="Bật Keystroke Analyzer" selected="true"/>
+                    </VBox>
+                    
+                    <Separator/>
+                    
+                    <!-- Process Blacklist -->
+                    <VBox spacing="10">
+                        <Label text="Process Blacklist" styleClass="subsection-title"/>
+                        <TextArea fx:id="processBlacklistArea" prefRowCount="10" 
+                                 promptText="Mỗi dòng một process name (VD: chrome.exe, notepad.exe)"/>
+                    </VBox>
+                    
+                    <Separator/>
+                    
+                    <!-- Alert Thresholds -->
+                    <VBox spacing="10">
+                        <Label text="Ngưỡng Cảnh báo" styleClass="subsection-title"/>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Window Switch Threshold:" prefWidth="250"/>
+                            <TextField fx:id="windowSwitchThresholdField" prefWidth="100" text="10"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Clipboard Threshold:" prefWidth="250"/>
+                            <TextField fx:id="clipboardThresholdField" prefWidth="100" text="20"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </Tab>
+        
+        <!-- Exam Settings Tab -->
+        <Tab text="📝 Đề thi" closable="false">
+            <ScrollPane fitToWidth="true" fitToHeight="true">
+                <VBox spacing="15" styleClass="config-tab-content">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <Label text="Cấu hình Đề thi" styleClass="section-title"/>
+                    <Separator/>
+                    
+                    <VBox spacing="10">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Thời gian mặc định (phút):" prefWidth="250"/>
+                            <TextField fx:id="defaultDurationField" prefWidth="100" text="60"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Số lần làm bài tối đa:" prefWidth="250"/>
+                            <TextField fx:id="defaultMaxAttemptsField" prefWidth="100" text="1"/>
+                        </HBox>
+                        
+                        <Separator/>
+                        
+                        <Label text="Quy tắc Chấm tự động" styleClass="subsection-title"/>
+                        <CheckBox fx:id="autoGradeMultipleChoiceCheck" text="Tự động chấm Multiple Choice" selected="true"/>
+                        <CheckBox fx:id="autoGradeTrueFalseCheck" text="Tự động chấm True/False" selected="true"/>
+                        <CheckBox fx:id="autoGradeMultipleSelectCheck" text="Tự động chấm Multiple Select" selected="true"/>
+                        <CheckBox fx:id="autoGradeFillInBlankCheck" text="Tự động chấm Fill in Blank" selected="true"/>
+                        <CheckBox fx:id="autoGradeMatchingCheck" text="Tự động chấm Matching" selected="true"/>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </Tab>
+        
+        <!-- Email Settings Tab -->
+        <Tab text="📧 Email" closable="false">
+            <ScrollPane fitToWidth="true" fitToHeight="true">
+                <VBox spacing="15" styleClass="config-tab-content">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <Label text="Cấu hình Email" styleClass="section-title"/>
+                    <Separator/>
+                    
+                    <VBox spacing="10">
+                        <Label text="SMTP Configuration" styleClass="subsection-title"/>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="SMTP Host:" prefWidth="150"/>
+                            <TextField fx:id="smtpHostField" prefWidth="300" text="smtp.gmail.com"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="SMTP Port:" prefWidth="150"/>
+                            <TextField fx:id="smtpPortField" prefWidth="100" text="587"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Username:" prefWidth="150"/>
+                            <TextField fx:id="smtpUsernameField" prefWidth="300"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Password:" prefWidth="150"/>
+                            <PasswordField fx:id="smtpPasswordField" prefWidth="300"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="From Email:" prefWidth="150"/>
+                            <TextField fx:id="smtpFromEmailField" prefWidth="300"/>
+                        </HBox>
+                        
+                        <CheckBox fx:id="smtpUseTlsCheck" text="Sử dụng TLS" selected="true"/>
+                        
+                        <Separator/>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="📧 Test Email" styleClass="secondary-button" 
+                                    onAction="#handleTestEmail"/>
+                            <TextField fx:id="testEmailField" promptText="Email để test..." prefWidth="250"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </Tab>
+        
+        <!-- Security Settings Tab -->
+        <Tab text="🔒 Bảo mật" closable="false">
+            <ScrollPane fitToWidth="true" fitToHeight="true">
+                <VBox spacing="15" styleClass="config-tab-content">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <Label text="Cấu hình Bảo mật" styleClass="section-title"/>
+                    <Separator/>
+                    
+                    <VBox spacing="10">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="JWT Expiration (giờ):" prefWidth="250"/>
+                            <TextField fx:id="jwtExpirationField" prefWidth="100" text="24"/>
+                        </HBox>
+                        
+                        <Separator/>
+                        
+                        <Label text="Password Policy" styleClass="subsection-title"/>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Độ dài tối thiểu:" prefWidth="250"/>
+                            <TextField fx:id="passwordMinLengthField" prefWidth="100" text="8"/>
+                        </HBox>
+                        
+                        <CheckBox fx:id="passwordRequireUppercaseCheck" text="Yêu cầu chữ hoa" selected="true"/>
+                        <CheckBox fx:id="passwordRequireLowercaseCheck" text="Yêu cầu chữ thường" selected="true"/>
+                        <CheckBox fx:id="passwordRequireNumberCheck" text="Yêu cầu số" selected="true"/>
+                        <CheckBox fx:id="passwordRequireSpecialCheck" text="Yêu cầu ký tự đặc biệt" selected="false"/>
+                        
+                        <Separator/>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Session Timeout (phút):" prefWidth="250"/>
+                            <TextField fx:id="sessionTimeoutField" prefWidth="100" text="30"/>
+                        </HBox>
+                        
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Số lần đăng nhập sai tối đa:" prefWidth="250"/>
+                            <TextField fx:id="maxLoginAttemptsField" prefWidth="100" text="5"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </Tab>
+        
+        <!-- Maintenance Tab -->
+        <Tab text="🔧 Bảo trì" closable="false">
+            <ScrollPane fitToWidth="true" fitToHeight="true">
+                <VBox spacing="15" styleClass="config-tab-content">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <Label text="Bảo trì Hệ thống" styleClass="section-title"/>
+                    <Separator/>
+                    
+                    <VBox spacing="15">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Maintenance Mode:" prefWidth="200"/>
+                            <ToggleButton fx:id="maintenanceModeToggle" text="Tắt" 
+                                         onAction="#handleMaintenanceModeToggle"/>
+                            <Label fx:id="maintenanceModeLabel" text="Hệ thống đang hoạt động bình thường"/>
+                        </HBox>
+                        
+                        <Separator/>
+                        
+                        <VBox spacing="10">
+                            <Label text="Backup &amp; Restore" styleClass="subsection-title"/>
+                            <HBox spacing="10">
+                                <Button text="💾 Tạo Backup" styleClass="primary-button" 
+                                       onAction="#handleCreateBackup"/>
+                                <Button text="📥 Restore từ Backup" styleClass="secondary-button" 
+                                       onAction="#handleRestoreBackup"/>
+                            </HBox>
+                        </VBox>
+                        
+                        <Separator/>
+                        
+                        <VBox spacing="10">
+                            <Label text="Cache &amp; Logs" styleClass="subsection-title"/>
+                            <HBox spacing="10">
+                                <Button text="🗑️ Xóa Cache" styleClass="secondary-button" 
+                                       onAction="#handleClearCache"/>
+                                <Button text="📄 Xem Logs" styleClass="secondary-button" 
+                                       onAction="#handleViewLogs"/>
+                            </HBox>
+                        </VBox>
+                        
+                        <Separator/>
+                        
+                        <VBox spacing="10">
+                            <Label text="System Information" styleClass="subsection-title"/>
+                            <TextArea fx:id="systemInfoArea" prefRowCount="10" editable="false" 
+                                     styleClass="system-info-text"/>
+                        </VBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </Tab>
+        
+    </TabPane>
+    
+</VBox>
+

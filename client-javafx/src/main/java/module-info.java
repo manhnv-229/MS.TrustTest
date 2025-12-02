@@ -27,6 +27,8 @@ module com.mstrust.client {
     opens com.mstrust.client.teacher.dto to com.google.gson;
     opens com.mstrust.client.teacher.dto.grading to com.google.gson;
     opens com.mstrust.client.teacher.api to com.google.gson;
+    opens com.mstrust.client.admin.controller to javafx.fxml, com.google.gson;
+    opens com.mstrust.client.admin.api to com.google.gson;
     
     exports com.mstrust.client;
     exports com.mstrust.client.monitoring;
@@ -49,4 +51,6 @@ module com.mstrust.client {
     exports com.mstrust.client.teacher.dto;
     exports com.mstrust.client.teacher.dto.grading;
     exports com.mstrust.client.teacher.api;
+    exports com.mstrust.client.admin.controller;
+    exports com.mstrust.client.admin.api;
 }

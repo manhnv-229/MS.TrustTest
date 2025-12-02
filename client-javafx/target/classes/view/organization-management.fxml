@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mstrust.client.admin.controller.OrganizationManagementController"
+      spacing="15" styleClass="content-container"
+      stylesheets="@../css/admin-styles.css, @../css/teacher-styles.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="🏫 Quản lý Tổ chức" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="refreshButton" text="↻ Làm mới" styleClass="secondary-button" 
+                onAction="#handleRefresh"/>
+    </HBox>
+    
+    <!-- TabPane với 3 tabs -->
+    <TabPane fx:id="mainTabPane" VBox.vgrow="ALWAYS" tabClosingPolicy="UNAVAILABLE">
+        
+        <!-- Departments Tab -->
+        <Tab text="📁 Khoa/Bộ môn" closable="false">
+            <VBox spacing="10">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                
+                <!-- Departments Header -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Button text="+ Tạo Khoa Mới" styleClass="primary-button" 
+                            onAction="#handleCreateDepartment"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <TextField fx:id="departmentSearchField" promptText="Tìm kiếm..." 
+                               prefWidth="300" onAction="#handleDepartmentSearch"/>
+                    <Button text="🔍 Tìm" styleClass="secondary-button" 
+                            onAction="#handleDepartmentSearch"/>
+                </HBox>
+                
+                <!-- Departments Table -->
+                <TableView fx:id="departmentsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="deptIdColumn" text="ID" prefWidth="50"/>
+                        <TableColumn fx:id="deptNameColumn" text="Tên Khoa" prefWidth="250"/>
+                        <TableColumn fx:id="deptCodeColumn" text="Mã Khoa" prefWidth="120"/>
+                        <TableColumn fx:id="deptDescriptionColumn" text="Mô tả" prefWidth="300"/>
+                        <TableColumn fx:id="deptActionsColumn" text="Thao tác" prefWidth="150"/>
+                    </columns>
+                </TableView>
+                
+                <!-- Departments Pagination -->
+                <HBox spacing="10" alignment="CENTER" styleClass="pagination-bar">
+                    <Button fx:id="deptFirstPageButton" text="⏮ Đầu" onAction="#handleDeptFirstPage"/>
+                    <Button fx:id="deptPrevPageButton" text="◀ Trước" onAction="#handleDeptPrevPage"/>
+                    <Label text="Trang"/>
+                    <Label fx:id="deptCurrentPageLabel" text="1" styleClass="page-number"/>
+                    <Label text="của"/>
+                    <Label fx:id="deptTotalPagesLabel" text="1" styleClass="page-number"/>
+                    <Button fx:id="deptNextPageButton" text="Sau ▶" onAction="#handleDeptNextPage"/>
+                    <Button fx:id="deptLastPageButton" text="Cuối ⏭" onAction="#handleDeptLastPage"/>
+                </HBox>
+            </VBox>
+        </Tab>
+        
+        <!-- Classes Tab -->
+        <Tab text="👥 Lớp Hành chính" closable="false">
+            <VBox spacing="10">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                
+                <!-- Classes Header -->
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Button text="+ Tạo Lớp Mới" styleClass="primary-button" 
+                            onAction="#handleCreateClass"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <TextField fx:id="classSearchField" promptText="Tìm kiếm..." 
+                               prefWidth="300" onAction="#handleClassSearch"/>
+                    <Button text="🔍 Tìm" styleClass="secondary-button" 
+                            onAction="#handleClassSearch"/>
+                </HBox>
+                
+                <!-- Classes Table -->
+                <TableView fx:id="classesTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="classIdColumn" text="ID" prefWidth="50"/>
+                        <TableColumn fx:id="classNameColumn" text="Tên Lớp" prefWidth="200"/>
+                        <TableColumn fx:id="classCodeColumn" text="Mã Lớp" prefWidth="120"/>
+                        <TableColumn fx:id="classDepartmentColumn" text="Khoa" prefWidth="200"/>
+                        <TableColumn fx:id="classYearColumn" text="Khóa" prefWidth="100"/>
+                        <TableColumn fx:id="classActionsColumn" text="Thao tác" prefWidth="150"/>
+                    </columns>
+                </TableView>
+                
+                <!-- Classes Pagination -->
+                <HBox spacing="10" alignment="CENTER" styleClass="pagination-bar">
+                    <Button fx:id="classFirstPageButton" text="⏮ Đầu" onAction="#handleClassFirstPage"/>
+                    <Button fx:id="classPrevPageButton" text="◀ Trước" onAction="#handleClassPrevPage"/>
+                    <Label text="Trang"/>
+                    <Label fx:id="classCurrentPageLabel" text="1" styleClass="page-number"/>
+                    <Label text="của"/>
+                    <Label fx:id="classTotalPagesLabel" text="1" styleClass="page-number"/>
+                    <Button fx:id="classNextPageButton" text="Sau ▶" onAction="#handleClassNextPage"/>
+                    <Button fx:id="classLastPageButton" text="Cuối ⏭" onAction="#handleClassLastPage"/>
+                </HBox>
+            </VBox>
+        </Tab>
+        
+        <!-- Subjects Tab -->
+        <Tab text="📖 Môn học" closable="false">
+            <VBox spacing="10">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                
+                <Label text="Quản lý Môn học đã có trong menu 'Quản lý Môn học' của Teacher." 
+                       styleClass="hint-text"/>
+                <Label text="Vui lòng sử dụng chức năng đó để quản lý môn học." 
+                       styleClass="hint-text"/>
+            </VBox>
+        </Tab>
+        
+    </TabPane>
+    
+</VBox>
+

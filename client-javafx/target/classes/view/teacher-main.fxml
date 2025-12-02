@@ -126,6 +126,18 @@
                     </Label>
                     <Separator/>
                     
+                    <Button fx:id="adminDashboardButton"
+                            text="Dashboard" 
+                            styleClass="menu-item"
+                            onAction="#handleAdminDashboardClick"
+                            maxWidth="Infinity"
+                            contentDisplay="LEFT"
+                            graphicTextGap="8">
+                        <VBox.margin>
+                            <Insets top="5"/>
+                        </VBox.margin>
+                    </Button>
+                    
                     <Button fx:id="userManagementButton" 
                             text="Quản lý Người dùng" 
                             styleClass="menu-item"
@@ -163,6 +175,15 @@
                         <graphic>
                             <Label text="⚙️" styleClass="menu-icon"/>
                         </graphic>
+                    </Button>
+                    
+                    <Button fx:id="reportsButton" 
+                            text="Báo cáo" 
+                            styleClass="menu-item"
+                            onAction="#handleReportsClick"
+                            maxWidth="Infinity"
+                            contentDisplay="LEFT"
+                            graphicTextGap="8">
                     </Button>
                 </VBox>
                 

@@ -13,6 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /* ---------------------------------------------------
@@ -193,29 +197,119 @@ public class LoginController {
      * @param loginResponse LoginResponse chứa user info và role
      * @author: K24DTCN210-NVMANH (25/11/2025 21:45)
      * EditBy: K24DTCN210-NVMANH (25/11/2025 21:52) - Handle ROLE_ prefix
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Xử lý nhiều roles, chọn role cao nhất
      * --------------------------------------------------- */
     private void navigateBasedOnRole(com.mstrust.client.exam.dto.LoginResponse loginResponse) {
-        String role = loginResponse.getRole();
+        String roleString = loginResponse.getRole();
         
-        // Normalize role: remove ROLE_ prefix nếu có
-        String normalizedRole = role;
-        if (role.startsWith("ROLE_")) {
-            normalizedRole = role.substring(5); // Remove "ROLE_"
+        // Parse roles: có thể là string với nhiều roles được join bằng dấu phẩy
+        // Ví dụ: "ROLE_TEACHER,ROLE_ADMIN" hoặc "ROLE_TEACHER, ROLE_ADMIN"
+        List<String> roles = parseRoles(roleString);
+        
+        if (roles.isEmpty()) {
+            logger.warn("No roles found in: {}", roleString);
+            setLoading(false);
+            showError("Không tìm thấy role: " + roleString);
+            return;
         }
         
-        logger.info("Navigating with normalized role: {}", normalizedRole);
+        // Normalize roles: remove "ROLE_" prefix và uppercase
+        List<String> normalizedRoles = new ArrayList<>();
+        for (String role : roles) {
+            String normalized = role.trim();
+            if (normalized.startsWith("ROLE_")) {
+                normalized = normalized.substring(5);
+            }
+            normalizedRoles.add(normalized.toUpperCase());
+        }
         
-        if ("STUDENT".equals(normalizedRole)) {
+        // Xác định role cao nhất theo thứ tự ưu tiên
+        String highestRole = determineHighestRole(normalizedRoles);
+        
+        logger.info("User roles: {} -> normalized: {} -> highest: {}", 
+            roles, normalizedRoles, highestRole);
+        
+        // Navigate dựa trên role cao nhất
+        if ("STUDENT".equals(highestRole)) {
             // Student → Exam List
             navigateToExamList(loginResponse);
-        } else if ("TEACHER".equals(normalizedRole) || "DEPT_MANAGER".equals(normalizedRole) || "ADMIN".equals(normalizedRole)) {
-            // Teacher/Admin → Teacher Dashboard
+        } else if ("TEACHER".equals(highestRole) || 
+                   "CLASS_MANAGER".equals(highestRole) ||
+                   "DEPT_MANAGER".equals(highestRole) || 
+                   "ADMIN".equals(highestRole)) {
+            // Teacher/Manager/Admin → Teacher Dashboard
             navigateToTeacherDashboard(loginResponse);
         } else {
-            logger.warn("Unknown role: {} (normalized: {})", role, normalizedRole);
+            logger.warn("Unknown highest role: {} (from roles: {})", highestRole, normalizedRoles);
             setLoading(false);
-            showError("Role không xác định: " + role);
+            showError("Role không xác định: " + highestRole);
         }
+    }
+    
+    /* ---------------------------------------------------
+     * Parse roles string thành list
+     * Hỗ trợ nhiều format: "ROLE_TEACHER,ROLE_ADMIN", "ROLE_TEACHER, ROLE_ADMIN", etc.
+     * @param roleString String chứa roles (có thể là single role hoặc comma-separated)
+     * @return List các role strings
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    private List<String> parseRoles(String roleString) {
+        List<String> roles = new ArrayList<>();
+        
+        if (roleString == null || roleString.trim().isEmpty()) {
+            return roles;
+        }
+        
+        // Split by comma và trim từng role
+        String[] parts = roleString.split(",");
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                roles.add(trimmed);
+            }
+        }
+        
+        return roles;
+    }
+    
+    /* ---------------------------------------------------
+     * Xác định role cao nhất theo thứ tự ưu tiên
+     * Thứ tự: ADMIN > DEPT_MANAGER > CLASS_MANAGER > TEACHER > STUDENT
+     * @param roles List các normalized roles (đã remove ROLE_ prefix và uppercase)
+     * @return Role cao nhất
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    private String determineHighestRole(List<String> roles) {
+        if (roles.isEmpty()) {
+            return "UNKNOWN";
+        }
+        
+        // Định nghĩa thứ tự ưu tiên (số nhỏ hơn = cao hơn)
+        Map<String, Integer> rolePriority = new HashMap<>();
+        rolePriority.put("ADMIN", 1);
+        rolePriority.put("DEPT_MANAGER", 2);
+        rolePriority.put("CLASS_MANAGER", 3);
+        rolePriority.put("TEACHER", 4);
+        rolePriority.put("STUDENT", 5);
+        
+        String highestRole = null;
+        int highestPriority = Integer.MAX_VALUE;
+        
+        for (String role : roles) {
+            Integer priority = rolePriority.get(role);
+            if (priority != null && priority < highestPriority) {
+                highestPriority = priority;
+                highestRole = role;
+            }
+        }
+        
+        // Nếu không tìm thấy role nào trong priority map, trả về role đầu tiên
+        if (highestRole == null) {
+            highestRole = roles.get(0);
+            logger.warn("Role {} not in priority map, using as highest", highestRole);
+        }
+        
+        return highestRole;
     }
     
     /* ---------------------------------------------------
@@ -283,7 +377,7 @@ public class LoginController {
             controller.setStage(stage);
             controller.setApiClient(apiClient);
             
-            Scene scene = new Scene(root, 1400, 850);
+            Scene scene = new Scene(root, 1500, 950);
             
             // Apply CSS
             try {

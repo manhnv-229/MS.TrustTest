@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" 
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.mstrust.client.admin.controller.UserManagementController"
+      spacing="15" styleClass="content-container"
+      stylesheets="@../css/admin-styles.css, @../css/teacher-styles.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15">
+        <Label text="👥 Quản lý Người dùng" styleClass="page-title"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="createButton" text="+ Tạo mới" styleClass="primary-button" 
+                onAction="#handleCreate"/>
+        <Button fx:id="refreshButton" text="↻ Làm mới" styleClass="secondary-button" 
+                onAction="#handleRefresh"/>
+        <Button fx:id="exportButton" text="📤 Xuất Excel" styleClass="secondary-button"
+                onAction="#handleExport"/>
+    </HBox>
+    
+    <!-- Search and Filters Section -->
+    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="filter-bar">
+        <Label text="Tìm kiếm:"/>
+        <TextField fx:id="searchField" promptText="Tên, Email, Mã SV..." prefWidth="300"
+                   onAction="#handleSearch"/>
+        
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <!-- Role Filter -->
+        <VBox spacing="3">
+            <Label text="Vai trò" styleClass="filter-label"/>
+            <ComboBox fx:id="roleFilter" promptText="Tất cả vai trò" prefWidth="150"
+                     onAction="#handleFilterChange"/>
+        </VBox>
+        
+        <!-- Status Filter -->
+        <VBox spacing="3">
+            <Label text="Trạng thái" styleClass="filter-label"/>
+            <ComboBox fx:id="statusFilter" promptText="Tất cả" prefWidth="120"
+                     onAction="#handleFilterChange"/>
+        </VBox>
+        
+        <Button text="🔍 Tìm" styleClass="secondary-button" onAction="#handleSearch"/>
+    </HBox>
+
+     <!-- Statistics Bar -->
+    <HBox spacing="20" alignment="CENTER_LEFT" styleClass="stats-bar">
+        <Label fx:id="totalUsersLabel" text="Tổng số: 0" styleClass="stat-label"/>
+        <Separator orientation="VERTICAL"/>
+        <Label fx:id="activeUsersLabel" text="Đang hoạt động: 0" styleClass="stat-label"/>
+        <Separator orientation="VERTICAL"/>
+        <Label fx:id="inactiveUsersLabel" text="Vô hiệu hóa: 0" styleClass="stat-label"/>
+    </HBox>
+    <!-- Table Toolbar -->
+    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="table-toolbar">
+        <Label text="Thao tác:" styleClass="toolbar-label"/>
+        <Separator orientation="VERTICAL"/>
+        <Button fx:id="editButton" text="Sửa" styleClass="secondary-button" 
+                onAction="#handleEdit" disable="true"/>
+        <Button fx:id="deleteButton" text="Xóa" styleClass="secondary-button" 
+                onAction="#handleDelete" disable="true"/>
+        <Button fx:id="activateButton" text="Kích hoạt" styleClass="secondary-button" 
+                onAction="#handleActivate" disable="true"/>
+        <Button fx:id="deactivateButton" text="Vô hiệu hóa" styleClass="secondary-button" 
+                onAction="#handleDeactivate" disable="true"/>
+        <Region HBox.hgrow="ALWAYS"/>
+    </HBox>
+    <!-- Table View with Loading Overlay -->
+    <StackPane VBox.vgrow="ALWAYS">
+        <TableView fx:id="usersTable" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="nameColumn" text="Họ tên" prefWidth="200"/>
+                <TableColumn fx:id="emailColumn" text="Email" prefWidth="200"/>
+                <TableColumn fx:id="studentCodeColumn" text="Mã SV" prefWidth="120"/>
+                <TableColumn fx:id="roleColumn" text="Vai trò" prefWidth="150"/>
+                <TableColumn fx:id="statusColumn" text="Trạng thái" prefWidth="100"/>
+                <TableColumn fx:id="departmentColumn" text="Khoa" prefWidth="150"/>
+                <TableColumn fx:id="classColumn" text="Lớp" prefWidth="120"/>
+                <TableColumn fx:id="lastLoginColumn" text="Đăng nhập cuối" prefWidth="150"/>
+            </columns>
+        </TableView>
+        
+        <!-- Loading Overlay -->
+        <StackPane fx:id="loadingPane" visible="false" styleClass="loading-overlay">
+            <VBox alignment="CENTER" spacing="10">
+                <ProgressIndicator styleClass="loading-spinner"/>
+                <Label fx:id="loadingMessage" text="Đang tải..." styleClass="loading-message"/>
+            </VBox>
+        </StackPane>
+    </StackPane>
+    
+    <!-- Pagination Bar -->
+    <HBox spacing="10" alignment="CENTER" styleClass="pagination-bar">
+        <Button fx:id="firstPageButton" text="⏮ Đầu" onAction="#handleFirstPage"/>
+        <Button fx:id="prevPageButton" text="◀ Trước" onAction="#handlePrevPage"/>
+        
+        <Label text="Trang"/>
+        <Label fx:id="currentPageLabel" text="1" styleClass="page-number"/>
+        <Label text="của"/>
+        <Label fx:id="totalPagesLabel" text="1" styleClass="page-number"/>
+        
+        <Button fx:id="nextPageButton" text="Sau ▶" onAction="#handleNextPage"/>
+        <Button fx:id="lastPageButton" text="Cuối ⏭" onAction="#handleLastPage"/>
+        
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <Label text="Hiển thị:"/>
+        <ComboBox fx:id="pageSizeCombo" prefWidth="80" onAction="#handlePageSizeChange"/>
+        <Label text="bản ghi/trang"/>
+    </HBox>
+    
+</VBox>
+

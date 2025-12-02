@@ -142,6 +142,24 @@ public class IconFactory {
     }
     
     /* ---------------------------------------------------
+     * Tạo icon Dashboard (Admin Dashboard)
+     * @returns FontIcon với icon tachometer-alt màu trắng, size 18px
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    public static FontIcon createDashboardIcon() {
+        return createIcon(FontAwesomeSolid.TACHOMETER_ALT, MENU_ICON_SIZE, COLOR_WHITE);
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo icon Báo cáo (Reports)
+     * @returns FontIcon với icon chart-pie màu trắng, size 18px
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    public static FontIcon createReportsIcon() {
+        return createIcon(FontAwesomeSolid.CHART_PIE, MENU_ICON_SIZE, COLOR_WHITE);
+    }
+    
+    /* ---------------------------------------------------
      * Tạo icon trợ giúp (Help)
      * @returns FontIcon với icon question-circle
      * @author: K24DTCN210-NVMANH (27/11/2025 16:45)
@@ -233,21 +251,43 @@ public class IconFactory {
     }
     
     /* ---------------------------------------------------
-     * Tạo icon edit cho button, size 18px
+     * Tạo icon edit cho button, size 14px
      * @returns FontIcon với icon pencil-alt
      * @author: K24DTCN210-NVMANH (30/11/2025)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Giảm size xuống SIZE_SMALL
      * --------------------------------------------------- */
     public static FontIcon createEditIconForButton() {
-        return createIcon(FontAwesomeSolid.PENCIL_ALT, SIZE_MEDIUM, COLOR_PRIMARY);
+        return createIcon(FontAwesomeSolid.PENCIL_ALT, SIZE_SMALL, COLOR_PRIMARY);
     }
     
     /* ---------------------------------------------------
-     * Tạo icon delete cho button, size 18px
+     * Tạo icon delete cho button, size 14px
      * @returns FontIcon với icon trash
      * @author: K24DTCN210-NVMANH (30/11/2025)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Giảm size xuống SIZE_SMALL
      * --------------------------------------------------- */
     public static FontIcon createDeleteIconForButton() {
-        return createIcon(FontAwesomeSolid.TRASH, SIZE_MEDIUM, COLOR_DANGER);
+        return createIcon(FontAwesomeSolid.TRASH, SIZE_SMALL, COLOR_DANGER);
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo icon activate/check cho button, size 14px
+     * @returns FontIcon với icon check-circle
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Giảm size xuống SIZE_SMALL
+     * --------------------------------------------------- */
+    public static FontIcon createActivateIcon() {
+        return createIcon(FontAwesomeSolid.CHECK_CIRCLE, SIZE_SMALL, COLOR_SUCCESS);
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo icon deactivate/ban cho button, size 14px
+     * @returns FontIcon với icon ban
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Giảm size xuống SIZE_SMALL
+     * --------------------------------------------------- */
+    public static FontIcon createDeactivateIcon() {
+        return createIcon(FontAwesomeSolid.BAN, SIZE_SMALL, COLOR_WARNING);
     }
     
     /* ---------------------------------------------------

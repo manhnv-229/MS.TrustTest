@@ -93,8 +93,8 @@ public class ExamClientApplication extends Application {
      * --------------------------------------------------- */
     private void configureStage() {
         primaryStage.setTitle("MS.TrustTest - Hệ Thống Thi Trực Tuyến");
-        primaryStage.setMinWidth(800);
-        primaryStage.setMinHeight(600);
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(750);
         
         // Store application instance in stage userData để các controller có thể access
         primaryStage.setUserData(this);

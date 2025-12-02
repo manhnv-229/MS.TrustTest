@@ -508,6 +508,23 @@
     -fx-text-fill: #1976D2;
 }
 
+/* Table Toolbar */
+.table-toolbar {
+    -fx-background-color: #FAFAFA;
+    -fx-padding: 10 15;
+    -fx-background-radius: 5px;
+    -fx-border-color: #E0E0E0;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1;
+}
+
+.toolbar-label {
+    -fx-text-fill: #546E7A;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 5 0 0;
+}
+
 /* Pagination Bar */
 .pagination-bar {
     -fx-background-color: #F5F5F5;

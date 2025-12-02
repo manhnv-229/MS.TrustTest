@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Map;
 
 /* ---------------------------------------------------
@@ -146,8 +147,9 @@ public class ExamApiClient {
     /* ---------------------------------------------------
      * Decode JWT token để lấy role từ claims
      * @param token JWT token
-     * @returns String role name
+     * @returns String role name (có thể là single role hoặc comma-separated roles)
      * @author: K24DTCN210-NVMANH (25/11/2025 21:43)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Xử lý nhiều roles, trả về tất cả roles join bằng dấu phẩy
      * --------------------------------------------------- */
     private String decodeJwtRole(String token) {
         try {
@@ -167,29 +169,50 @@ public class ExamApiClient {
             
             // Try different possible claim names
             if (claims.containsKey("role")) {
-                return (String) claims.get("role");
+                Object roleObj = claims.get("role");
+                // Nếu role là string, trả về trực tiếp
+                if (roleObj instanceof String) {
+                    return (String) roleObj;
+                }
+                // Nếu role là list, join bằng dấu phẩy
+                if (roleObj instanceof List) {
+                    List<?> roles = (List<?>) roleObj;
+                    return String.join(",", roles.stream()
+                        .map(Object::toString)
+                        .collect(java.util.stream.Collectors.toList()));
+                }
+                return roleObj.toString();
             } else if (claims.containsKey("roles")) {
-                // If roles is an array, take first one
+                // If roles is an array, join all roles
                 Object rolesObj = claims.get("roles");
                 if (rolesObj instanceof List) {
                     List<?> roles = (List<?>) rolesObj;
-                    return roles.isEmpty() ? "UNKNOWN" : roles.get(0).toString();
+                    if (roles.isEmpty()) {
+                        return "UNKNOWN";
+                    }
+                    // Join tất cả roles bằng dấu phẩy
+                    return String.join(",", roles.stream()
+                        .map(Object::toString)
+                        .collect(java.util.stream.Collectors.toList()));
                 }
                 return rolesObj.toString();
             } else if (claims.containsKey("authorities")) {
-                // Spring Security format
+                // Spring Security format - join tất cả authorities
                 Object authObj = claims.get("authorities");
                 if (authObj instanceof List) {
                     List<?> authorities = (List<?>) authObj;
-                    if (!authorities.isEmpty()) {
-                        String auth = authorities.get(0).toString();
-                        // Remove "ROLE_" prefix if present
-                        return auth.replace("ROLE_", "");
+                    if (authorities.isEmpty()) {
+                        return "UNKNOWN";
                     }
+                    // Join tất cả authorities bằng dấu phẩy (giữ nguyên ROLE_ prefix)
+                    return String.join(",", authorities.stream()
+                        .map(Object::toString)
+                        .collect(java.util.stream.Collectors.toList()));
                 }
+                return authObj.toString();
             }
             
-            logger.warn("No role found in JWT claims");
+            logger.warn("No role found in JWT claims. Available keys: {}", claims.keySet());
             return "UNKNOWN";
             
         } catch (Exception e) {

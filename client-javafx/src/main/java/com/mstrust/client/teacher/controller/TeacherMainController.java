@@ -16,6 +16,10 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -41,9 +45,11 @@ public class TeacherMainController {
     
     // Admin-only section
     @FXML private VBox adminMenuSection;
+    @FXML private Button adminDashboardButton;
     @FXML private Button userManagementButton;
     @FXML private Button organizationButton;
     @FXML private Button systemConfigButton;
+    @FXML private Button reportsButton;
     
     // Content area
     @FXML private StackPane contentArea;
@@ -86,6 +92,9 @@ public class TeacherMainController {
         monitoringButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createMonitoringIcon());
         
         // Admin menu icons (sẽ được hiển thị nếu user là admin)
+        if (adminDashboardButton != null) {
+            adminDashboardButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createDashboardIcon());
+        }
         if (userManagementButton != null) {
             userManagementButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createUserManagementIcon());
         }
@@ -94,6 +103,9 @@ public class TeacherMainController {
         }
         if (systemConfigButton != null) {
             systemConfigButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createSettingsIcon());
+        }
+        if (reportsButton != null) {
+            reportsButton.setGraphic(com.mstrust.client.exam.util.IconFactory.createReportsIcon());
         }
         
         // Logout button icon
@@ -108,27 +120,126 @@ public class TeacherMainController {
     /* ---------------------------------------------------
      * Setup user info và role-based UI
      * @param userName Tên người dùng
-     * @param role Vai trò (TEACHER, ADMIN hoặc ROLE_TEACHER, ROLE_ADMIN)
+     * @param role Vai trò (TEACHER, ADMIN hoặc ROLE_TEACHER, ROLE_ADMIN hoặc comma-separated roles)
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
      * EditBy: K24DTCN210-NVMANH (25/11/2025 22:15) - Fix lambda final variable
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Xử lý nhiều roles, chọn role cao nhất
      * --------------------------------------------------- */
     public void setupUserInfo(String userName, String role) {
         this.currentUserName = userName;
         this.currentUserRole = role;
         
-        // Normalize role for display: remove ROLE_ prefix nếu có
-        final String displayRole = role.startsWith("ROLE_") ? role.substring(5) : role;
+        // Parse roles: có thể là string với nhiều roles được join bằng dấu phẩy
+        // Ví dụ: "ROLE_TEACHER,ROLE_ADMIN" hoặc "ROLE_TEACHER, ROLE_ADMIN"
+        List<String> roles = parseRoles(role);
+        
+        if (roles.isEmpty()) {
+            // Fallback: nếu không parse được, dùng role gốc
+            final String displayRole = role.startsWith("ROLE_") ? role.substring(5) : role;
+            Platform.runLater(() -> {
+                userLabel.setText(userName);
+                roleLabel.setText("[" + displayRole + "]");
+                adminMenuSection.setVisible(false);
+                adminMenuSection.setManaged(false);
+            });
+            return;
+        }
+        
+        // Normalize roles: remove "ROLE_" prefix và uppercase
+        List<String> normalizedRoles = new ArrayList<>();
+        for (String r : roles) {
+            String normalized = r.trim();
+            if (normalized.startsWith("ROLE_")) {
+                normalized = normalized.substring(5);
+            }
+            normalizedRoles.add(normalized.toUpperCase());
+        }
+        
+        // Xác định role cao nhất theo thứ tự ưu tiên
+        String highestRole = determineHighestRole(normalizedRoles);
+        
+        final String displayRole = highestRole;
         
         Platform.runLater(() -> {
             userLabel.setText(userName);
             roleLabel.setText("[" + displayRole + "]");
             
-            // Show admin menu nếu role là ADMIN
-            if ("ADMIN".equals(displayRole)) {
+            // Show admin menu nếu role cao nhất là ADMIN, DEPT_MANAGER, hoặc CLASS_MANAGER
+            if ("ADMIN".equals(displayRole) || 
+                "DEPT_MANAGER".equals(displayRole) || 
+                "CLASS_MANAGER".equals(displayRole)) {
                 adminMenuSection.setVisible(true);
                 adminMenuSection.setManaged(true);
+            } else {
+                adminMenuSection.setVisible(false);
+                adminMenuSection.setManaged(false);
             }
         });
+    }
+    
+    /* ---------------------------------------------------
+     * Parse roles string thành list
+     * Hỗ trợ nhiều format: "ROLE_TEACHER,ROLE_ADMIN", "ROLE_TEACHER, ROLE_ADMIN", etc.
+     * @param roleString String chứa roles (có thể là single role hoặc comma-separated)
+     * @return List các role strings
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    private List<String> parseRoles(String roleString) {
+        List<String> roles = new ArrayList<>();
+        
+        if (roleString == null || roleString.trim().isEmpty()) {
+            return roles;
+        }
+        
+        // Split by comma và trim từng role
+        String[] parts = roleString.split(",");
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                roles.add(trimmed);
+            }
+        }
+        
+        return roles;
+    }
+    
+    /* ---------------------------------------------------
+     * Xác định role cao nhất theo thứ tự ưu tiên
+     * Thứ tự: ADMIN > DEPT_MANAGER > CLASS_MANAGER > TEACHER > STUDENT
+     * @param roles List các normalized roles (đã remove ROLE_ prefix và uppercase)
+     * @return Role cao nhất
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    private String determineHighestRole(List<String> roles) {
+        if (roles.isEmpty()) {
+            return "UNKNOWN";
+        }
+        
+        // Định nghĩa thứ tự ưu tiên (số nhỏ hơn = cao hơn)
+        Map<String, Integer> rolePriority = new HashMap<>();
+        rolePriority.put("ADMIN", 1);
+        rolePriority.put("DEPT_MANAGER", 2);
+        rolePriority.put("CLASS_MANAGER", 3);
+        rolePriority.put("TEACHER", 4);
+        rolePriority.put("STUDENT", 5);
+        
+        String highestRole = null;
+        int highestPriority = Integer.MAX_VALUE;
+        
+        for (String role : roles) {
+            Integer priority = rolePriority.get(role);
+            if (priority != null && priority < highestPriority) {
+                highestPriority = priority;
+                highestRole = role;
+            }
+        }
+        
+        // Nếu không tìm thấy role nào trong priority map, trả về role đầu tiên
+        if (highestRole == null) {
+            highestRole = roles.get(0);
+        }
+        
+        return highestRole;
     }
     
     /* ---------------------------------------------------
@@ -334,34 +445,151 @@ public class TeacherMainController {
     }
     
     /* ---------------------------------------------------
+     * Handle Admin Dashboard (Admin only) - mở Admin Dashboard
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    @FXML
+    private void handleAdminDashboardClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/admin-dashboard.fxml"));
+            Parent adminDashboardView = loader.load();
+            
+            // Get controller and initialize
+            com.mstrust.client.admin.controller.AdminDashboardController controller = 
+                loader.getController();
+            
+            // Initialize với base URL và auth token
+            String baseUrl = apiClient.getBaseUrl();
+            controller.initialize(baseUrl, apiClient.getAuthToken(), stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(adminDashboardView);
+            highlightSelectedMenu(adminDashboardButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Admin Dashboard: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /* ---------------------------------------------------
      * Handle User Management menu click (Admin only)
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Implement user management UI
      * --------------------------------------------------- */
     @FXML
     private void handleUserManagementClick() {
-        showInfo("Quản lý Người dùng", 
-                "Chức năng quản lý người dùng sẽ được phát triển trong phase tới.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/user-management.fxml"));
+            Parent userManagementView = loader.load();
+            
+            // Get controller and initialize
+            com.mstrust.client.admin.controller.UserManagementController controller = 
+                loader.getController();
+            
+            // Initialize với base URL và auth token
+            String baseUrl = apiClient.getBaseUrl();
+            controller.initialize(baseUrl, apiClient.getAuthToken(), stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(userManagementView);
+            highlightSelectedMenu(userManagementButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Quản lý Người dùng: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /* ---------------------------------------------------
      * Handle Organization menu click (Admin only)
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Implement organization management UI
      * --------------------------------------------------- */
     @FXML
     private void handleOrganizationClick() {
-        showInfo("Quản lý Tổ chức", 
-                "Chức năng quản lý tổ chức đã có Backend APIs (Phase 3).\n" +
-                "UI sẽ được phát triển trong phase tới.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/organization-management.fxml"));
+            Parent organizationView = loader.load();
+            
+            // Get controller and initialize
+            com.mstrust.client.admin.controller.OrganizationManagementController controller = 
+                loader.getController();
+            
+            // Initialize với base URL và auth token
+            String baseUrl = apiClient.getBaseUrl();
+            controller.initialize(baseUrl, apiClient.getAuthToken(), stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(organizationView);
+            highlightSelectedMenu(organizationButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Quản lý Tổ chức: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /* ---------------------------------------------------
      * Handle System Config menu click (Admin only)
      * @author: K24DTCN210-NVMANH (25/11/2025 21:05)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025) - Implement system config UI
      * --------------------------------------------------- */
     @FXML
     private void handleSystemConfigClick() {
-        showInfo("Cấu hình Hệ thống", 
-                "Chức năng cấu hình hệ thống sẽ được phát triển trong phase tới.");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/system-config.fxml"));
+            Parent systemConfigView = loader.load();
+            
+            // Get controller and initialize
+            com.mstrust.client.admin.controller.SystemConfigController controller = 
+                loader.getController();
+            
+            // Initialize với base URL và auth token
+            String baseUrl = apiClient.getBaseUrl();
+            controller.initialize(baseUrl, apiClient.getAuthToken(), stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(systemConfigView);
+            highlightSelectedMenu(systemConfigButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Cấu hình Hệ thống: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Handle Reports menu click (Admin only)
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    @FXML
+    private void handleReportsClick() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/reports-view.fxml"));
+            Parent reportsView = loader.load();
+            
+            // Get controller and initialize
+            com.mstrust.client.admin.controller.ReportsController controller = 
+                loader.getController();
+            
+            // Initialize với base URL và auth token
+            String baseUrl = apiClient.getBaseUrl();
+            controller.initialize(baseUrl, apiClient.getAuthToken(), stage);
+            
+            // Load view
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(reportsView);
+            highlightSelectedMenu(reportsButton);
+            
+        } catch (IOException e) {
+            showError("Lỗi tải View", "Không thể tải Báo cáo: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
     
     /* ---------------------------------------------------
@@ -432,9 +660,11 @@ public class TeacherMainController {
         monitoringButton.getStyleClass().remove("menu-item-selected");
         
         if (adminMenuSection.isVisible()) {
+            adminDashboardButton.getStyleClass().remove("menu-item-selected");
             userManagementButton.getStyleClass().remove("menu-item-selected");
             organizationButton.getStyleClass().remove("menu-item-selected");
             systemConfigButton.getStyleClass().remove("menu-item-selected");
+            reportsButton.getStyleClass().remove("menu-item-selected");
         }
         
         // Add highlight to selected button

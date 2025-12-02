@@ -1,6 +1,7 @@
 package com.mstrust.exam.service;
 
 import com.mstrust.exam.dto.ChangePasswordRequest;
+import com.mstrust.exam.dto.CreateUserRequest;
 import com.mstrust.exam.dto.UserDTO;
 import com.mstrust.exam.dto.UserSearchCriteria;
 import com.mstrust.exam.dto.UserStatisticsDTO;
@@ -9,11 +10,13 @@ import com.mstrust.exam.entity.Department;
 import com.mstrust.exam.entity.Role;
 import com.mstrust.exam.entity.User;
 import com.mstrust.exam.exception.BadRequestException;
+import com.mstrust.exam.exception.DuplicateResourceException;
 import com.mstrust.exam.exception.ResourceNotFoundException;
 import com.mstrust.exam.repository.ClassRepository;
 import com.mstrust.exam.repository.DepartmentRepository;
 import com.mstrust.exam.repository.RoleRepository;
 import com.mstrust.exam.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +25,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /* ---------------------------------------------------
@@ -33,6 +38,7 @@ import java.util.stream.Collectors;
  * @author: K24DTCN210-NVMANH (13/11/2025 15:02)
  * --------------------------------------------------- */
 @Service
+@Slf4j
 public class UserService {
 
     @Autowired
@@ -128,6 +134,117 @@ public class UserService {
     }
 
     /* ---------------------------------------------------
+     * Tạo user mới (Admin only)
+     * @param request CreateUserRequest chứa thông tin user mới
+     * @returns UserDTO của user vừa tạo
+     * @throws DuplicateResourceException nếu email/student_code/phone đã tồn tại
+     * @throws ResourceNotFoundException nếu department/class/role không tồn tại
+     * @author: K24DTCN210-NVMANH (02/12/2025)
+     * --------------------------------------------------- */
+    @Transactional
+    public UserDTO createUser(CreateUserRequest request) {
+        log.info("Creating new user with email: {}", request.getEmail());
+        
+        // Validate duplicate email
+        if (userRepository.existsByEmail(request.getEmail())) {
+            log.warn("Duplicate email detected: {}", request.getEmail());
+            throw new DuplicateResourceException("User", "email", request.getEmail());
+        }
+
+        // Validate duplicate student code
+        if (request.getStudentCode() != null && !request.getStudentCode().trim().isEmpty()) {
+            if (userRepository.existsByStudentCode(request.getStudentCode())) {
+                log.warn("Duplicate student code detected: {}", request.getStudentCode());
+                throw new DuplicateResourceException("User", "studentCode", request.getStudentCode());
+            }
+        }
+
+        // Validate duplicate phone
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty()) {
+            if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+                log.warn("Duplicate phone number detected: {}", request.getPhoneNumber());
+                throw new DuplicateResourceException("User", "phoneNumber", request.getPhoneNumber());
+            }
+        }
+
+        // Create new user
+        User user = new User();
+        user.setStudentCode(request.getStudentCode() != null && !request.getStudentCode().trim().isEmpty() 
+            ? request.getStudentCode().trim() : null);
+        user.setEmail(request.getEmail().trim());
+        user.setPhoneNumber(request.getPhoneNumber() != null && !request.getPhoneNumber().trim().isEmpty() 
+            ? request.getPhoneNumber().trim() : null);
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setFullName(request.getFullName().trim());
+        user.setDateOfBirth(request.getDateOfBirth());
+        
+        if (request.getGender() != null && !request.getGender().trim().isEmpty()) {
+            try {
+                user.setGender(User.Gender.valueOf(request.getGender().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid gender value: {}, ignoring", request.getGender());
+            }
+        }
+        
+        user.setAddress(request.getAddress() != null ? request.getAddress().trim() : null);
+        user.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+
+        // Assign department
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                    .orElseThrow(() -> {
+                        log.error("Department not found with ID: {}", request.getDepartmentId());
+                        return new ResourceNotFoundException("Department", "id", request.getDepartmentId());
+                    });
+            user.setDepartment(department);
+            log.debug("Assigned department: {} to user", department.getDepartmentName());
+        }
+
+        // Assign class
+        if (request.getClassId() != null) {
+            ClassEntity classEntity = classRepository.findById(request.getClassId())
+                    .orElseThrow(() -> {
+                        log.error("Class not found with ID: {}", request.getClassId());
+                        return new ResourceNotFoundException("Class", "id", request.getClassId());
+                    });
+            user.setClassEntity(classEntity);
+            log.debug("Assigned class: {} to user", classEntity.getClassName());
+        }
+
+        // Assign roles
+        Set<Role> roles = new HashSet<>();
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            for (String roleName : request.getRoles()) {
+                // Normalize role name (remove ROLE_ prefix if present, then add it)
+                String normalizedRoleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName.toUpperCase();
+                Role role = roleRepository.findByRoleName(normalizedRoleName)
+                        .orElseThrow(() -> {
+                            log.error("Role not found: {}", normalizedRoleName);
+                            return new ResourceNotFoundException("Role", "roleName", normalizedRoleName);
+                        });
+                roles.add(role);
+                log.debug("Assigned role: {} to user", normalizedRoleName);
+            }
+        } else {
+            // Default to STUDENT role if no roles specified
+            Role studentRole = roleRepository.findByRoleName("ROLE_STUDENT")
+                    .orElseThrow(() -> {
+                        log.error("Default STUDENT role not found");
+                        return new ResourceNotFoundException("Role", "roleName", "ROLE_STUDENT");
+                    });
+            roles.add(studentRole);
+            log.debug("Assigned default STUDENT role to user");
+        }
+        user.setRoles(roles);
+
+        // Save user
+        User savedUser = userRepository.save(user);
+        log.info("User created successfully with ID: {}, email: {}", savedUser.getId(), savedUser.getEmail());
+
+        return UserDTO.from(savedUser);
+    }
+
+    /* ---------------------------------------------------
      * Toggle user active status (active <-> inactive)
      * @param id User ID
      * @returns UserDTO đã update
@@ -153,34 +270,176 @@ public class UserService {
      * --------------------------------------------------- */
     @Transactional
     public UserDTO updateUser(Long id, UserDTO userDTO) {
+        log.info("Updating user with ID: {}", id);
+        log.debug("Update data - Email: {}, FullName: {}, Gender: {}, StudentCode: {}, PhoneNumber: {}, IsActive: {}, Roles: {}", 
+            userDTO.getEmail(), userDTO.getFullName(), userDTO.getGender(), 
+            userDTO.getStudentCode(), userDTO.getPhoneNumber(), userDTO.getIsActive(), userDTO.getRoles());
+        
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
+                .orElseThrow(() -> {
+                    log.error("User not found with ID: {}", id);
+                    return new ResourceNotFoundException("User", "id", id);
+                });
 
         if (user.isDeleted()) {
+            log.error("User with ID {} is deleted", id);
             throw new ResourceNotFoundException("User", "id", id);
         }
 
         // Update fields (không update password ở đây, có method riêng)
         if (userDTO.getFullName() != null) {
             user.setFullName(userDTO.getFullName());
+            log.debug("Updated fullName: {}", userDTO.getFullName());
         }
+        
+        // Update email (cần validate duplicate, loại trừ user hiện tại)
+        if (userDTO.getEmail() != null && !userDTO.getEmail().equals(user.getEmail())) {
+            // Tìm user khác có email này (loại trừ user hiện tại)
+            User existingUser = userRepository.findByEmail(userDTO.getEmail()).orElse(null);
+            if (existingUser != null && !existingUser.getId().equals(id)) {
+                log.warn("Duplicate email detected: {} (belongs to user ID: {})", userDTO.getEmail(), existingUser.getId());
+                throw new DuplicateResourceException("User", "email", userDTO.getEmail());
+            }
+            user.setEmail(userDTO.getEmail());
+            log.debug("Updated email: {}", userDTO.getEmail());
+        }
+        
+        // Update student code (cần validate duplicate, loại trừ user hiện tại)
+        if (userDTO.getStudentCode() != null) {
+            if (!userDTO.getStudentCode().equals(user.getStudentCode())) {
+                // Tìm user khác có student code này (loại trừ user hiện tại)
+                User existingUser = userRepository.findByStudentCode(userDTO.getStudentCode()).orElse(null);
+                if (existingUser != null && !existingUser.getId().equals(id)) {
+                    log.warn("Duplicate student code detected: {} (belongs to user ID: {})", userDTO.getStudentCode(), existingUser.getId());
+                    throw new DuplicateResourceException("User", "studentCode", userDTO.getStudentCode());
+                }
+            }
+            user.setStudentCode(userDTO.getStudentCode());
+            log.debug("Updated studentCode: {}", userDTO.getStudentCode());
+        } else {
+            // Nếu gửi null thì xóa student code
+            user.setStudentCode(null);
+            log.debug("Cleared studentCode");
+        }
+        
+        // Update date of birth - có thể cập nhật hoặc xóa
         if (userDTO.getDateOfBirth() != null) {
             user.setDateOfBirth(userDTO.getDateOfBirth());
+            log.debug("Updated dateOfBirth: {}", userDTO.getDateOfBirth());
+        } else {
+            // Nếu gửi null thì xóa date of birth
+            user.setDateOfBirth(null);
+            log.debug("Cleared dateOfBirth");
         }
+        
         if (userDTO.getGender() != null) {
-            user.setGender(User.Gender.valueOf(userDTO.getGender()));
+            try {
+                user.setGender(User.Gender.valueOf(userDTO.getGender().toUpperCase()));
+                log.debug("Updated gender: {}", userDTO.getGender());
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid gender value: {}, ignoring", userDTO.getGender());
+            }
+        } else {
+            // Nếu gửi null thì xóa gender
+            user.setGender(null);
+            log.debug("Cleared gender");
         }
+        
         if (userDTO.getAddress() != null) {
             user.setAddress(userDTO.getAddress());
+            log.debug("Updated address");
+        } else {
+            // Nếu gửi null thì xóa address
+            user.setAddress(null);
+            log.debug("Cleared address");
         }
+        
         if (userDTO.getAvatarUrl() != null) {
             user.setAvatarUrl(userDTO.getAvatarUrl());
+            log.debug("Updated avatarUrl");
         }
+        
         if (userDTO.getPhoneNumber() != null) {
+            // Validate duplicate phone number (loại trừ user hiện tại)
+            if (!userDTO.getPhoneNumber().equals(user.getPhoneNumber())) {
+                // Tìm user khác có phone number này (loại trừ user hiện tại)
+                User existingUser = userRepository.findByPhoneNumber(userDTO.getPhoneNumber()).orElse(null);
+                if (existingUser != null && !existingUser.getId().equals(id)) {
+                    log.warn("Duplicate phone number detected: {} (belongs to user ID: {})", userDTO.getPhoneNumber(), existingUser.getId());
+                    throw new DuplicateResourceException("User", "phoneNumber", userDTO.getPhoneNumber());
+                }
+            }
             user.setPhoneNumber(userDTO.getPhoneNumber());
+            log.debug("Updated phoneNumber: {}", userDTO.getPhoneNumber());
+        } else {
+            // Nếu gửi null thì xóa phone number
+            user.setPhoneNumber(null);
+            log.debug("Cleared phoneNumber");
+        }
+        
+        // Update isActive
+        if (userDTO.getIsActive() != null) {
+            user.setIsActive(userDTO.getIsActive());
+            log.debug("Updated isActive: {}", userDTO.getIsActive());
+        }
+        
+        // Update department - có thể cập nhật hoặc xóa
+        if (userDTO.getDepartmentId() != null) {
+            Department department = departmentRepository.findByIdAndDeletedAtIsNull(userDTO.getDepartmentId())
+                    .orElseThrow(() -> {
+                        log.error("Department not found with ID: {}", userDTO.getDepartmentId());
+                        return new ResourceNotFoundException("Department", "id", userDTO.getDepartmentId());
+                    });
+            user.setDepartment(department);
+            log.debug("Updated department: {} ({})", department.getDepartmentName(), department.getId());
+        } else {
+            // Nếu gửi null thì xóa department
+            user.setDepartment(null);
+            log.debug("Cleared department");
+        }
+        
+        // Update class - có thể cập nhật hoặc xóa
+        if (userDTO.getClassId() != null) {
+            ClassEntity classEntity = classRepository.findById(userDTO.getClassId())
+                    .orElseThrow(() -> {
+                        log.error("Class not found with ID: {}", userDTO.getClassId());
+                        return new ResourceNotFoundException("Class", "id", userDTO.getClassId());
+                    });
+            if (classEntity.getDeletedAt() != null) {
+                log.error("Class with ID {} is deleted", userDTO.getClassId());
+                throw new ResourceNotFoundException("Class", "id", userDTO.getClassId());
+            }
+            user.setClassEntity(classEntity);
+            log.debug("Updated class: {} ({})", classEntity.getClassName(), classEntity.getId());
+        } else {
+            // Nếu gửi null thì xóa class
+            user.setClassEntity(null);
+            log.debug("Cleared class");
+        }
+        
+        // Update roles - luôn cập nhật (kể cả khi empty list)
+        if (userDTO.getRoles() != null) {
+            Set<Role> roles = new HashSet<>();
+            if (!userDTO.getRoles().isEmpty()) {
+                for (String roleName : userDTO.getRoles()) {
+                    // Normalize role name (remove ROLE_ prefix if present, then add it)
+                    String normalizedRoleName = roleName.startsWith("ROLE_") ? roleName : "ROLE_" + roleName.toUpperCase();
+                    Role role = roleRepository.findByRoleName(normalizedRoleName)
+                            .orElseThrow(() -> {
+                                log.error("Role not found: {}", normalizedRoleName);
+                                return new ResourceNotFoundException("Role", "roleName", normalizedRoleName);
+                            });
+                    roles.add(role);
+                    log.debug("Assigned role: {} to user", normalizedRoleName);
+                }
+            }
+            // Nếu roles rỗng, set empty set (xóa tất cả roles)
+            user.setRoles(roles);
+            log.debug("Updated roles: {} (total: {})", userDTO.getRoles(), roles.size());
         }
 
         User updatedUser = userRepository.save(user);
+        log.info("User updated successfully with ID: {}, email: {}", updatedUser.getId(), updatedUser.getEmail());
         return UserDTO.from(updatedUser);
     }
 
