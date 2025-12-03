@@ -34,15 +34,15 @@
     <!-- Login Form -->
     <VBox spacing="15" alignment="CENTER" maxWidth="300">
         
-        <!-- Email Field -->
+        <!-- Login Field (Email/Student Code/Phone) -->
         <VBox spacing="5">
-            <Label text="Email:" styleClass="login-label">
+            <Label text="Thông tin đăng nhập:" styleClass="login-label">
                 <font>
                     <Font size="13"/>
                 </font>
             </Label>
             <TextField fx:id="emailField" 
-                      promptText="Nhập email của bạn"
+                      promptText="Email, Mã sinh viên hoặc SĐT"
                       styleClass="login-textfield"/>
         </VBox>
         

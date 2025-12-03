@@ -1,25 +1,16 @@
-package com.mstrust.exam.dto;
+package com.mstrust.client.exam.dto;
 
-import com.mstrust.exam.entity.ExamStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /* ---------------------------------------------------
- * DTO cho danh sách bài thi có thể làm
- * Lightweight version, không chứa questions
- * @author: K24DTCN210-NVMANH (19/11/2025 15:17)
+ * DTO cho available exams từ backend
+ * Map từ backend AvailableExamDTO
+ * @author: K24DTCN210-NVMANH (02/12/2025 18:15)
  * --------------------------------------------------- */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class AvailableExamDTO {
-    
     private Long id;
     private String title;
     private String description;
@@ -56,7 +47,7 @@ public class AvailableExamDTO {
     private BigDecimal highestScore;  // Điểm cao nhất (null nếu chưa submit lần nào)
     
     // Status
-    private ExamStatus status;  // DRAFT, PUBLISHED, ONGOING, COMPLETED
+    private String status;  // DRAFT, PUBLISHED, ONGOING, COMPLETED
     private Boolean isEligible;  // Student có thể làm không
     private String ineligibleReason;  // Lý do không thể làm (nếu có)
     

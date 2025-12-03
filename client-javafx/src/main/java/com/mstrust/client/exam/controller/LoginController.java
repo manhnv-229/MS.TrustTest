@@ -99,12 +99,12 @@ public class LoginController {
         
         // Validate input
         if (email.isEmpty() || password.isEmpty()) {
-            showError("Vui lòng nhập đầy đủ email và mật khẩu");
+            showError("Vui lòng nhập đầy đủ thông tin đăng nhập và mật khẩu");
             return;
         }
         
-        if (!isValidEmail(email)) {
-            showError("Email không hợp lệ");
+        if (!isValidLoginInput(email)) {
+            showError("Thông tin đăng nhập không hợp lệ (Email, Mã sinh viên hoặc SĐT)");
             return;
         }
         
@@ -171,14 +171,35 @@ public class LoginController {
     }
     
     /* ---------------------------------------------------
-     * Validate email format
-     * @param email Email cần validate
-     * @return true nếu email hợp lệ
-     * @author: K24DTCN210-NVMANH (24/11/2025 08:00)
-     * EditBy: K24DTCN210-NVMANH (27/11/2025 15:50) - Fixed regex pattern
+     * Validate login input format (Email, Student Code, hoặc Phone Number)
+     * @param input Input cần validate (có thể là email, mã SV, hoặc SĐT)
+     * @return true nếu input hợp lệ
+     * @author: K24DTCN210-NVMANH (03/12/2025 11:15)
+     * Hỗ trợ đăng nhập đa phương thức: Email, Mã sinh viên, SĐT
      * --------------------------------------------------- */
-    private boolean isValidEmail(String email) {
-        return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
+    private boolean isValidLoginInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return false;
+        }
+        
+        input = input.trim();
+        
+        // Check if it's a valid email
+        if (input.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            return true;
+        }
+        
+        // Check if it's a valid student code (ví dụ: B21DCCN001, K24DTCN210)
+        if (input.matches("^[A-Z][0-9]{2}[A-Z]{2,6}[0-9]{3}$")) {
+            return true;
+        }
+        
+        // Check if it's a valid phone number (10-11 digits, có thể bắt đầu bằng 0)
+        if (input.matches("^0[0-9]{9,10}$")) {
+            return true;
+        }
+        
+        return false;
     }
     
     /* ---------------------------------------------------

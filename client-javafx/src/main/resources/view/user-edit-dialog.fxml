@@ -3,21 +3,24 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane xmlns="http://javafx.com/javafx" 
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.mstrust.client.admin.controller.UserEditDialogController"
             styleClass="user-dialog-container"
-            prefWidth="750" prefHeight="700">
+            stylesheets="@../css/admin-styles.css, @../css/teacher-styles.css"
+            prefWidth="800" prefHeight="750">
     
-    <!-- Header - Ẩn title không cần thiết -->
+    <!-- Header với icon và title -->
     <top>
-        <VBox styleClass="dialog-header" visible="false" managed="false">
+        <HBox styleClass="dialog-header" alignment="CENTER_LEFT" spacing="12">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="20" right="25" bottom="15" left="25"/>
             </padding>
+            <FontIcon iconLiteral="fas-user-plus" iconSize="24" iconColor="#1976d2"/>
             <Label fx:id="dialogTitle" styleClass="page-title" text="Tạo người dùng mới"/>
-        </VBox>
+        </HBox>
     </top>
     
     <!-- Content với ScrollPane -->
@@ -33,46 +36,51 @@
                     <Label text="Thông tin cơ bản" styleClass="section-title"/>
                     
                     <!-- Full Name -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Họ tên:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Họ tên:" minWidth="110" styleClass="form-label"/>
                         <TextField fx:id="fullNameField" promptText="Nhập họ và tên đầy đủ" 
-                                   styleClass="form-field" prefWidth="400"/>
+                                   styleClass="form-field" prefWidth="380"/>
                         <Label text="*" styleClass="required-mark"/>
                         <Label fx:id="fullNameErrorLabel" styleClass="error-label" visible="false" 
                                text="Họ tên không được để trống"/>
                     </HBox>
                     
                     <!-- Email -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Email:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-envelope" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Email:" minWidth="110" styleClass="form-label"/>
                         <TextField fx:id="emailField" promptText="example@email.com" 
-                                   styleClass="form-field" prefWidth="400"/>
+                                   styleClass="form-field" prefWidth="380"/>
                         <Label text="*" styleClass="required-mark"/>
                         <Label fx:id="emailErrorLabel" styleClass="error-label" visible="false" 
                                text="Email không hợp lệ"/>
                     </HBox>
                     
                     <!-- Password (chỉ hiển thị khi tạo mới) -->
-                    <HBox spacing="10" alignment="CENTER_LEFT" fx:id="passwordContainer">
-                        <Label text="Mật khẩu:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row" fx:id="passwordContainer">
+                        <FontIcon iconLiteral="fas-lock" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Mật khẩu:" minWidth="110" styleClass="form-label"/>
                         <PasswordField fx:id="passwordField" promptText="Tối thiểu 6 ký tự" 
-                                       styleClass="form-field" prefWidth="300"/>
+                                       styleClass="form-field" prefWidth="280"/>
                         <Label text="*" styleClass="required-mark"/>
                         <Label fx:id="passwordErrorLabel" styleClass="error-label" visible="false" 
                                text="Mật khẩu phải có ít nhất 6 ký tự"/>
                     </HBox>
                     
                     <!-- Student Code -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Mã SV:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-id-card" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Mã SV:" minWidth="110" styleClass="form-label"/>
                         <TextField fx:id="studentCodeField" promptText="Ví dụ: SV001" 
                                    styleClass="form-field" prefWidth="200"/>
                         <Label text="(Tùy chọn)" styleClass="hint-text"/>
                     </HBox>
                     
                     <!-- Phone Number -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Số điện thoại:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-phone" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Số điện thoại:" minWidth="110" styleClass="form-label"/>
                         <TextField fx:id="phoneNumberField" promptText="Ví dụ: 0123456789" 
                                    styleClass="form-field" prefWidth="200"/>
                         <Label text="(Tùy chọn)" styleClass="hint-text"/>
@@ -84,29 +92,36 @@
                     <Label text="Thông tin cá nhân" styleClass="section-title"/>
                     
                     <!-- Date of Birth -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Ngày sinh:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-calendar-alt" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Ngày sinh:" minWidth="110" styleClass="form-label"/>
                         <DatePicker fx:id="dateOfBirthPicker" styleClass="form-field" prefWidth="200"/>
                         <Label text="(Tùy chọn)" styleClass="hint-text"/>
                     </HBox>
                     
                     <!-- Gender -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Giới tính:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-venus-mars" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Giới tính:" minWidth="110" styleClass="form-label"/>
                         <ComboBox fx:id="genderCombo" promptText="-- Chọn giới tính --" 
                                   styleClass="combo-box" prefWidth="200"/>
                         <Label text="(Tùy chọn)" styleClass="hint-text"/>
                     </HBox>
                     
                     <!-- Address -->
-                    <VBox spacing="5">
-                        <HBox spacing="10" alignment="CENTER_LEFT">
+                    <VBox spacing="8" styleClass="textarea-container">
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-map-marker-alt" iconSize="16" iconColor="#546e7a"/>
                             <Label text="Địa chỉ:" styleClass="form-label"/>
                             <Label text="(Tùy chọn)" styleClass="hint-text"/>
                         </HBox>
                         <TextArea fx:id="addressArea" 
                                   promptText="Nhập địa chỉ chi tiết..." 
-                                  styleClass="form-field" prefHeight="80" wrapText="true"/>
+                                  styleClass="form-field" prefHeight="80" wrapText="true">
+                            <VBox.margin>
+                                <Insets left="28"/>
+                            </VBox.margin>
+                        </TextArea>
                     </VBox>
                 </VBox>
                 
@@ -115,19 +130,21 @@
                     <Label text="Thông tin tổ chức" styleClass="section-title"/>
                     
                     <!-- Department -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Khoa:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-building" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Khoa:" minWidth="110" styleClass="form-label"/>
                         <ComboBox fx:id="departmentCombo" promptText="-- Chọn khoa --" 
-                                  styleClass="combo-box" prefWidth="300"/>
+                                  styleClass="combo-box" prefWidth="280"/>
                         <Label text="(Tùy chọn)" styleClass="hint-text"/>
                         <Label fx:id="departmentErrorLabel" styleClass="error-label" visible="false"/>
                     </HBox>
                     
                     <!-- Class -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Lớp:" minWidth="120" styleClass="form-label"/>
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-users" iconSize="16" iconColor="#546e7a"/>
+                        <Label text="Lớp:" minWidth="110" styleClass="form-label"/>
                         <ComboBox fx:id="classCombo" promptText="-- Chọn lớp --" 
-                                  styleClass="combo-box" prefWidth="300" disable="true"/>
+                                  styleClass="combo-box" prefWidth="280" disable="true"/>
                         <Label text="(Tùy chọn)" styleClass="hint-text"/>
                         <Label fx:id="classErrorLabel" styleClass="error-label" visible="false"/>
                     </HBox>
@@ -138,17 +155,24 @@
                     <Label text="Vai trò và trạng thái" styleClass="section-title"/>
                     
                     <!-- Roles -->
-                    <VBox spacing="5">
-                        <Label text="Vai trò:" styleClass="form-label"/>
-                        <VBox fx:id="rolesContainer" spacing="5">
+                    <VBox spacing="8" styleClass="roles-container">
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-user-tag" iconSize="16" iconColor="#546e7a"/>
+                            <Label text="Vai trò:" styleClass="form-label"/>
+                        </HBox>
+                        <VBox fx:id="rolesContainer" spacing="8">
+                            <VBox.margin>
+                                <Insets left="28"/>
+                            </VBox.margin>
                             <!-- Roles sẽ được thêm động -->
                         </VBox>
                     </VBox>
                     
                     <!-- Active Status -->
-                    <HBox spacing="10" alignment="CENTER_LEFT">
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="input-row">
+                        <FontIcon iconLiteral="fas-toggle-on" iconSize="16" iconColor="#4caf50"/>
                         <CheckBox fx:id="isActiveCheckBox" text="Tài khoản đang hoạt động" 
-                                  selected="true"/>
+                                  styleClass="status-checkbox" selected="true"/>
                     </HBox>
                 </VBox>
                 
@@ -171,9 +195,17 @@
             </padding>
             
             <Button text="Hủy" onAction="#handleCancel" styleClass="secondary-button" 
-                    prefWidth="110" prefHeight="38"/>
+                    prefWidth="120" prefHeight="40">
+                <graphic>
+                    <FontIcon iconLiteral="fas-times" iconSize="14" iconColor="#757575"/>
+                </graphic>
+            </Button>
             <Button fx:id="saveButton" text="Lưu" onAction="#handleSave" 
-                    styleClass="primary-button" prefWidth="110" prefHeight="38"/>
+                    styleClass="primary-button" prefWidth="120" prefHeight="40">
+                <graphic>
+                    <FontIcon iconLiteral="fas-save" iconSize="14" iconColor="white"/>
+                </graphic>
+            </Button>
         </HBox>
     </bottom>
 </BorderPane>

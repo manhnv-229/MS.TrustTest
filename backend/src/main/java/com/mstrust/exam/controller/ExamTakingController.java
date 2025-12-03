@@ -52,6 +52,20 @@ public class ExamTakingController {
     }
     
     /* ---------------------------------------------------
+     * GET /exam-taking/subjects
+     * Lấy danh sách môn học mà student có thể làm bài thi
+     * @returns List<Map<String, String>> với subjectCode và subjectName
+     * @author: K24DTCN210-NVMANH (03/12/2025 16:55)
+     * --------------------------------------------------- */
+    @GetMapping("/subjects")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<Map<String, String>>> getAvailableSubjects(Authentication auth) {
+        Long studentId = getCurrentUserId(auth);
+        List<Map<String, String>> subjects = examTakingService.getAvailableSubjects(studentId);
+        return ResponseEntity.ok(subjects);
+    }
+    
+    /* ---------------------------------------------------
      * GET /exam-taking/check-eligibility/{examId}
      * Check xem student có thể làm exam này không
      * @param examId ID của exam

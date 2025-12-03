@@ -112,6 +112,178 @@
     -fx-background-color: #388E3C;
 }
 
+/* === COMPACT BUTTONS === */
+.compact-button {
+    -fx-background-color: linear-gradient(to bottom, #F8F9FA, #E9ECEF);
+    -fx-border-color: #DEE2E6;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6;
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-max-width: 32;
+    -fx-max-height: 32;
+    -fx-cursor: hand;
+}
+
+.compact-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #E3F2FD, #BBDEFB);
+    -fx-border-color: #2196F3;
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.3), 4, 0, 0, 2);
+}
+
+.compact-button-danger {
+    -fx-background-color: linear-gradient(to bottom, #FFEBEE, #FFCDD2);
+    -fx-border-color: #FFCDD2;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6;
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-max-width: 32;
+    -fx-max-height: 32;
+    -fx-cursor: hand;
+}
+
+.compact-button-danger:hover {
+    -fx-background-color: linear-gradient(to bottom, #FFCDD2, #EF9A9A);
+    -fx-border-color: #F44336;
+    -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.3), 4, 0, 0, 2);
+}
+
+.start-exam-button {
+    -fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 16;
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.3), 6, 0, 0, 2);
+}
+
+.start-exam-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #66BB6A, #4CAF50);
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.5), 8, 0, 0, 3);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+}
+
+.start-exam-button .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.disabled-button {
+    -fx-background-color: linear-gradient(to bottom, #F5F5F5, #EEEEEE);
+    -fx-text-fill: #9E9E9E;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 16;
+}
+
+.disabled-button .label {
+    -fx-text-fill: #9E9E9E;
+}
+
+/* === ULTRA COMPACT BUTTONS === */
+.start-exam-button-compact {
+    -fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.25), 4, 0, 0, 1);
+}
+
+.start-exam-button-compact:hover {
+    -fx-background-color: linear-gradient(to bottom, #66BB6A, #4CAF50);
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.4), 6, 0, 0, 2);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.start-exam-button-compact .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 10px;
+}
+
+.disabled-button-compact {
+    -fx-background-color: linear-gradient(to bottom, #F5F5F5, #EEEEEE);
+    -fx-text-fill: #9E9E9E;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.disabled-button-compact .label {
+    -fx-text-fill: #9E9E9E;
+    -fx-font-size: 10px;
+}
+
+/* === CLEAN EXAM BUTTONS === */
+.exam-button-primary {
+    -fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.3), 4, 0, 0, 2);
+}
+
+.exam-button-primary:hover {
+    -fx-background-color: linear-gradient(to bottom, #66BB6A, #4CAF50);
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.5), 6, 0, 0, 3);
+}
+
+.exam-button-secondary {
+    -fx-background-color: linear-gradient(to bottom, #2196F3, #1976D2);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.3), 4, 0, 0, 2);
+}
+
+.exam-button-secondary:hover {
+    -fx-background-color: linear-gradient(to bottom, #42A5F5, #2196F3);
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.5), 6, 0, 0, 3);
+}
+
+.exam-button-disabled {
+    -fx-background-color: linear-gradient(to bottom, #F5F5F5, #EEEEEE);
+    -fx-text-fill: #9E9E9E;
+    -fx-font-size: 13px;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.exam-button-disabled .label {
+    -fx-text-fill: #9E9E9E;
+    -fx-font-size: 13px;
+}
+
+.exam-button-primary .label {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.exam-button-secondary .label {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
 /* Primary Button - for exam management */
 .primary-button {
     -fx-background-color: linear-gradient(to bottom, #42A5F5, #2196F3);
@@ -173,10 +345,120 @@
     -fx-cursor: hand;
 }
 
+/* === CLEAN EXAM CARD === */
+.exam-card-clean {
+    -fx-background-color: white;
+    -fx-border-color: #E1E5E9;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 2);
+    -fx-padding: 16;
+}
+
+.exam-card-clean:hover {
+    -fx-border-color: #2196F3;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.2), 12, 0, 0, 6);
+    -fx-cursor: hand;
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+}
+
+/* Exam card states */
+.exam-card-out-of-attempts {
+    -fx-background-color: #FFEBEE;
+    -fx-border-color: #F44336;
+    -fx-border-width: 2;
+    -fx-opacity: 0.85;
+}
+
+.exam-card-out-of-attempts:hover {
+    -fx-border-color: #F44336;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.3), 8, 0, 0, 4);
+    -fx-cursor: default;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+}
+
+.exam-card-ineligible {
+    -fx-background-color: #FFF3E0;
+    -fx-border-color: #FF9800;
+    -fx-border-width: 2;
+    -fx-opacity: 0.85;
+}
+
+.exam-card-ineligible:hover {
+    -fx-border-color: #FF9800;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(255,152,0,0.3), 8, 0, 0, 4);
+    -fx-cursor: default;
+    -fx-scale-x: 1.0;
+    -fx-scale-y: 1.0;
+}
+
+.exam-card-passed {
+    -fx-background-color: #E8F5E8;
+    -fx-border-color: #4CAF50;
+    -fx-border-width: 2;
+}
+
+.exam-card-passed:hover {
+    -fx-border-color: #4CAF50;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.3), 8, 0, 0, 4);
+    -fx-cursor: hand;
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+}
+
+/* === ULTRA COMPACT EXAM CARD === */
+.exam-card-ultra-compact {
+    -fx-background-color: linear-gradient(to bottom, #FFFFFF, #F8F9FA);
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 3, 0, 0, 1);
+    -fx-padding: 12;
+}
+
+.exam-card-ultra-compact:hover {
+    -fx-background-color: linear-gradient(to bottom, #F3E5F5, #E8EAF6);
+    -fx-border-color: #9C27B0;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(156,39,176,0.2), 6, 0, 0, 2);
+    -fx-cursor: hand;
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+}
+
 .exam-title {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
     -fx-text-fill: -fx-text-primary;
+}
+
+.exam-title-compact {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+    -fx-wrap-text: true;
+}
+
+.exam-title-clean {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1A1A1A;
+    -fx-wrap-text: true;
+}
+
+.exam-title-ultra-compact {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-text-primary;
+    -fx-wrap-text: true;
 }
 
 .exam-title-compact {
@@ -196,6 +478,24 @@
     -fx-text-fill: -fx-text-secondary;
 }
 
+.exam-subject-clean {
+    -fx-font-size: 13px;
+    -fx-text-fill: #2196F3;
+    -fx-font-weight: 600;
+}
+
+.exam-subject-clean .label {
+    -fx-text-fill: #2196F3;
+    -fx-font-weight: 600;
+    -fx-font-size: 12px;
+}
+
+.exam-subtitle-compact {
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: 500;
+}
+
 .exam-info-label {
     -fx-font-size: 13px;
     -fx-text-fill: -fx-text-secondary;
@@ -207,12 +507,51 @@
     -fx-text-fill: -fx-text-primary;
 }
 
+.exam-info-compact {
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 400;
+}
+
+.exam-info-clean {
+    -fx-font-size: 11px;
+    -fx-text-fill: #424242;
+    -fx-font-weight: 500;
+    -fx-wrap-text: true;
+}
+
+.exam-emoji {
+    -fx-font-size: 14px;
+}
+
+.exam-info-ultra-compact {
+    -fx-font-size: 10px;
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-weight: 500;
+}
+
+.countdown-info {
+    -fx-background-color: rgba(255, 152, 0, 0.1);
+    -fx-background-radius: 4;
+    -fx-padding: 4 8;
+}
+
+.countdown-info .label {
+    -fx-text-fill: #FF9800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
 /* === STATUS BADGES === */
 .status-badge {
-    -fx-padding: 4 12;
-    -fx-background-radius: 12;
-    -fx-font-size: 12px;
+    -fx-padding: 6 14;
+    -fx-background-radius: 15;
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
+    -fx-min-width: 80;
+    -fx-pref-width: -1;
+    -fx-max-width: -1;
+    -fx-alignment: center;
 }
 
 .status-badge-compact {
@@ -228,6 +567,7 @@
     -fx-text-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(33,150,243,0.4), 4, 0, 0, 2);
     -fx-font-weight: bold;
+    -fx-min-width: 90;
 }
 
 .status-ongoing {
@@ -235,6 +575,7 @@
     -fx-text-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.4), 4, 0, 0, 2);
     -fx-font-weight: bold;
+    -fx-min-width: 90;
 }
 
 .status-ended {
@@ -242,6 +583,7 @@
     -fx-text-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(128,128,128,0.3), 3, 0, 0, 1);
     -fx-font-weight: bold;
+    -fx-min-width: 90;
 }
 
 /* === EMPTY STATE === */
@@ -256,6 +598,55 @@
     -fx-text-fill: -fx-text-secondary;
 }
 
+/* === TOP BAR & FOOTER === */
+.top-bar {
+    -fx-background-color: linear-gradient(to bottom, #FFFFFF, #F8F9FA);
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1);
+}
+
+.app-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2196F3;
+}
+
+.user-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #424242;
+}
+
+.role-badge {
+    -fx-background-color: #E3F2FD;
+    -fx-text-fill: #1976D2;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3 8;
+    -fx-background-radius: 12;
+}
+
+.logout-button {
+    -fx-background-color: linear-gradient(to bottom, #F44336, #D32F2F);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12;
+    -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.3), 4, 0, 0, 2);
+}
+
+.logout-button:hover {
+    -fx-background-color: linear-gradient(to bottom, #EF5350, #F44336);
+    -fx-effect: dropshadow(gaussian, rgba(244,67,54,0.5), 6, 0, 0, 3);
+}
+
+.footer-info {
+    -fx-font-size: 12px;
+    -fx-text-fill: #757575;
+}
+
 /* === COMBO BOX === */
 .combo-box {
     -fx-background-color: #FFFFFF;
@@ -266,8 +657,9 @@
 }
 
 .combo-box:focused {
-    -fx-border-color: #2196F3;
-    -fx-border-width: 2;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.8), 4, 0.5, 0, 0);
 }
 
 /* === SCROLL PANE === */
@@ -372,8 +764,9 @@
 }
 
 .text-field:focused {
-    -fx-border-color: #2196F3;
-    -fx-border-width: 2;
+    -fx-border-color: #E0E0E0;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.8), 4, 0.5, 0, 0);
 }
 
 /* === TEXT AREA === */
@@ -386,8 +779,9 @@
 }
 
 .text-area:focused {
-    -fx-border-color: -fx-primary;
-    -fx-border-width: 2;
+    -fx-border-color: -fx-border;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.8), 4, 0.5, 0, 0);
 }
 
 .text-area .content {
@@ -823,12 +1217,7 @@
 /* Focus Indicators - Accessibility */
 /* Button focus handled in main button styles above */
 
-.text-field:focused,
-.text-area:focused {
-    -fx-border-color: #2196F3;
-    -fx-border-width: 3;
-    -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.4), 8, 0, 0, 0);
-}
+/* Removed duplicate focus styles - handled above */
 
 .radio-button:focused .radio,
 .check-box:focused .box {
@@ -837,11 +1226,7 @@
     -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.4), 8, 0, 0, 0);
 }
 
-.combo-box:focused {
-    -fx-border-color: #2196F3;
-    -fx-border-width: 3;
-    -fx-effect: dropshadow(three-pass-box, rgba(33, 150, 243, 0.4), 8, 0, 0, 0);
-}
+/* Removed duplicate combo-box focus styles - handled above */
 
 /* Question Palette Focus */
 .question-button:focused {

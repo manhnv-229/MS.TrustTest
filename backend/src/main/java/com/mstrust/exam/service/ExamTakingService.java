@@ -8,6 +8,8 @@ import com.mstrust.exam.exception.ResourceNotFoundException;
 import com.mstrust.exam.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.persistence.EntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,7 @@ public class ExamTakingService {
     private final SubjectClassStudentRepository subjectClassStudentRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final EntityManager entityManager;
     
     /* ---------------------------------------------------
      * Lấy danh sách exams student có thể làm
@@ -50,7 +53,7 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public List<AvailableExamDTO> getAvailableExams(Long studentId, String subjectCode) {
         User student = userRepository.findById(studentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sinh viên"));
         
         // ✅ Lấy danh sách classes mà student đã enroll
         List<SubjectClassStudent> enrolledClasses = subjectClassStudentRepository
@@ -93,6 +96,56 @@ public class ExamTakingService {
     }
     
     /* ---------------------------------------------------
+     * Lấy danh sách môn học mà student có thể làm bài thi
+     * @param studentId ID của student
+     * @returns List SubjectDTO với subjectCode và subjectName
+     * @author: K24DTCN210-NVMANH (03/12/2025 16:55)
+     * --------------------------------------------------- */
+    public List<Map<String, String>> getAvailableSubjects(Long studentId) {
+        User student = userRepository.findById(studentId)
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sinh viên"));
+        
+        // Lấy danh sách classes mà student đã enroll
+        List<SubjectClassStudent> enrolledClasses = subjectClassStudentRepository
+            .findEnrolledClassesByStudentId(studentId);
+        
+        // Tạo Set classIds để filter nhanh
+        Set<Long> enrolledClassIds = enrolledClasses.stream()
+            .map(scs -> scs.getSubjectClass().getId())
+            .collect(Collectors.toSet());
+        
+        // Lấy danh sách subjects từ các exams có thể làm
+        Set<String> subjectCodesWithExams = examRepository.findAll().stream()
+            .filter(exam -> {
+                // Check status
+                ExamStatus status = exam.getCurrentStatus();
+                if (status != ExamStatus.PUBLISHED && status != ExamStatus.ONGOING) {
+                    return false;
+                }
+                
+                // Check student có thuộc class này không
+                Long examClassId = exam.getSubjectClass().getId();
+                return enrolledClassIds.contains(examClassId);
+            })
+            .map(exam -> exam.getSubjectClass().getSubject().getSubjectCode())
+            .collect(Collectors.toSet());
+        
+        // Convert thành List<Map> với subjectCode và subjectName
+        return enrolledClasses.stream()
+            .map(scs -> scs.getSubjectClass().getSubject())
+            .filter(subject -> subjectCodesWithExams.contains(subject.getSubjectCode()))
+            .distinct()
+            .map(subject -> {
+                Map<String, String> subjectInfo = new HashMap<>();
+                subjectInfo.put("subjectCode", subject.getSubjectCode());
+                subjectInfo.put("subjectName", subject.getSubjectName());
+                return subjectInfo;
+            })
+            .sorted(Comparator.comparing(s -> s.get("subjectName")))
+            .collect(Collectors.toList());
+    }
+    
+    /* ---------------------------------------------------
      * Check eligibility của student cho một exam
      * @param examId ID của exam
      * @param studentId ID của student
@@ -103,13 +156,13 @@ public class ExamTakingService {
         Map<String, Object> result = new HashMap<>();
         
         Exam exam = examRepository.findById(examId)
-            .orElseThrow(() -> new ResourceNotFoundException("Exam not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài thi"));
         
         // Check 1: Exam status
         ExamStatus status = exam.getCurrentStatus();
         if (status != ExamStatus.PUBLISHED && status != ExamStatus.ONGOING) {
             result.put("isEligible", false);
-            result.put("reason", "Exam is not available yet");
+            result.put("reason", "Bài thi chưa mở");
             return result;
         }
         
@@ -118,7 +171,7 @@ public class ExamTakingService {
         Integer maxAttempts = exam.getMaxAttempts();
         if (maxAttempts != null && maxAttempts > 0 && attemptsMade >= maxAttempts) {
             result.put("isEligible", false);
-            result.put("reason", "Maximum attempts reached (" + maxAttempts + ")");
+            result.put("reason", "Đã hết số lần làm bài (" + maxAttempts + " lần)");
             return result;
         }
         
@@ -128,7 +181,7 @@ public class ExamTakingService {
         
         if (activeSubmission.isPresent()) {
             result.put("isEligible", false);
-            result.put("reason", "You have an active submission in progress");
+            result.put("reason", "Bạn đang có bài thi chưa hoàn thành");
             result.put("submissionId", activeSubmission.get().getId());
             return result;
         }
@@ -149,6 +202,42 @@ public class ExamTakingService {
      * @author: K24DTCN210-NVMANH (19/11/2025 15:30)
      * --------------------------------------------------- */
     public StartExamResponse startExam(Long examId, Long studentId) {
+        // Double-check for active submission before creating new one
+        Optional<ExamSubmission> existingActiveSubmission = submissionRepository
+            .findActiveSubmission(studentId, examId);
+        
+        if (existingActiveSubmission.isPresent()) {
+            // Return existing submission instead of creating new one
+            ExamSubmission activeSubmission = existingActiveSubmission.get();
+            log.info("Found existing active submission {} for student {} exam {}", 
+                activeSubmission.getId(), studentId, examId);
+            
+            // Build response for existing submission
+            LocalDateTime startedAtLocal = activeSubmission.getStartedAt().toLocalDateTime();
+            LocalDateTime mustSubmitBefore = startedAtLocal.plusMinutes(activeSubmission.getExam().getDurationMinutes());
+            long remainingSeconds = java.time.Duration.between(LocalDateTime.now(), mustSubmitBefore).getSeconds();
+            remainingSeconds = Math.max(0, remainingSeconds); // Don't allow negative
+            
+            int totalQuestions = (int) examQuestionRepository.countByExamId(examId);
+            
+            return StartExamResponse.builder()
+                .submissionId(activeSubmission.getId())
+                .examId(examId)
+                .examTitle(activeSubmission.getExam().getTitle())
+                .attemptNumber(activeSubmission.getAttemptNumber())
+                .maxAttempts(activeSubmission.getExam().getMaxAttempts())
+                .startedAt(startedAtLocal)
+                .durationMinutes(activeSubmission.getExam().getDurationMinutes())
+                .mustSubmitBefore(mustSubmitBefore)
+                .remainingSeconds((int) remainingSeconds)
+                .totalQuestions(totalQuestions)
+                .randomizeQuestions(activeSubmission.getExam().getRandomizeQuestions())
+                .randomizeOptions(activeSubmission.getExam().getRandomizeOptions())
+                .autoSaveIntervalSeconds(30)
+                .message("Tiếp tục bài thi đang làm dở")
+                .build();
+        }
+        
         // Validate eligibility
         Map<String, Object> eligibility = checkEligibility(examId, studentId);
         if (!(Boolean) eligibility.get("isEligible")) {
@@ -156,10 +245,10 @@ public class ExamTakingService {
         }
         
         Exam exam = examRepository.findById(examId)
-            .orElseThrow(() -> new ResourceNotFoundException("Exam not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài thi"));
         
         User student = userRepository.findById(studentId)
-            .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sinh viên"));
         
         // Calculate attempt number
         int attemptNumber = submissionRepository.countByStudentIdAndExamId(studentId, examId) + 1;
@@ -171,9 +260,9 @@ public class ExamTakingService {
             System.currentTimeMillis() + 1000 : null;
         
         // Get question count
-        int totalQuestions = (int) examQuestionRepository.countByExamId(examId);
+        int totalQuestionsCount = (int) examQuestionRepository.countByExamId(examId);
         
-        // Create submission
+        // Create submission with constraint violation handling
         Timestamp now = new Timestamp(System.currentTimeMillis());
         ExamSubmission submission = ExamSubmission.builder()
             .exam(exam)
@@ -187,7 +276,58 @@ public class ExamTakingService {
             .autoSaveCount(0)  // Khởi tạo autoSaveCount = 0
             .build();
         
-        submission = submissionRepository.save(submission);
+        ExamSubmission savedSubmission = null;
+        try {
+            savedSubmission = submissionRepository.save(submission);
+        } catch (DataIntegrityViolationException e) {
+            // Clear failed entity from Hibernate session to avoid AssertionFailure
+            // Detach entity để tránh Hibernate cố flush entity chưa có ID
+            if (submission != null) {
+                entityManager.detach(submission);
+            }
+            
+            // Handle constraint violation - check if active submission exists
+            if (e.getMessage() != null && e.getMessage().contains("uk_exam_student")) {
+                log.warn("Constraint violation when creating submission for student {} exam {}. Checking for existing active submission.", studentId, examId);
+                
+                // Query lại trong transaction mới để tránh session issues
+                Optional<ExamSubmission> existingSubmission = submissionRepository
+                    .findActiveSubmission(studentId, examId);
+                
+                if (existingSubmission.isPresent()) {
+                    // Return existing submission
+                    ExamSubmission activeSubmission = existingSubmission.get();
+                    log.info("Found existing active submission {} after constraint violation", activeSubmission.getId());
+                    
+                    LocalDateTime startedAtLocal = activeSubmission.getStartedAt().toLocalDateTime();
+                    LocalDateTime mustSubmitBefore = startedAtLocal.plusMinutes(activeSubmission.getExam().getDurationMinutes());
+                    long remainingSeconds = java.time.Duration.between(LocalDateTime.now(), mustSubmitBefore).getSeconds();
+                    remainingSeconds = Math.max(0, remainingSeconds);
+                    
+                    int totalQuestions = (int) examQuestionRepository.countByExamId(examId);
+                    
+                    return StartExamResponse.builder()
+                        .submissionId(activeSubmission.getId())
+                        .examId(examId)
+                        .examTitle(activeSubmission.getExam().getTitle())
+                        .attemptNumber(activeSubmission.getAttemptNumber())
+                        .maxAttempts(activeSubmission.getExam().getMaxAttempts())
+                        .startedAt(startedAtLocal)
+                        .durationMinutes(activeSubmission.getExam().getDurationMinutes())
+                        .mustSubmitBefore(mustSubmitBefore)
+                        .remainingSeconds((int) remainingSeconds)
+                        .totalQuestions(totalQuestionsCount)
+                        .randomizeQuestions(activeSubmission.getExam().getRandomizeQuestions())
+                        .randomizeOptions(activeSubmission.getExam().getRandomizeOptions())
+                        .autoSaveIntervalSeconds(30)
+                        .message("Tiếp tục bài thi đang làm dở")
+                        .build();
+                }
+            }
+            
+            // Re-throw if not constraint violation or no existing submission found
+            throw e;
+        }
         
         log.info("Student {} started exam {} (attempt #{})", studentId, examId, attemptNumber);
         
@@ -196,7 +336,7 @@ public class ExamTakingService {
         LocalDateTime mustSubmitBefore = startedAtLocal.plusMinutes(exam.getDurationMinutes());
         
         return StartExamResponse.builder()
-            .submissionId(submission.getId())
+            .submissionId(savedSubmission.getId())
             .examId(examId)
             .examTitle(exam.getTitle())
             .attemptNumber(attemptNumber)
@@ -205,7 +345,7 @@ public class ExamTakingService {
             .durationMinutes(exam.getDurationMinutes())
             .mustSubmitBefore(mustSubmitBefore)
             .remainingSeconds(exam.getDurationMinutes() * 60)
-            .totalQuestions(totalQuestions)
+            .totalQuestions(totalQuestionsCount)
             .randomizeQuestions(exam.getRandomizeQuestions())
             .randomizeOptions(exam.getRandomizeOptions())
             .autoSaveIntervalSeconds(30)
@@ -222,16 +362,16 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public List<QuestionForStudentDTO> getExamQuestions(Long submissionId, Long studentId) {
         ExamSubmission submission = submissionRepository.findById(submissionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài làm"));
         
         // Validate ownership
         if (!submission.getStudent().getId().equals(studentId)) {
-            throw new BadRequestException("This submission does not belong to you");
+            throw new BadRequestException("Bài làm này không thuộc về bạn");
         }
         
         // Validate status
         if (!submission.isActive()) {
-            throw new BadRequestException("This submission is not active");
+            throw new BadRequestException("Bài làm này không còn hoạt động");
         }
         
         Exam exam = submission.getExam();
@@ -302,27 +442,27 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public Map<String, Object> saveAnswer(Long submissionId, SubmitAnswerRequest request, Long studentId) {
         ExamSubmission submission = submissionRepository.findById(submissionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài làm"));
         
         // Validate ownership
         if (!submission.getStudent().getId().equals(studentId)) {
-            throw new BadRequestException("This submission does not belong to you");
+            throw new BadRequestException("Bài làm này không thuộc về bạn");
         }
         
         // Validate status and time
         if (!submission.isActive()) {
-            throw new BadRequestException("This submission is not active");
+            throw new BadRequestException("Bài làm này không còn hoạt động");
         }
         
         if (submission.isExpired()) {
             submitExam(submissionId, studentId);
-            throw new BadRequestException("Time expired. Exam has been auto-submitted");
+            throw new BadRequestException("Hết thời gian. Bài thi đã được tự động nộp");
         }
         
         // Find ExamQuestion first to validate question belongs to this exam
         ExamQuestion examQuestion = examQuestionRepository
             .findByExamIdAndQuestionId(submission.getExam().getId(), request.getQuestionId())
-            .orElseThrow(() -> new ResourceNotFoundException("Question not found in this exam"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy câu hỏi trong bài thi này"));
         
         QuestionBank question = examQuestion.getQuestion();
         
@@ -398,16 +538,16 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public ExamResultDTO submitExam(Long submissionId, Long studentId) {
         ExamSubmission submission = submissionRepository.findById(submissionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài làm"));
         
         // Validate ownership
         if (!submission.getStudent().getId().equals(studentId)) {
-            throw new BadRequestException("This submission does not belong to you");
+            throw new BadRequestException("Bài làm này không thuộc về bạn");
         }
         
         // Validate status
         if (submission.isSubmitted()) {
-            throw new BadRequestException("This exam has already been submitted");
+            throw new BadRequestException("Bài thi này đã được nộp rồi");
         }
         
         Exam exam = submission.getExam();
@@ -451,11 +591,11 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public ExamResultDTO getResult(Long submissionId, Long studentId) {
         ExamSubmission submission = submissionRepository.findById(submissionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài làm"));
         
         // Validate ownership
         if (!submission.getStudent().getId().equals(studentId)) {
-            throw new BadRequestException("This submission does not belong to you");
+            throw new BadRequestException("Bài làm này không thuộc về bạn");
         }
         
         Exam exam = submission.getExam();
@@ -539,7 +679,7 @@ public class ExamTakingService {
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 ExamSubmission submission = submissionRepository.findById(submissionId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài làm"));
                 
                 Timestamp now = new Timestamp(System.currentTimeMillis());
                 submission.setLastSavedAt(now);
@@ -600,6 +740,7 @@ public class ExamTakingService {
             .subjectClassId(exam.getSubjectClass().getId())
             .subjectClassName(exam.getSubjectClass().getCode())
             .subjectCode(exam.getSubjectClass().getSubject().getSubjectCode())
+            .subjectName(exam.getSubjectClass().getSubject().getSubjectName())  // ✅ Thêm subjectName
             .startTime(exam.getStartTime())
             .endTime(exam.getEndTime())
             .durationMinutes(exam.getDurationMinutes())
@@ -768,7 +909,7 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public Map<String, Object> pauseExam(PauseExamRequest request, Long teacherId) {
         ExamSubmission submission = submissionRepository.findById(request.getSubmissionId())
-            .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài làm"));
         
         // Validate status
         if (submission.getStatus() != SubmissionStatus.IN_PROGRESS) {
@@ -778,7 +919,7 @@ public class ExamTakingService {
         
         // Validate teacher has permission (check if teacher manages the exam's class)
         User teacher = userRepository.findById(teacherId)
-            .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giáo viên"));
         
         // Update status to PAUSED
         submission.setStatus(SubmissionStatus.PAUSED);
@@ -807,7 +948,7 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public Map<String, Object> resumeExam(ResumeExamRequest request, Long teacherId) {
         ExamSubmission submission = submissionRepository.findById(request.getSubmissionId())
-            .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài làm"));
         
         // Validate status
         if (submission.getStatus() != SubmissionStatus.PAUSED) {
@@ -817,7 +958,7 @@ public class ExamTakingService {
         
         // Validate teacher has permission
         User teacher = userRepository.findById(teacherId)
-            .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giáo viên"));
         
         // Update status back to IN_PROGRESS
         submission.setStatus(SubmissionStatus.IN_PROGRESS);
@@ -866,7 +1007,7 @@ public class ExamTakingService {
      * --------------------------------------------------- */
     public TeacherLiveViewDTO getTeacherLiveView(Long examId) {
         Exam exam = examRepository.findById(examId)
-            .orElseThrow(() -> new ResourceNotFoundException("Exam not found"));
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài thi"));
         
         // Get all active sessions for this exam
         List<ExamSubmission> activeSessions = submissionRepository

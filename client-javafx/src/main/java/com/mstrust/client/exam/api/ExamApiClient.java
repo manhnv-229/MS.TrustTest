@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mstrust.client.config.AppConfig;
 import com.mstrust.client.exam.dto.ExamInfoDTO;
+import com.mstrust.client.exam.dto.AvailableExamDTO;
 import com.mstrust.client.exam.dto.LoginResponse;
 import com.mstrust.client.exam.dto.QuestionDTO;
 import com.mstrust.client.exam.dto.SaveAnswerRequest;
@@ -81,6 +82,42 @@ public class ExamApiClient {
         logger.info("Auth token set for ExamApiClient");
     }
 
+    /* ---------------------------------------------------
+     * Convert AvailableExamDTO sang ExamInfoDTO
+     * @param availableExam AvailableExamDTO từ backend
+     * @returns ExamInfoDTO cho UI
+     * @author: K24DTCN210-NVMANH (02/12/2025 18:15)
+     * --------------------------------------------------- */
+    private ExamInfoDTO convertToExamInfoDTO(AvailableExamDTO availableExam) {
+        ExamInfoDTO examInfo = new ExamInfoDTO();
+        examInfo.setId(availableExam.getId());
+        examInfo.setTitle(availableExam.getTitle());
+        examInfo.setDescription(availableExam.getDescription());
+        examInfo.setDuration(availableExam.getDurationMinutes());
+        examInfo.setStartTime(availableExam.getStartTime());
+        examInfo.setEndTime(availableExam.getEndTime());
+        examInfo.setTotalQuestions(availableExam.getTotalQuestions());
+        examInfo.setTotalPoints(availableExam.getTotalScore() != null ? availableExam.getTotalScore().doubleValue() : null);
+        examInfo.setPassingScore(availableExam.getPassingScore() != null ? availableExam.getPassingScore().doubleValue() : null);
+        examInfo.setStatus(availableExam.getStatus());
+        examInfo.setSubjectCode(availableExam.getSubjectCode());
+        examInfo.setSubjectName(availableExam.getSubjectName());
+        
+        // Attempt information
+        examInfo.setMaxAttempts(availableExam.getMaxAttempts());
+        examInfo.setAttemptsMade(availableExam.getAttemptsMade());
+        examInfo.setRemainingAttempts(availableExam.getRemainingAttempts());
+        examInfo.setHasActiveSubmission(availableExam.getHasActiveSubmission());
+        examInfo.setHasPassed(availableExam.getHasPassed());
+        examInfo.setHighestScore(availableExam.getHighestScore() != null ? availableExam.getHighestScore().doubleValue() : null);
+        examInfo.setIsEligible(availableExam.getIsEligible());
+        examInfo.setIneligibleReason(availableExam.getIneligibleReason());
+        
+        examInfo.setCanStart(availableExam.getIsEligible() != null ? availableExam.getIsEligible() : false);
+        
+        return examInfo;
+    }
+    
     /* ---------------------------------------------------
      * Get JWT token hiện tại
      * @returns String JWT access token
@@ -238,14 +275,50 @@ public class ExamApiClient {
                 HttpResponse.BodyHandlers.ofString());
         
         if (response.statusCode() == 200) {
-            Type listType = new TypeToken<List<ExamInfoDTO>>(){}.getType();
-            List<ExamInfoDTO> exams = gson.fromJson(response.body(), listType);
+            // Backend trả về AvailableExamDTO, cần convert sang ExamInfoDTO
+            Type listType = new TypeToken<List<AvailableExamDTO>>(){}.getType();
+            List<AvailableExamDTO> availableExams = gson.fromJson(response.body(), listType);
+            
+            // Convert sang ExamInfoDTO
+            List<ExamInfoDTO> exams = availableExams.stream()
+                .map(this::convertToExamInfoDTO)
+                .collect(java.util.stream.Collectors.toList());
+            
             logger.info("Retrieved {} available exams", exams.size());
             return exams;
         } else {
             logger.error("Failed to get available exams. Status: {}, Body: {}", 
                     response.statusCode(), response.body());
             throw new IOException("Failed to get available exams: " + response.statusCode());
+        }
+    }
+
+    /* ---------------------------------------------------
+     * Lấy danh sách môn học mà student có thể làm bài thi
+     * GET /api/exam-taking/subjects
+     * @returns List<Map<String, String>> với subjectCode và subjectName
+     * @author: K24DTCN210-NVMANH (03/12/2025 16:55)
+     * --------------------------------------------------- */
+    public List<Map<String, String>> getAvailableSubjects() throws IOException, InterruptedException {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + "/api/exam-taking/subjects"))
+                .header("Authorization", "Bearer " + authToken)
+                .GET()
+                .build();
+        
+        HttpResponse<String> response = httpClient.send(request, 
+                HttpResponse.BodyHandlers.ofString());
+        
+        if (response.statusCode() == 200) {
+            Type listType = new TypeToken<List<Map<String, String>>>(){}.getType();
+            List<Map<String, String>> subjects = gson.fromJson(response.body(), listType);
+            
+            logger.info("Retrieved {} available subjects", subjects.size());
+            return subjects;
+        } else {
+            logger.error("Failed to get available subjects. Status: {}, Body: {}", 
+                    response.statusCode(), response.body());
+            throw new IOException("Failed to get available subjects: " + response.statusCode());
         }
     }
 

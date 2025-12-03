@@ -4,13 +4,15 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <!-- 
-  Exam List Screen - Phase 8.2
-  Màn hình hiển thị danh sách đề thi available cho student
+  Exam List Screen - Phase 8.2 (Redesigned)
+  Màn hình hiển thị danh sách đề thi available cho student với giao diện compact
   @author: K24DTCN210-NVMANH (23/11/2025 12:04)
   EditBy: K24DTCN210-NVMANH (25/11/2025 11:02) - Added loading overlay
   EditBy: K24DTCN210-NVMANH (01/12/2025 00:30) - Added top bar with user info and logout
+  EditBy: K24DTCN210-NVMANH (02/12/2025 16:51) - Redesigned with compact layout and IKonli icons
 -->
 
 <StackPane xmlns="http://javafx.com/javafx"
@@ -31,14 +33,27 @@
                         <Insets top="10" right="15" bottom="10" left="15"/>
                     </padding>
                     
-                    <Label text="MS.TrustTest - Student Dashboard" styleClass="app-title"/>
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <FontIcon iconLiteral="fas-graduation-cap" iconSize="20" iconColor="#2196F3"/>
+                        <Label text="MS.TrustTest - Student Dashboard" styleClass="app-title"/>
+                    </HBox>
                     
                     <Region HBox.hgrow="ALWAYS"/>
                     
-                    <Label fx:id="userLabel" text="Student Name" styleClass="user-label"/>
-                    <Label fx:id="roleLabel" text="[STUDENT]" styleClass="role-badge"/>
-                    <Button fx:id="logoutButton" text="Đăng xuất" styleClass="logout-button" 
-                            onAction="#handleLogout"/>
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <FontIcon iconLiteral="fas-user-circle" iconSize="16" iconColor="#757575"/>
+                        <Label fx:id="userLabel" text="Student Name" styleClass="user-label"/>
+                        <Label fx:id="roleLabel" text="[STUDENT]" styleClass="role-badge"/>
+                    </HBox>
+                    
+                    <Button fx:id="logoutButton" styleClass="logout-button" onAction="#handleLogout">
+                        <graphic>
+                            <HBox alignment="CENTER" spacing="5">
+                                <FontIcon iconLiteral="fas-sign-out-alt" iconSize="14" iconColor="white"/>
+                                <Label text="Đăng xuất" style="-fx-text-fill: white;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
                 </HBox>
                 
                 <!-- Header Section -->
@@ -49,7 +64,8 @@
                 
                 <!-- Title -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="📋 Danh Sách Đề Thi" styleClass="page-title"/>
+                    <FontIcon iconLiteral="fas-list-alt" iconSize="28" iconColor="#2196F3"/>
+                    <Label text="Danh Sách Đề Thi" styleClass="page-title"/>
                 </HBox>
                 
                 <!-- Filters Row -->
@@ -60,28 +76,38 @@
                     
                     <!-- Subject Filter -->
                     <VBox spacing="5">
-                        <Label text="Môn học:" styleClass="filter-label"/>
+                        <HBox alignment="CENTER_LEFT" spacing="5">
+                            <FontIcon iconLiteral="fas-book" iconSize="12" iconColor="#757575"/>
+                            <Label text="Môn học:" styleClass="filter-label"/>
+                        </HBox>
                         <ComboBox fx:id="subjectFilterCombo" 
                                   promptText="Tất cả môn học"
-                                  prefWidth="200"/>
+                                  prefWidth="180"/>
                     </VBox>
                     
                     <!-- Status Filter -->
                     <VBox spacing="5">
-                        <Label text="Trạng thái:" styleClass="filter-label"/>
+                        <HBox alignment="CENTER_LEFT" spacing="5">
+                            <FontIcon iconLiteral="fas-clock" iconSize="12" iconColor="#757575"/>
+                            <Label text="Trạng thái:" styleClass="filter-label"/>
+                        </HBox>
                         <ComboBox fx:id="statusFilterCombo" 
                                   promptText="Tất cả trạng thái"
-                                  prefWidth="200"/>
+                                  prefWidth="180"/>
                     </VBox>
                     
                     <!-- Spacer -->
                     <Region HBox.hgrow="ALWAYS"/>
                     
                     <!-- Refresh Button -->
-                    <Button fx:id="refreshButton" 
-                            text="🔄 Làm mới" 
-                            onAction="#onRefresh"
-                            styleClass="secondary-button"/>
+                    <Button fx:id="refreshButton" onAction="#onRefresh" styleClass="secondary-button">
+                        <graphic>
+                            <HBox alignment="CENTER" spacing="5">
+                                <FontIcon iconLiteral="fas-sync-alt" iconSize="14" iconColor="#2196F3"/>
+                                <Label text="Làm mới" style="-fx-text-fill: #2196F3;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
                 </HBox>
                 </VBox>
             </VBox>
@@ -89,14 +115,19 @@
         
         <!-- Main Content - Exam List -->
         <center>
-            <ScrollPane fitToWidth="true" fitToHeight="true">
+            <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="exam-scroll-pane">
                 <padding>
-                    <Insets top="10" right="20" bottom="10" left="20"/>
+                    <Insets top="15" right="20" bottom="15" left="20"/>
                 </padding>
                 
-                <!-- Exam Cards Container -->
-                <VBox fx:id="examCardsContainer" spacing="15">
-                    <!-- Exam cards sẽ được add dynamically từ controller -->
+                <!-- Exam Cards Container - True Grid Layout -->
+                <VBox fx:id="examCardsContainerWrapper" spacing="0">
+                    <GridPane fx:id="examCardsContainer" 
+                              hgap="20" vgap="20" 
+                              alignment="CENTER"
+                              style="-fx-padding: 20;">
+                        <!-- Exam cards sẽ được add dynamically từ controller -->
+                    </GridPane>
                     
                     <!-- Empty State (hiển thị khi không có đề thi) -->
                     <VBox fx:id="emptyStateBox" 
@@ -104,8 +135,9 @@
                           spacing="20"
                           visible="false"
                           managed="false"
+                          prefWidth="800"
                           prefHeight="400">
-                        <Text text="📭" style="-fx-font-size: 72px;"/>
+                        <FontIcon iconLiteral="fas-inbox" iconSize="72" iconColor="#BDBDBD"/>
                         <Label text="Không có đề thi nào" 
                                styleClass="empty-state-text"/>
                         <Label text="Hiện tại không có đề thi available cho bạn" 
@@ -117,16 +149,22 @@
         
         <!-- Footer - Info -->
         <bottom>
-            <HBox styleClass="footer-section" alignment="CENTER" spacing="10">
+            <HBox styleClass="footer-section" alignment="CENTER" spacing="15">
                 <padding>
                     <Insets top="10" right="20" bottom="10" left="20"/>
                 </padding>
                 
-                <Label fx:id="examCountLabel" text="Tìm thấy 0 đề thi"/>
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <FontIcon iconLiteral="fas-search" iconSize="12" iconColor="#757575"/>
+                    <Label fx:id="examCountLabel" text="Tìm thấy 0 đề thi" styleClass="footer-info"/>
+                </HBox>
                 
                 <Region HBox.hgrow="ALWAYS"/>
                 
-                <Label fx:id="lastRefreshLabel" text="Cập nhật lần cuối: --:--"/>
+                <HBox alignment="CENTER_LEFT" spacing="5">
+                    <FontIcon iconLiteral="fas-clock" iconSize="12" iconColor="#757575"/>
+                    <Label fx:id="lastRefreshLabel" text="Cập nhật lần cuối: --:--" styleClass="footer-info"/>
+                </HBox>
             </HBox>
         </bottom>
         

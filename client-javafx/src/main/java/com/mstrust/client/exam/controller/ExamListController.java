@@ -20,6 +20,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.geometry.HPos;
+import com.mstrust.client.exam.util.IconFactory;
+import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +33,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -51,7 +57,8 @@ public class ExamListController {
     @FXML private ComboBox<String> statusFilterCombo;
     @FXML private Button refreshButton;
     @FXML private Button createExamButton;
-    @FXML private VBox examCardsContainer;
+    @FXML private GridPane examCardsContainer;
+    @FXML private VBox examCardsContainerWrapper;
     @FXML private VBox emptyStateBox;
     @FXML private Label examCountLabel;
     @FXML private Label lastRefreshLabel;
@@ -86,6 +93,9 @@ public class ExamListController {
             createExamButton.setVisible(false);
             createExamButton.setManaged(false);
         }
+        
+        // Setup responsive layout listener
+        setupResponsiveLayout();
         
         // Load initial data
         loadExams();
@@ -159,23 +169,57 @@ public class ExamListController {
     }
 
     /* ---------------------------------------------------
+     * Setup responsive layout listener cho GridPane
+     * @author: K24DTCN210-NVMANH (02/12/2025 19:00)
+     * EditBy: K24DTCN210-NVMANH (03/12/2025 09:10) - Updated for GridPane
+     * --------------------------------------------------- */
+    private void setupResponsiveLayout() {
+        // Listener để responsive khi container resize
+        if (examCardsContainer != null) {
+            examCardsContainer.widthProperty().addListener((obs, oldWidth, newWidth) -> {
+                if (filteredExams != null && !filteredExams.isEmpty() && newWidth.doubleValue() > 0) {
+                    Platform.runLater(() -> refreshGridLayout());
+                }
+            });
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Refresh grid layout với width mới
+     * @author: K24DTCN210-NVMANH (03/12/2025 09:10)
+     * --------------------------------------------------- */
+    private void refreshGridLayout() {
+        if (filteredExams == null || filteredExams.isEmpty()) return;
+        
+        double containerWidth = examCardsContainer.getWidth();
+        int newColumns = calculateOptimalColumns(containerWidth);
+        double newCardWidth = calculateCardWidthForGrid(containerWidth, newColumns);
+        
+        // Kiểm tra nếu layout thay đổi thì rebuild grid
+        int currentColumns = examCardsContainer.getColumnConstraints().size();
+        if (currentColumns != newColumns) {
+            // Rebuild toàn bộ grid với layout mới
+            displayExams();
+        } else {
+            // Chỉ update card width nếu số cột không đổi
+            setupGridColumns(newColumns, newCardWidth);
+            examCardsContainer.getChildren().forEach(node -> {
+                if (node instanceof VBox) {
+                    VBox card = (VBox) node;
+                    card.setPrefWidth(newCardWidth);
+                    card.setMaxWidth(newCardWidth);
+                }
+            });
+        }
+    }
+    
+    /* ---------------------------------------------------
      * Setup các combo box filters
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * EditBy: K24DTCN210-NVMANH (03/12/2025 16:55) - Load subjects từ API
      * --------------------------------------------------- */
     private void setupFilters() {
-        // Subject filter
-        subjectFilterCombo.getItems().addAll(
-            "Tất cả môn học",
-            "Toán",
-            "Lý",
-            "Hóa",
-            "Sinh",
-            "Văn",
-            "Anh"
-        );
-        subjectFilterCombo.setValue("Tất cả môn học");
-        
-        // Status filter
+        // Status filter - setup trước
         statusFilterCombo.getItems().addAll(
             "Tất cả trạng thái",
             "Sắp diễn ra",
@@ -183,6 +227,161 @@ public class ExamListController {
             "Đã kết thúc"
         );
         statusFilterCombo.setValue("Tất cả trạng thái");
+        
+        // Subject filter - load từ API
+        loadSubjectsFromAPI();
+        
+        // Add listeners cho filters
+        setupFilterListeners();
+    }
+    
+    /* ---------------------------------------------------
+     * Load danh sách môn học từ API
+     * @author: K24DTCN210-NVMANH (03/12/2025 16:55)
+     * --------------------------------------------------- */
+    private void loadSubjectsFromAPI() {
+        // Chỉ load subjects cho student mode
+        if (examApiClient == null) {
+            // Teacher mode - dùng hardcode subjects tạm thời
+            subjectFilterCombo.getItems().addAll(
+                "Tất cả môn học",
+                "Toán",
+                "Lý", 
+                "Hóa",
+                "Sinh",
+                "Văn",
+                "Anh"
+            );
+            subjectFilterCombo.setValue("Tất cả môn học");
+            return;
+        }
+        
+        // Student mode - load từ API
+        new Thread(() -> {
+            try {
+                List<Map<String, String>> subjects = examApiClient.getAvailableSubjects();
+                
+                Platform.runLater(() -> {
+                    subjectFilterCombo.getItems().clear();
+                    subjectFilterCombo.getItems().add("Tất cả môn học");
+                    
+                    for (Map<String, String> subject : subjects) {
+                        String displayText = subject.get("subjectName") + " (" + subject.get("subjectCode") + ")";
+                        subjectFilterCombo.getItems().add(displayText);
+                    }
+                    
+                    subjectFilterCombo.setValue("Tất cả môn học");
+                    logger.info("Loaded {} subjects for filter", subjects.size());
+                });
+                
+            } catch (Exception e) {
+                logger.error("Failed to load subjects for filter", e);
+                Platform.runLater(() -> {
+                    // Fallback to default subjects
+                    subjectFilterCombo.getItems().addAll(
+                        "Tất cả môn học",
+                        "Toán",
+                        "Lý",
+                        "Hóa", 
+                        "Sinh",
+                        "Văn",
+                        "Anh"
+                    );
+                    subjectFilterCombo.setValue("Tất cả môn học");
+                });
+            }
+        }).start();
+    }
+    
+    /* ---------------------------------------------------
+     * Setup listeners cho filter ComboBoxes
+     * @author: K24DTCN210-NVMANH (03/12/2025 16:55)
+     * --------------------------------------------------- */
+    private void setupFilterListeners() {
+        // Subject filter listener
+        subjectFilterCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                logger.info("Subject filter changed to: {}", newValue);
+                applyFilters();
+            }
+        });
+        
+        // Status filter listener  
+        statusFilterCombo.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                logger.info("Status filter changed to: {}", newValue);
+                applyFilters();
+            }
+        });
+    }
+    
+    /* ---------------------------------------------------
+     * Apply filters để lọc danh sách đề thi
+     * @author: K24DTCN210-NVMANH (03/12/2025 16:55)
+     * --------------------------------------------------- */
+    private void applyFilters() {
+        if (allExams == null || allExams.isEmpty()) {
+            filteredExams = allExams;
+            displayExams();
+            return;
+        }
+        
+        String selectedSubject = subjectFilterCombo.getValue();
+        String selectedStatus = statusFilterCombo.getValue();
+        
+        filteredExams = allExams.stream()
+            .filter(exam -> filterBySubject(exam, selectedSubject))
+            .filter(exam -> filterByStatus(exam, selectedStatus))
+            .collect(java.util.stream.Collectors.toList());
+        
+        logger.info("Applied filters - Subject: {}, Status: {} - {} exams found", 
+            selectedSubject, selectedStatus, filteredExams.size());
+        
+        displayExams();
+    }
+    
+    /* ---------------------------------------------------
+     * Filter by subject
+     * @param exam ExamInfoDTO
+     * @param subjectFilter Subject filter value
+     * @returns true nếu pass filter
+     * @author: K24DTCN210-NVMANH (03/12/2025 16:55)
+     * --------------------------------------------------- */
+    private boolean filterBySubject(ExamInfoDTO exam, String subjectFilter) {
+        if (subjectFilter == null || subjectFilter.equals("Tất cả môn học")) {
+            return true;
+        }
+        
+        // Extract subject code from display text "Tên môn (CODE)"
+        String subjectCode = null;
+        String subjectName = null;
+        
+        if (subjectFilter.contains("(") && subjectFilter.contains(")")) {
+            // Format: "Tên môn (CODE)"
+            int startIndex = subjectFilter.lastIndexOf("(");
+            int endIndex = subjectFilter.lastIndexOf(")");
+            if (startIndex != -1 && endIndex != -1 && endIndex > startIndex) {
+                subjectCode = subjectFilter.substring(startIndex + 1, endIndex);
+                subjectName = subjectFilter.substring(0, startIndex).trim();
+            }
+        } else {
+            // Fallback - assume it's subject name only
+            subjectName = subjectFilter;
+        }
+        
+        // Check against exam's subject
+        if (subjectCode != null && exam.getSubjectCode() != null) {
+            return exam.getSubjectCode().equals(subjectCode);
+        }
+        
+        if (subjectName != null && exam.getSubjectName() != null) {
+            return exam.getSubjectName().contains(subjectName) || 
+                   subjectName.contains(exam.getSubjectName());
+        }
+        
+        // Fallback - check both subject name and code
+        return (exam.getSubjectName() != null && exam.getSubjectName().contains(subjectFilter)) ||
+               (exam.getSubjectCode() != null && exam.getSubjectCode().contains(subjectFilter));
     }
 
     /* ---------------------------------------------------
@@ -254,20 +453,39 @@ public class ExamListController {
         info.setEndTime(examDTO.getEndTime());
         info.setTotalQuestions(examDTO.getQuestionCount());
         info.setTotalPoints(examDTO.getTotalScore() != null ? examDTO.getTotalScore().doubleValue() : 0.0);
+        info.setPassingScore(examDTO.getPassingScore() != null ? examDTO.getPassingScore().doubleValue() : null);
         info.setStatus(examDTO.getCurrentStatus() != null ? examDTO.getCurrentStatus() : "UNKNOWN");
         info.setSubjectCode(examDTO.getSubjectClassName());
         info.setSubjectName(examDTO.getSubjectName());
+        
+        // Teacher mode - no attempt info
+        info.setMaxAttempts(null);
+        info.setAttemptsMade(0);
+        info.setRemainingAttempts(null);
+        info.setHasActiveSubmission(false);
+        info.setHasPassed(false);
+        info.setHighestScore(null);
+        info.setIsEligible(false);
+        info.setIneligibleReason("Teacher mode");
+        
+        // Debug logging
+        logger.info("Converting ExamDTO to ExamInfoDTO: {} - Duration: {} - SubjectName: {} - SubjectClassName: {}", 
+            examDTO.getTitle(), examDTO.getDurationMinutes(), examDTO.getSubjectName(), examDTO.getSubjectClassName());
+        
         // Class names - có thể cần lấy từ examDTO nếu có
         info.setCanStart(false); // Teacher không làm bài
         return info;
     }
 
     /* ---------------------------------------------------
-     * Hiển thị danh sách exam cards
+     * Hiển thị danh sách exam cards với GridPane layout
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * EditBy: K24DTCN210-NVMANH (03/12/2025 09:10) - Changed to GridPane for proper grid layout
      * --------------------------------------------------- */
     private void displayExams() {
         examCardsContainer.getChildren().clear();
+        examCardsContainer.getColumnConstraints().clear();
+        examCardsContainer.getRowConstraints().clear();
         
         if (filteredExams == null || filteredExams.isEmpty()) {
             // Show empty state
@@ -279,103 +497,300 @@ public class ExamListController {
             emptyStateBox.setVisible(false);
             emptyStateBox.setManaged(false);
             
-            // Create cards for each exam
-            for (ExamInfoDTO exam : filteredExams) {
-                VBox card = createExamCard(exam);
-                examCardsContainer.getChildren().add(card);
-            }
-            
-            examCountLabel.setText(String.format("Tìm thấy %d đề thi", filteredExams.size()));
+            // Calculate responsive grid layout
+            Platform.runLater(() -> {
+                double containerWidth = examCardsContainer.getWidth();
+                if (containerWidth <= 0) {
+                    containerWidth = 1000; // Default container width
+                }
+                
+                // Tính số cột tối ưu
+                int columns = calculateOptimalColumns(containerWidth);
+                double cardWidth = calculateCardWidthForGrid(containerWidth, columns);
+                
+                // Setup column constraints
+                setupGridColumns(columns, cardWidth);
+                
+                // Add cards to grid
+                int row = 0;
+                int col = 0;
+                
+                for (ExamInfoDTO exam : filteredExams) {
+                    logger.info("Creating card for exam: {} at position [{},{}]", 
+                        exam.getTitle(), row, col);
+                    
+                    VBox card = createExamCard(exam, cardWidth);
+                    examCardsContainer.add(card, col, row);
+                    
+                    col++;
+                    if (col >= columns) {
+                        col = 0;
+                        row++;
+                    }
+                }
+                
+                examCountLabel.setText(String.format("Tìm thấy %d đề thi", filteredExams.size()));
+            });
         }
     }
 
     /* ---------------------------------------------------
-     * Tạo exam card cho một đề thi
+     * Tạo exam card với layout responsive
      * @param exam ExamInfoDTO
+     * @param cardWidth Chiều rộng card được tính toán
      * @returns VBox chứa card UI
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025 19:00) - Responsive card width
      * --------------------------------------------------- */
-    private VBox createExamCard(ExamInfoDTO exam) {
-        VBox card = new VBox(15);
-        card.getStyleClass().add("exam-card");
-        card.setPrefWidth(Double.MAX_VALUE);
+    private VBox createExamCard(ExamInfoDTO exam, double cardWidth) {
+        VBox card = new VBox(8);
+        card.getStyleClass().add("exam-card-clean");
         
-        // Header row (Title + Status badge)
-        HBox headerRow = new HBox(10);
-        headerRow.setAlignment(Pos.CENTER_LEFT);
-        
-        Label titleLabel = new Label(exam.getTitle());
-        titleLabel.getStyleClass().add("exam-title");
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
-        
-        Label statusBadge = createStatusBadge(exam);
-        
-        headerRow.getChildren().addAll(titleLabel, statusBadge);
-        
-        // Subject row
-        Label subjectLabel = new Label("📚 " + exam.getSubjectName());
-        subjectLabel.getStyleClass().add("exam-subtitle");
-        
-        // Info grid
-        VBox infoGrid = new VBox(8);
-        infoGrid.getChildren().addAll(
-            createInfoRow("⏰ Thời gian:", 
-                TimeFormatter.formatDateTime(exam.getStartTime()) + 
-                " - " + TimeFormatter.formatTime(exam.getEndTime())),
-            createInfoRow("⏱️ Thời lượng:", 
-                exam.getDurationMinutes() != null 
-                    ? TimeFormatter.formatDuration(exam.getDurationMinutes())
-                    : "Không xác định"),
-            createInfoRow("📝 Số câu hỏi:", 
-                String.valueOf(exam.getTotalQuestions()))
-        );
-        
-        // Countdown hoặc status message
-        Label countdownLabel = createCountdownLabel(exam);
-        if (countdownLabel != null) {
-            infoGrid.getChildren().add(countdownLabel);
+        // Add special style for out of attempts or ineligible exams
+        if (examApiClient != null) { // Only for student mode
+            if (isOutOfAttempts(exam)) {
+                card.getStyleClass().add("exam-card-out-of-attempts");
+            } else if (exam.getIsEligible() != null && !exam.getIsEligible()) {
+                card.getStyleClass().add("exam-card-ineligible");
+            } else if (exam.getHasPassed() != null && exam.getHasPassed()) {
+                card.getStyleClass().add("exam-card-passed");
+            }
         }
         
-        // Action buttons - khác nhau giữa student và teacher mode
-        Node actionSection;
-        if (examManagementApiClient != null) {
-            // Teacher mode: hiển thị các action buttons quản lý
-            actionSection = createTeacherActionButtons(exam);
+        card.setPrefWidth(cardWidth);
+        card.setMaxWidth(cardWidth);
+        card.setPrefHeight(190); // Fixed height để cards đều nhau
+        
+        // Header: Title + Status
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+        
+        Label title = new Label(exam.getTitle());
+        title.getStyleClass().add("exam-title-clean");
+        title.setWrapText(true);
+        title.setMaxWidth(220); // Giảm để dành chỗ cho status badge
+        HBox.setHgrow(title, Priority.ALWAYS);
+        
+        Label status = createStatusBadge(exam);
+        status.setMinWidth(Region.USE_PREF_SIZE); // Đảm bảo hiển thị đầy đủ
+        status.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        
+        header.getChildren().addAll(title, status);
+        
+        // Subject và exam type line
+        HBox subjectLine = new HBox(15);
+        subjectLine.setAlignment(Pos.CENTER_LEFT);
+        
+        // Subject info - Format: [Mã môn] - [Tên môn]
+        HBox subjectInfo = new HBox(6);
+        subjectInfo.setAlignment(Pos.CENTER_LEFT);
+        
+        String subjectDisplayName = formatSubjectDisplay(exam.getSubjectCode(), exam.getSubjectName());
+        
+        subjectInfo.getChildren().addAll(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.BOOK, 12, IconFactory.COLOR_PRIMARY),
+            new Label(subjectDisplayName)
+        );
+        
+        // Exam type info (nếu có)
+        HBox examTypeInfo = new HBox(6);
+        examTypeInfo.setAlignment(Pos.CENTER_LEFT);
+        String examType = determineExamType(exam); // Xác định loại đề thi
+        examTypeInfo.getChildren().addAll(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.TAG, 12, IconFactory.COLOR_INFO),
+            new Label(examType)
+        );
+        
+        subjectLine.getChildren().addAll(subjectInfo, examTypeInfo);
+        subjectLine.getStyleClass().add("exam-subject-clean");
+        
+        // Info grid - 3 rows với thông tin chi tiết
+        VBox infoGrid = new VBox(6);
+        
+        // Sử dụng GridPane để layout cân đối hơn
+        GridPane infoGridPane = new GridPane();
+        infoGridPane.setHgap(10);
+        infoGridPane.setVgap(6);
+        
+        // Column constraints để chia đều không gian
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(50);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(50);
+        infoGridPane.getColumnConstraints().addAll(col1, col2);
+        
+        // Row 0: Thời gian bắt đầu và kết thúc
+        infoGridPane.add(createFullWidthInfoItem(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.CLOCK, 12, IconFactory.COLOR_PRIMARY),
+            "Bắt đầu: " + TimeFormatter.formatDateTime(exam.getStartTime())
+        ), 0, 0);
+        
+        infoGridPane.add(createFullWidthInfoItem(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.CALENDAR_TIMES, 12, IconFactory.COLOR_DANGER),
+            "Kết thúc: " + TimeFormatter.formatDateTime(exam.getEndTime())
+        ), 1, 0);
+        
+        // Row 1: Thời lượng và số câu hỏi
+        String durationText;
+        if (exam.getDurationMinutes() != null) {
+            durationText = "Thời gian: " + exam.getDurationMinutes() + " phút";
+        } else if (exam.getDuration() != null) {
+            durationText = "Thời gian: " + exam.getDuration() + " phút";
         } else {
-            // Student mode: hiển thị button "Bắt đầu làm bài"
-            actionSection = createActionButton(exam);
+            durationText = "Thời gian: Không xác định";
         }
         
-        // Add all to card
-        card.getChildren().addAll(
-            headerRow,
-            subjectLabel,
-            new Separator(),
-            infoGrid,
-            actionSection
-        );
+        infoGridPane.add(createFullWidthInfoItem(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.HOURGLASS_HALF, 12, IconFactory.COLOR_WARNING),
+            durationText
+        ), 0, 1);
+        
+        infoGridPane.add(createFullWidthInfoItem(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.QUESTION_CIRCLE, 12, IconFactory.COLOR_INFO),
+            exam.getTotalQuestions() + " câu hỏi"
+        ), 1, 1);
+        
+        // Row 2: Điểm số và điểm đạt
+        infoGridPane.add(createFullWidthInfoItem(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.STAR, 12, IconFactory.COLOR_SUCCESS),
+            "Điểm tối đa: " + (exam.getTotalPoints() != null ? String.format("%.0f", exam.getTotalPoints()) : "Chưa xác định")
+        ), 0, 2);
+        
+        infoGridPane.add(createFullWidthInfoItem(
+            IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.TROPHY, 12, IconFactory.COLOR_WARNING),
+            "Điểm đạt: " + (exam.getPassingScore() != null ? String.format("%.0f", exam.getPassingScore()) : "Chưa xác định")
+        ), 1, 2);
+        
+        // Row 3: Attempt information (chỉ hiển thị cho student mode)
+        if (examApiClient != null && exam.getMaxAttempts() != null) {
+            String attemptText = formatAttemptInfo(exam);
+            String scoreText = formatScoreInfo(exam);
+            
+            infoGridPane.add(createFullWidthInfoItem(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.REDO_ALT, 12, 
+                    isOutOfAttempts(exam) ? IconFactory.COLOR_DANGER : IconFactory.COLOR_INFO),
+                attemptText
+            ), 0, 3);
+            
+            if (scoreText != null) {
+                infoGridPane.add(createFullWidthInfoItem(
+                    IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.CHART_LINE, 12, 
+                        exam.getHasPassed() != null && exam.getHasPassed() ? IconFactory.COLOR_SUCCESS : IconFactory.COLOR_INFO),
+                    scoreText
+                ), 1, 3);
+            }
+        }
+        
+        infoGrid.getChildren().add(infoGridPane);
+        
+        // Countdown warning if needed
+        HBox countdown = createCountdownLabel(exam);
+        if (countdown != null) {
+            infoGrid.getChildren().add(countdown);
+        }
+        
+        // Action button
+        Button actionBtn = createSimpleActionButton(exam);
+        
+        // Assemble card
+        card.getChildren().addAll(header, subjectLine, infoGrid, actionBtn);
         
         return card;
     }
     
     /* ---------------------------------------------------
-     * Tạo action buttons cho teacher mode (Edit, Delete, Publish/Unpublish)
+     * Format thông tin số lần làm bài
+     * @param exam ExamInfoDTO
+     * @returns String mô tả số lần làm bài
+     * @author: K24DTCN210-NVMANH (03/12/2025 17:05)
+     * --------------------------------------------------- */
+    private String formatAttemptInfo(ExamInfoDTO exam) {
+        Integer attemptsMade = exam.getAttemptsMade() != null ? exam.getAttemptsMade() : 0;
+        Integer maxAttempts = exam.getMaxAttempts();
+        
+        if (maxAttempts == null || maxAttempts == 0) {
+            return "Lần làm: " + attemptsMade + " (Không giới hạn)";
+        } else {
+            Integer remaining = exam.getRemainingAttempts() != null ? exam.getRemainingAttempts() : (maxAttempts - attemptsMade);
+            return "Lần làm: " + attemptsMade + "/" + maxAttempts + " (Còn " + remaining + ")";
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Format thông tin điểm số cao nhất
+     * @param exam ExamInfoDTO
+     * @returns String mô tả điểm số hoặc null nếu chưa làm
+     * @author: K24DTCN210-NVMANH (03/12/2025 17:05)
+     * --------------------------------------------------- */
+    private String formatScoreInfo(ExamInfoDTO exam) {
+        if (exam.getAttemptsMade() == null || exam.getAttemptsMade() == 0) {
+            return null; // Chưa làm lần nào
+        }
+        
+        if (exam.getHighestScore() != null) {
+            String scoreText = "Điểm cao nhất: " + String.format("%.1f", exam.getHighestScore());
+            if (exam.getHasPassed() != null && exam.getHasPassed()) {
+                scoreText += " ✓";
+            }
+            return scoreText;
+        } else {
+            return "Chưa có điểm";
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Kiểm tra xem đã hết lượt làm bài chưa
+     * @param exam ExamInfoDTO
+     * @returns true nếu đã hết lượt
+     * @author: K24DTCN210-NVMANH (03/12/2025 17:05)
+     * --------------------------------------------------- */
+    private boolean isOutOfAttempts(ExamInfoDTO exam) {
+        if (exam.getMaxAttempts() == null || exam.getMaxAttempts() == 0) {
+            return false; // Unlimited attempts
+        }
+        
+        Integer remaining = exam.getRemainingAttempts();
+        if (remaining != null) {
+            return remaining <= 0;
+        }
+        
+        Integer attemptsMade = exam.getAttemptsMade() != null ? exam.getAttemptsMade() : 0;
+        return attemptsMade >= exam.getMaxAttempts();
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo exam card với default width (backward compatibility)
+     * @param exam ExamInfoDTO
+     * @returns VBox chứa card UI
+     * @author: K24DTCN210-NVMANH (02/12/2025 19:00)
+     * --------------------------------------------------- */
+    private VBox createExamCard(ExamInfoDTO exam) {
+        return createExamCard(exam, 380); // Default width
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo action buttons cho teacher mode (Edit, Delete, Publish/Unpublish) - Compact version
      * @param exam ExamInfoDTO
      * @returns HBox chứa các action buttons
      * @author: K24DTCN210-NVMANH (30/11/2025)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025 16:51) - Compact buttons with IKonli icons
      * --------------------------------------------------- */
     private HBox createTeacherActionButtons(ExamInfoDTO exam) {
-        HBox buttonContainer = new HBox(10);
+        HBox buttonContainer = new HBox(6);
         buttonContainer.setAlignment(Pos.CENTER_RIGHT);
         
         // View Details button
-        Button viewButton = new Button("👁️ Chi tiết");
-        viewButton.getStyleClass().add("secondary-button");
+        Button viewButton = new Button();
+        viewButton.setGraphic(IconFactory.createViewIcon());
+        viewButton.getStyleClass().add("compact-button");
+        viewButton.setTooltip(new Tooltip("Xem chi tiết"));
         viewButton.setOnAction(e -> handleViewExamDetails(exam));
         
         // Edit button
-        Button editButton = new Button("✏️ Sửa");
-        editButton.getStyleClass().add("secondary-button");
+        Button editButton = new Button();
+        editButton.setGraphic(IconFactory.createEditIconForButton());
+        editButton.getStyleClass().add("compact-button");
+        editButton.setTooltip(new Tooltip("Chỉnh sửa"));
         editButton.setOnAction(e -> handleEditExam(exam));
         
         // Publish/Unpublish button (cần lấy từ ExamDTO)
@@ -384,17 +799,21 @@ public class ExamListController {
         boolean isPublished = exam.getStatus() != null && 
             (exam.getStatus().contains("PUBLISHED") || exam.getStatus().contains("ONGOING"));
         if (isPublished) {
-            publishButton.setText("🔒 Ẩn");
+            publishButton.setGraphic(IconFactory.createLockIconForButton());
+            publishButton.setTooltip(new Tooltip("Ẩn đề thi"));
             publishButton.setOnAction(e -> handleUnpublishExam(exam));
         } else {
-            publishButton.setText("📢 Xuất bản");
+            publishButton.setGraphic(IconFactory.createPublishIcon());
+            publishButton.setTooltip(new Tooltip("Xuất bản"));
             publishButton.setOnAction(e -> handlePublishExam(exam));
         }
-        publishButton.getStyleClass().add("secondary-button");
+        publishButton.getStyleClass().add("compact-button");
         
         // Delete button
-        Button deleteButton = new Button("🗑️ Xóa");
-        deleteButton.getStyleClass().add("danger-button");
+        Button deleteButton = new Button();
+        deleteButton.setGraphic(IconFactory.createDeleteIconForButton());
+        deleteButton.getStyleClass().add("compact-button-danger");
+        deleteButton.setTooltip(new Tooltip("Xóa đề thi"));
         deleteButton.setOnAction(e -> handleDeleteExam(exam));
         
         buttonContainer.getChildren().addAll(viewButton, editButton, publishButton, deleteButton);
@@ -495,7 +914,309 @@ public class ExamListController {
     }
 
     /* ---------------------------------------------------
-     * Tạo info row (label + value)
+     * Tính toán số cột tối ưu cho GridPane
+     * @param containerWidth Chiều rộng container
+     * @returns int số cột tối ưu
+     * @author: K24DTCN210-NVMANH (03/12/2025 09:10)
+     * --------------------------------------------------- */
+    private int calculateOptimalColumns(double containerWidth) {
+        // Trừ padding
+        double availableWidth = containerWidth - 40; // 20px padding mỗi bên
+        
+        // Xác định số cột dựa trên kích thước màn hình
+        if (availableWidth >= 1400) {
+            return 4; // 4 cột cho màn hình rất lớn
+        } else if (availableWidth >= 1050) {
+            return 3; // 3 cột cho màn hình lớn
+        } else if (availableWidth >= 700) {
+            return 2; // 2 cột cho màn hình trung bình
+        } else {
+            return 1; // 1 cột cho màn hình nhỏ
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Tính toán card width cho GridPane
+     * @param containerWidth Chiều rộng container
+     * @param columns Số cột
+     * @returns double card width
+     * @author: K24DTCN210-NVMANH (03/12/2025 09:10)
+     * --------------------------------------------------- */
+    private double calculateCardWidthForGrid(double containerWidth, int columns) {
+        // Trừ padding và gaps
+        double availableWidth = containerWidth - 40; // 20px padding mỗi bên
+        double totalGaps = (columns - 1) * 20; // 20px gap giữa các cột
+        double cardWidth = (availableWidth - totalGaps) / columns;
+        
+        // Đảm bảo card width trong khoảng hợp lý
+        cardWidth = Math.max(300, Math.min(450, cardWidth));
+        
+        logger.info("Container width: {}, Columns: {}, Card width: {}", 
+            containerWidth, columns, cardWidth);
+        
+        return cardWidth;
+    }
+    
+    /* ---------------------------------------------------
+     * Setup column constraints cho GridPane
+     * @param columns Số cột
+     * @param cardWidth Chiều rộng card
+     * @author: K24DTCN210-NVMANH (03/12/2025 09:10)
+     * --------------------------------------------------- */
+    private void setupGridColumns(int columns, double cardWidth) {
+        examCardsContainer.getColumnConstraints().clear();
+        
+        for (int i = 0; i < columns; i++) {
+            ColumnConstraints colConstraints = new ColumnConstraints();
+            colConstraints.setPrefWidth(cardWidth);
+            colConstraints.setMinWidth(cardWidth);
+            colConstraints.setMaxWidth(cardWidth);
+            colConstraints.setHalignment(HPos.CENTER);
+            examCardsContainer.getColumnConstraints().add(colConstraints);
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Format hiển thị môn học: [Mã môn] - [Tên môn]
+     * @param subjectCode Mã môn học
+     * @param subjectName Tên môn học
+     * @returns String formatted subject display
+     * @author: K24DTCN210-NVMANH (02/12/2025 18:30)
+     * --------------------------------------------------- */
+    private String formatSubjectDisplay(String subjectCode, String subjectName) {
+        boolean hasCode = subjectCode != null && !subjectCode.trim().isEmpty();
+        boolean hasName = subjectName != null && !subjectName.trim().isEmpty();
+        
+        if (hasCode && hasName) {
+            return subjectCode + " - " + subjectName;
+        } else if (hasCode) {
+            return subjectCode;
+        } else if (hasName) {
+            return subjectName;
+        } else {
+            return "Chưa xác định môn học";
+        }
+    }
+    
+    /* ---------------------------------------------------
+     * Xác định loại đề thi dựa trên thông tin exam
+     * @param exam ExamInfoDTO
+     * @returns String loại đề thi
+     * @author: K24DTCN210-NVMANH (02/12/2025 18:00)
+     * --------------------------------------------------- */
+    private String determineExamType(ExamInfoDTO exam) {
+        // Logic xác định loại đề thi dựa trên các thuộc tính
+        if (exam.getTitle().toLowerCase().contains("giữa kỳ")) {
+            return "Giữa kỳ";
+        } else if (exam.getTitle().toLowerCase().contains("cuối kỳ")) {
+            return "Cuối kỳ";
+        } else if (exam.getTitle().toLowerCase().contains("test")) {
+            return "Kiểm tra";
+        } else if (exam.getDurationMinutes() != null) {
+            if (exam.getDurationMinutes() >= 90) {
+                return "Thi chính thức";
+            } else if (exam.getDurationMinutes() >= 45) {
+                return "Kiểm tra";
+            } else {
+                return "Trắc nghiệm";
+            }
+        }
+        return "Bài thi";
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo full width info item cho GridPane
+     * @param icon FontIcon
+     * @param text Text content
+     * @returns HBox chứa icon và text, sử dụng toàn bộ width
+     * @author: K24DTCN210-NVMANH (02/12/2025 18:45)
+     * --------------------------------------------------- */
+    private HBox createFullWidthInfoItem(FontIcon icon, String text) {
+        HBox item = new HBox(6);
+        item.setAlignment(Pos.CENTER_LEFT);
+        item.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        item.setMaxWidth(Double.MAX_VALUE);
+        
+        Label textLabel = new Label(text);
+        textLabel.getStyleClass().add("exam-info-clean");
+        textLabel.setWrapText(true);
+        textLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(textLabel, Priority.ALWAYS);
+        
+        item.getChildren().addAll(icon, textLabel);
+        return item;
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo info item với FontAwesome icon
+     * @param icon FontIcon
+     * @param text Text content
+     * @returns HBox chứa icon và text
+     * @author: K24DTCN210-NVMANH (02/12/2025 17:45)
+     * --------------------------------------------------- */
+    private HBox createIconInfoItem(FontIcon icon, String text) {
+        HBox item = new HBox(6);
+        item.setAlignment(Pos.CENTER_LEFT);
+        item.setPrefWidth(180); // Tăng width để chứa datetime dài hơn
+        
+        Label textLabel = new Label(text);
+        textLabel.getStyleClass().add("exam-info-clean");
+        textLabel.setWrapText(true); // Cho phép wrap text nếu quá dài
+        
+        item.getChildren().addAll(icon, textLabel);
+        return item;
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo clean info item với emoji icon
+     * @param emoji Emoji icon
+     * @param text Text content
+     * @returns HBox chứa emoji và text
+     * @author: K24DTCN210-NVMANH (02/12/2025 17:30)
+     * --------------------------------------------------- */
+    private HBox createCleanInfoItem(String emoji, String text) {
+        HBox item = new HBox(5);
+        item.setAlignment(Pos.CENTER_LEFT);
+        item.setPrefWidth(150);
+        
+        Label emojiLabel = new Label(emoji);
+        emojiLabel.getStyleClass().add("exam-emoji");
+        
+        Label textLabel = new Label(text);
+        textLabel.getStyleClass().add("exam-info-clean");
+        
+        item.getChildren().addAll(emojiLabel, textLabel);
+        return item;
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo simple action button
+     * @param exam ExamInfoDTO
+     * @returns Button
+     * @author: K24DTCN210-NVMANH (02/12/2025 17:30)
+     * --------------------------------------------------- */
+    private Button createSimpleActionButton(ExamInfoDTO exam) {
+        Button button = new Button();
+        button.setPrefWidth(Double.MAX_VALUE);
+        button.setPrefHeight(32);
+        
+        LocalDateTime now = LocalDateTime.now();
+        
+        if (now.isBefore(exam.getStartTime())) {
+            HBox content = new HBox(6);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.CLOCK, 14, IconFactory.COLOR_GRAY),
+                new Label("Chưa tới giờ thi")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("exam-button-disabled");
+            button.setDisable(true);
+        } else if (now.isAfter(exam.getEndTime())) {
+            HBox content = new HBox(6);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.TIMES_CIRCLE, 14, IconFactory.COLOR_DANGER),
+                new Label("Đã kết thúc")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("exam-button-disabled");
+            button.setDisable(true);
+        } else {
+            if (examManagementApiClient != null) {
+                HBox content = new HBox(6);
+                content.setAlignment(Pos.CENTER);
+                content.getChildren().addAll(
+                    IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.EYE, 14, IconFactory.COLOR_WHITE),
+                    new Label("Xem chi tiết")
+                );
+                button.setGraphic(content);
+                button.getStyleClass().add("exam-button-secondary");
+                button.setOnAction(e -> handleViewExamDetails(exam));
+            } else {
+                // Student mode - check eligibility and attempts
+                if (exam.getIsEligible() != null && !exam.getIsEligible()) {
+                    // Not eligible - show reason
+                    HBox content = new HBox(6);
+                    content.setAlignment(Pos.CENTER);
+                    String reason = exam.getIneligibleReason() != null ? exam.getIneligibleReason() : "Không thể làm bài";
+                    content.getChildren().addAll(
+                        IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.BAN, 14, IconFactory.COLOR_DANGER),
+                        new Label(reason)
+                    );
+                    button.setGraphic(content);
+                    button.getStyleClass().add("exam-button-disabled");
+                    button.setDisable(true);
+                } else if (isOutOfAttempts(exam)) {
+                    // Out of attempts
+                    HBox content = new HBox(6);
+                    content.setAlignment(Pos.CENTER);
+                    content.getChildren().addAll(
+                        IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.EXCLAMATION_TRIANGLE, 14, IconFactory.COLOR_DANGER),
+                        new Label("Đã hết lượt làm bài")
+                    );
+                    button.setGraphic(content);
+                    button.getStyleClass().add("exam-button-disabled");
+                    button.setDisable(true);
+                } else {
+                    // Can start exam
+                    HBox content = new HBox(6);
+                    content.setAlignment(Pos.CENTER);
+                    String buttonText = (exam.getHasActiveSubmission() != null && exam.getHasActiveSubmission()) ? 
+                        "Tiếp tục làm bài" : "Bắt đầu làm bài";
+                    content.getChildren().addAll(
+                        IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.PLAY, 14, IconFactory.COLOR_WHITE),
+                        new Label(buttonText)
+                    );
+                    button.setGraphic(content);
+                    button.getStyleClass().add("exam-button-primary");
+                    button.setOnAction(e -> handleStartExam(exam));
+                }
+            }
+        }
+        
+        return button;
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo ultra compact info row với icon nhỏ
+     * @param icon FontIcon cho info
+     * @param value Giá trị hiển thị
+     * @returns HBox chứa icon và value
+     * @author: K24DTCN210-NVMANH (02/12/2025 17:15)
+     * --------------------------------------------------- */
+    private HBox createUltraCompactInfoRow(FontIcon icon, String value) {
+        HBox row = new HBox(3);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPrefWidth(100);
+        
+        Label valueNode = new Label(value);
+        valueNode.getStyleClass().add("exam-info-ultra-compact");
+        
+        row.getChildren().addAll(icon, valueNode);
+        return row;
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo compact info row với icon
+     * @param icon FontIcon cho info
+     * @param value Giá trị hiển thị
+     * @returns HBox chứa icon và value
+     * @author: K24DTCN210-NVMANH (02/12/2025 16:51)
+     * --------------------------------------------------- */
+    private HBox createCompactInfoRow(FontIcon icon, String value) {
+        HBox row = new HBox(6);
+        row.setAlignment(Pos.CENTER_LEFT);
+        
+        Label valueNode = new Label(value);
+        valueNode.getStyleClass().add("exam-info-compact");
+        
+        row.getChildren().addAll(icon, valueNode);
+        return row;
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo info row (label + value) - Legacy method for compatibility
      * @param label Nhãn
      * @param value Giá trị
      * @returns HBox chứa label và value
@@ -517,30 +1238,85 @@ public class ExamListController {
     }
 
     /* ---------------------------------------------------
-     * Tạo countdown label nếu exam chưa bắt đầu
+     * Tạo countdown label nếu exam chưa bắt đầu - Compact version
      * @param exam ExamInfoDTO
-     * @returns Label hoặc null
+     * @returns HBox hoặc null
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025 16:51) - Compact version with icon
      * --------------------------------------------------- */
-    private Label createCountdownLabel(ExamInfoDTO exam) {
+    private HBox createCountdownLabel(ExamInfoDTO exam) {
         LocalDateTime now = LocalDateTime.now();
         
         if (now.isBefore(exam.getStartTime())) {
             String timeRemaining = TimeFormatter.formatTimeRemaining(exam.getStartTime());
-            Label label = new Label("⏳ Bắt đầu sau: " + timeRemaining);
-            label.getStyleClass().add("exam-info-value");
-            label.setStyle("-fx-text-fill: #FF9800;"); // Warning color
-            return label;
+            
+            HBox countdownBox = new HBox(6);
+            countdownBox.setAlignment(Pos.CENTER_LEFT);
+            countdownBox.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.HOURGLASS_START, 12, IconFactory.COLOR_WARNING),
+                new Label("Bắt đầu sau: " + timeRemaining)
+            );
+            countdownBox.getStyleClass().add("countdown-info");
+            return countdownBox;
         }
         
         return null;
     }
 
     /* ---------------------------------------------------
-     * Tạo action button (Bắt đầu hoặc disabled)
+     * Tạo compact action button cho layout mới
+     * @param exam ExamInfoDTO
+     * @returns Button
+     * @author: K24DTCN210-NVMANH (02/12/2025 17:15)
+     * --------------------------------------------------- */
+    private Button createCompactActionButton(ExamInfoDTO exam) {
+        Button button = new Button();
+        button.setPrefWidth(120);
+        button.setPrefHeight(35);
+        
+        LocalDateTime now = LocalDateTime.now();
+        
+        if (now.isBefore(exam.getStartTime())) {
+            VBox content = new VBox(2);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.CLOCK, 16, IconFactory.COLOR_GRAY),
+                new Label("Chưa tới giờ")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("disabled-button-compact");
+            button.setDisable(true);
+        } else if (now.isAfter(exam.getEndTime())) {
+            VBox content = new VBox(2);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.TIMES_CIRCLE, 16, IconFactory.COLOR_DANGER),
+                new Label("Đã kết thúc")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("disabled-button-compact");
+            button.setDisable(true);
+        } else {
+            VBox content = new VBox(2);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.PLAY, 16, IconFactory.COLOR_WHITE),
+                new Label("Bắt đầu")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("start-exam-button-compact");
+            button.setOnAction(e -> handleStartExam(exam));
+        }
+        
+        return button;
+    }
+    
+    /* ---------------------------------------------------
+     * Tạo action button (Bắt đầu hoặc disabled) - Compact version
      * @param exam ExamInfoDTO
      * @returns Button
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025 16:51) - Compact button with IKonli icons
      * --------------------------------------------------- */
     private Button createActionButton(ExamInfoDTO exam) {
         Button button = new Button();
@@ -549,14 +1325,34 @@ public class ExamListController {
         LocalDateTime now = LocalDateTime.now();
         
         if (now.isBefore(exam.getStartTime())) {
-            button.setText("Chưa đến giờ thi");
+            HBox content = new HBox(5);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.CLOCK, 14, IconFactory.COLOR_GRAY),
+                new Label("Chưa đến giờ thi")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("disabled-button");
             button.setDisable(true);
         } else if (now.isAfter(exam.getEndTime())) {
-            button.setText("Đã kết thúc");
+            HBox content = new HBox(5);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.TIMES_CIRCLE, 14, IconFactory.COLOR_DANGER),
+                new Label("Đã kết thúc")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("disabled-button");
             button.setDisable(true);
         } else {
-            button.setText("🚀 Bắt đầu làm bài");
-            button.getStyleClass().add("success-button");
+            HBox content = new HBox(5);
+            content.setAlignment(Pos.CENTER);
+            content.getChildren().addAll(
+                IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.PLAY, 14, IconFactory.COLOR_WHITE),
+                new Label("Bắt đầu làm bài")
+            );
+            button.setGraphic(content);
+            button.getStyleClass().add("start-exam-button");
             button.setOnAction(e -> handleStartExam(exam));
         }
         

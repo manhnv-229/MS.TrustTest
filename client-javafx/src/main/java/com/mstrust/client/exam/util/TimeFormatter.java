@@ -14,6 +14,8 @@ public class TimeFormatter {
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DateTimeFormatter TIME_FORMATTER = 
             DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATE_FORMATTER = 
+            DateTimeFormatter.ofPattern("dd/MM");
 
     /* ---------------------------------------------------
      * Format seconds thành HH:MM:SS
@@ -56,10 +58,22 @@ public class TimeFormatter {
      * @param dateTime LocalDateTime cần format
      * @returns String dạng "12:00"
      * @author: K24DTCN210-NVMANH (23/11/2025 12:01)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025 17:15) - Fixed format to only show time
      * --------------------------------------------------- */
     public static String formatTime(LocalDateTime dateTime) {
         if (dateTime == null) return "";
-        return dateTime.format(DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"));
+        return dateTime.format(TIME_FORMATTER);
+    }
+    
+    /* ---------------------------------------------------
+     * Format ngày từ LocalDateTime
+     * @param dateTime LocalDateTime cần format
+     * @returns String dạng "23/11"
+     * @author: K24DTCN210-NVMANH (02/12/2025 17:15)
+     * --------------------------------------------------- */
+    public static String formatDate(LocalDateTime dateTime) {
+        if (dateTime == null) return "";
+        return dateTime.format(DATE_FORMATTER);
     }
     
     /* ---------------------------------------------------
@@ -76,10 +90,11 @@ public class TimeFormatter {
     }
 
     /* ---------------------------------------------------
-     * Tính thời gian còn lại (friendly format)
+     * Tính thời gian còn lại (friendly format với ngày)
      * @param endTime Thời điểm kết thúc
-     * @returns String dạng "2 giờ 30 phút" hoặc "45 phút"
+     * @returns String dạng "2 ngày 15 giờ 4 phút", "2 giờ 30 phút" hoặc "45 phút"
      * @author: K24DTCN210-NVMANH (23/11/2025 12:01)
+     * EditBy: K24DTCN210-NVMANH (02/12/2025 18:30) - Added days support
      * --------------------------------------------------- */
     public static String formatTimeRemaining(LocalDateTime endTime) {
         if (endTime == null) return "";
@@ -89,14 +104,31 @@ public class TimeFormatter {
             return "Đã kết thúc";
         }
         
-        long hours = duration.toHours();
+        long totalHours = duration.toHours();
+        long days = totalHours / 24;
+        long hours = totalHours % 24;
         long minutes = duration.toMinutes() % 60;
         
-        if (hours > 0) {
-            return String.format("%d giờ %d phút", hours, minutes);
+        StringBuilder result = new StringBuilder();
+        
+        if (days > 0) {
+            result.append(days).append(" ngày");
+            if (hours > 0) {
+                result.append(" ").append(hours).append(" giờ");
+            }
+            if (minutes > 0) {
+                result.append(" ").append(minutes).append(" phút");
+            }
+        } else if (hours > 0) {
+            result.append(hours).append(" giờ");
+            if (minutes > 0) {
+                result.append(" ").append(minutes).append(" phút");
+            }
         } else {
-            return String.format("%d phút", minutes);
+            result.append(minutes).append(" phút");
         }
+        
+        return result.toString();
     }
 
     /* ---------------------------------------------------

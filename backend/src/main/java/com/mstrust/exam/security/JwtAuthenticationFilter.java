@@ -31,6 +31,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private CustomUserDetailsService userDetailsService;
 
     /* ---------------------------------------------------
+     * Skip filter cho public endpoints (auth, public, health)
+     * @param request HTTP request
+     * @return true nếu nên skip filter
+     * @author: K24DTCN210-NVMANH (03/12/2025 11:30)
+     * --------------------------------------------------- */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // Skip JWT filter cho public endpoints
+        return path.startsWith("/auth/") || 
+               path.startsWith("/public/") || 
+               path.startsWith("/health/") ||
+               path.startsWith("/swagger-ui/") ||
+               path.startsWith("/v3/api-docs/");
+    }
+
+    /* ---------------------------------------------------
      * Filter mỗi request để validate JWT
      * @param request HTTP request
      * @param response HTTP response
