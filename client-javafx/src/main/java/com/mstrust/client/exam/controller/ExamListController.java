@@ -1135,7 +1135,10 @@ public class ExamListController {
                 button.setOnAction(e -> handleViewExamDetails(exam));
             } else {
                 // Student mode - check eligibility and attempts
-                if (exam.getIsEligible() != null && !exam.getIsEligible()) {
+                boolean hasActiveSubmission = exam.getHasActiveSubmission() != null && exam.getHasActiveSubmission();
+                
+                // Chỉ disable nếu không eligible VÀ không có bài thi đang làm dở
+                if (exam.getIsEligible() != null && !exam.getIsEligible() && !hasActiveSubmission) {
                     // Not eligible - show reason
                     HBox content = new HBox(6);
                     content.setAlignment(Pos.CENTER);
@@ -1147,8 +1150,8 @@ public class ExamListController {
                     button.setGraphic(content);
                     button.getStyleClass().add("exam-button-disabled");
                     button.setDisable(true);
-                } else if (isOutOfAttempts(exam)) {
-                    // Out of attempts
+                } else if (isOutOfAttempts(exam) && !hasActiveSubmission) {
+                    // Out of attempts AND no active submission
                     HBox content = new HBox(6);
                     content.setAlignment(Pos.CENTER);
                     content.getChildren().addAll(
@@ -1159,11 +1162,19 @@ public class ExamListController {
                     button.getStyleClass().add("exam-button-disabled");
                     button.setDisable(true);
                 } else {
-                    // Can start exam
+                    // Can start or continue exam
                     HBox content = new HBox(6);
                     content.setAlignment(Pos.CENTER);
-                    String buttonText = (exam.getHasActiveSubmission() != null && exam.getHasActiveSubmission()) ? 
-                        "Tiếp tục làm bài" : "Bắt đầu làm bài";
+                    
+                    String buttonText;
+                    if (hasActiveSubmission) {
+                        buttonText = "Tiếp tục làm bài";
+                    } else if (exam.getAttemptsMade() != null && exam.getAttemptsMade() > 0) {
+                        buttonText = "Làm lại bài thi";
+                    } else {
+                        buttonText = "Bắt đầu làm bài";
+                    }
+                    
                     content.getChildren().addAll(
                         IconFactory.createIcon(org.kordamp.ikonli.fontawesome5.FontAwesomeSolid.PLAY, 14, IconFactory.COLOR_WHITE),
                         new Label(buttonText)
