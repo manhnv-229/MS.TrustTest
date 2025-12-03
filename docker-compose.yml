@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ms-trust-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Cấu hình kết nối Database trỏ về MySQL server hiện tại
+      - SPRING_DATASOURCE_URL=jdbc:mysql://104.199.231.104:3306/MS.TrustTest?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=nvmanh
+      - SPRING_DATASOURCE_PASSWORD=!M@nh1989
+      # Cấu hình FTP (giữ nguyên như application.yml)
+      - FTP_SERVER=153.92.11.239
+      - FTP_PORT=21
+      - FTP_USERNAME=u341775345.admin
+      - FTP_PASSWORD=!M@nh1989
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
