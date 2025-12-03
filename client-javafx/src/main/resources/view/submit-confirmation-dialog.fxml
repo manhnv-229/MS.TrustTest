@@ -1,0 +1,228 @@
+<? xml version="1.0" encoding="UTF-8"?>
+
+<? import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx. FontIcon?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com. mstrust.client.exam. controller. SubmitConfirmationDialogController"
+            styleClass="content-container"
+            prefWidth="650" prefHeight="580">
+    
+    <!-- Header với icon và tiêu đề -->
+    <top>
+        <VBox styleClass="dialog-header" alignment="CENTER">
+            <padding>
+                <Insets top="25" right="25" bottom="20" left="25"/>
+            </padding>
+            
+            <!-- Warning Icon -->
+            <FontIcon iconLiteral="fas-exclamation-triangle" iconSize="48" 
+                      style="-fx-icon-color: #FF9800;" />
+            
+            <!-- Dialog Title -->
+            <Label text="🎓 XÁC NHẬN NỘP BÀI THI" styleClass="page-title" 
+                   style="-fx-font-size: 22px; -fx-text-alignment: center; -fx-text-fill: #FF9800; -fx-font-weight: bold;">
+                <VBox.margin>
+                    <Insets top="15"/>
+                </VBox.margin>
+            </Label>
+            
+            <!-- Subtitle -->
+            <Label text="⚠️ BẠN SẮP NỘP BÀI THI - HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC!" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #F44336; -fx-font-weight: bold; -fx-text-alignment: center;">
+                <VBox.margin>
+                    <Insets top="5"/>
+                </VBox.margin>
+            </Label>
+        </VBox>
+    </top>
+    
+    <!-- Content trong ScrollPane -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="dialog-content" 
+                    style="-fx-background-color: transparent; -fx-padding: 0;">
+            <VBox spacing="20">
+                <padding>
+                    <Insets top="10" right="25" bottom="10" left="25"/>
+                </padding>
+                
+                <!-- Thống kê bài làm -->
+                <VBox spacing="15" styleClass="form-section" 
+                      style="-fx-background-color: #E8F5E9; -fx-border-color: #4CAF50; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 20;">
+                    
+                    <!-- Section Header -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <FontIcon iconLiteral="fas-chart-bar" iconSize="20" 
+                                  style="-fx-icon-color: #4CAF50;" />
+                        <Label text="📊 THỐNG KÊ BÀI LÀM CỦA BẠN" 
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2E7D32;"/>
+                    </HBox>
+                    
+                    <!-- Statistics Grid -->
+                    <GridPane hgap="30" vgap="12">
+                        <!-- Row 1 -->
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <FontIcon iconLiteral="fas-list-ol" iconSize="16" style="-fx-icon-color: #2196F3;" />
+                            <Label text="Tổng số câu hỏi:" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #424242;"/>
+                        </HBox>
+                        <Label fx:id="totalQuestionsLabel" text="25 câu" 
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1976D2;"
+                               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                        
+                        <!-- Row 2 -->
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <FontIcon iconLiteral="fas-check-circle" iconSize="16" style="-fx-icon-color: #4CAF50;" />
+                            <Label text="Đã trả lời:" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #424242;"/>
+                        </HBox>
+                        <Label fx:id="answeredQuestionsLabel" text="20 câu" 
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;"
+                               GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        
+                        <!-- Row 3 -->
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <FontIcon iconLiteral="fas-times-circle" iconSize="16" style="-fx-icon-color: #F44336;" />
+                            <Label text="Chưa trả lời:" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #424242;"/>
+                        </HBox>
+                        <Label fx:id="unansweredQuestionsLabel" text="5 câu" 
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #F44336;"
+                               GridPane. columnIndex="1" GridPane. rowIndex="2"/>
+                        
+                        <!-- Row 4 -->
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                            <FontIcon iconLiteral="fas-percentage" iconSize="16" style="-fx-icon-color: #FF9800;" />
+                            <Label text="Tỷ lệ hoàn thành:" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #424242;"/>
+                        </HBox>
+                        <Label fx:id="completionPercentageLabel" text="80. 0%" 
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #FF9800;"
+                               GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        
+                        <!-- Row 5 -->
+                        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.columnIndex="0" GridPane.rowIndex="4">
+                            <FontIcon iconLiteral="fas-clock" iconSize="16" style="-fx-icon-color: #9C27B0;" />
+                            <Label text="Thời gian còn lại:" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-text-fill: #424242;"/>
+                        </HBox>
+                        <Label fx:id="remainingTimeLabel" text="15:30" 
+                               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #9C27B0;"
+                               GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                    </GridPane>
+                </VBox>
+                
+                <!-- Cảnh báo nếu có câu chưa trả lời -->
+                <VBox fx:id="warningSection" spacing="10" styleClass="form-section" 
+                      style="-fx-background-color: #FFF3E0; -fx-border-color: #FF9800; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 20;"
+                      managed="false" visible="false">
+                    
+                    <!-- Warning Header -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <FontIcon iconLiteral="fas-exclamation-triangle" iconSize="20" 
+                                  style="-fx-icon-color: #FF9800;" />
+                        <Label text="⚠️ CẢNH BÁO" 
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #E65100;"/>
+                    </HBox>
+                    
+                    <!-- Warning Content -->
+                    <VBox spacing="8">
+                        <Label fx:id="warningMessageLabel" text="• Bạn còn 5 câu chưa trả lời!" 
+                               style="-fx-font-size: 14px; -fx-text-fill: #E65100; -fx-font-weight: 600;"/>
+                        <Label text="• Các câu này sẽ được tính là 0 điểm." 
+                               style="-fx-font-size: 14px; -fx-text-fill: #E65100;"/>
+                        <Label text="• Bạn có chắc muốn nộp bài với số câu chưa hoàn thành này?" 
+                               style="-fx-font-size: 14px; -fx-text-fill: #E65100; -fx-font-weight: 600;"/>
+                    </VBox>
+                </VBox>
+                
+                <!-- Lưu ý quan trọng -->
+                <VBox spacing="15" styleClass="form-section" 
+                      style="-fx-background-color: #E3F2FD; -fx-border-color: #2196F3; -fx-border-width: 2; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 20;">
+                    
+                    <!-- Important Notes Header -->
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <FontIcon iconLiteral="fas-info-circle" iconSize="20" 
+                                  style="-fx-icon-color: #2196F3;" />
+                        <Label text="🔒 LƯU Ý QUAN TRỌNG" 
+                               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1976D2;"/>
+                    </HBox>
+                    
+                    <!-- Important Notes Content -->
+                    <VBox spacing="8">
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-lock" iconSize="12" style="-fx-icon-color: #1976D2;" />
+                            <Label text="Sau khi nộp bài, bạn KHÔNG THỂ chỉnh sửa câu trả lời" 
+                                   style="-fx-font-size: 14px; -fx-text-fill: #1976D2;"/>
+                        </HBox>
+                        
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-save" iconSize="12" style="-fx-icon-color: #1976D2;" />
+                            <Label text="Tất cả câu trả lời sẽ được lưu vĩnh viễn vào hệ thống" 
+                                   style="-fx-font-size: 14px; -fx-text-fill: #1976D2;"/>
+                        </HBox>
+                        
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-chart-line" iconSize="12" style="-fx-icon-color: #1976D2;" />
+                            <Label text="Kết quả bài thi sẽ được hiển thị ngay sau khi nộp" 
+                                   style="-fx-font-size: 14px; -fx-text-fill: #1976D2;"/>
+                        </HBox>
+                        
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-ban" iconSize="12" style="-fx-icon-color: #1976D2;" />
+                            <Label text="Hành động này KHÔNG THỂ HOÀN TÁC" 
+                                   style="-fx-font-size: 14px; -fx-text-fill: #1976D2; -fx-font-weight: bold;"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+                
+                <!-- Confirmation Question -->
+                <VBox spacing="10" alignment="CENTER" 
+                      style="-fx-background-color: #F5F5F5; -fx-border-color: #9E9E9E; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 20;">
+                    
+                    <FontIcon iconLiteral="fas-question-circle" iconSize="32" 
+                              style="-fx-icon-color: #424242;" />
+                    
+                    <Label text="💡 Bạn có CHẮC CHẮN muốn nộp bài không?" 
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #424242; -fx-text-alignment: center;"/>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+    
+    <!-- Action Buttons -->
+    <bottom>
+        <HBox spacing="15" alignment="CENTER" styleClass="dialog-footer" 
+              style="-fx-background-color: #FAFAFA; -fx-border-color: #E0E0E0; -fx-border-width: 1 0 0 0;">
+            <padding>
+                <Insets top="20" right="25" bottom="20" left="25"/>
+            </padding>
+            
+            <!-- Back Button -->
+            <Button fx:id="cancelButton" onAction="#handleCancel" 
+                    style="-fx-background-color: linear-gradient(to bottom, #FF9800, #F57C00); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 24; -fx-background-radius: 8; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(255,152,0,0.3), 4, 0, 0, 2);"
+                    prefWidth="180">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <FontIcon iconLiteral="fas-arrow-left" iconSize="14" 
+                                  style="-fx-icon-color: white;" />
+                        <Label text="Quay Lại Kiểm Tra" 
+                               style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+            
+            <!-- Submit Button -->
+            <Button fx:id="submitButton" onAction="#handleSubmit" 
+                    style="-fx-background-color: linear-gradient(to bottom, #4CAF50, #388E3C); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 12 24; -fx-background-radius: 8; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(76,175,80,0.4), 6, 0, 0, 3);"
+                    prefWidth="180">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <FontIcon iconLiteral="fas-check-circle" iconSize="14" 
+                                  style="-fx-icon-color: white;" />
+                        <Label text="Xác Nhận Nộp Bài" 
+                               style="-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+        </HBox>
+    </bottom>
+</BorderPane>

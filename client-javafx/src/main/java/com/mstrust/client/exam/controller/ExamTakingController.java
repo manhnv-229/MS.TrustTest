@@ -876,12 +876,10 @@ public class ExamTakingController {
     }
 
     /* ---------------------------------------------------
-     * Show submit confirmation dialog với statistics chi tiết
+     * Show submit confirmation dialog với custom UI đẹp và statistics chi tiết
      * @returns true nếu user xác nhận submit, false nếu cancel
      * @author: K24DTCN210-NVMANH (23/11/2025 18:57)
-     * EditBy: K24DTCN210-NVMANH (25/11/2025 11:48) - Bug 6: Fixed time display & improved UI
-     * EditBy: K24DTCN210-NVMANH (25/11/2025 14:40) - Enhanced dialog UI with better styling
-     * EditBy: K24DTCN210-NVMANH (25/11/2025 15:03) - Fixed dialog owner & centering
+     * EditBy: K24DTCN210-NVMANH (03/12/2025 14:15) - Replaced Alert with custom dialog
      * --------------------------------------------------- */
     private boolean showSubmitConfirmationDialog() {
         // Calculate statistics
@@ -891,122 +889,19 @@ public class ExamTakingController {
         // Count answered questions from cache
         for (Long questionId : answersCache.keySet()) {
             String answer = answersCache.get(questionId);
-            if (answer != null && !answer.trim().isEmpty()) {
+            if (answer != null && !answer.trim(). isEmpty()) {
                 answered++;
             }
         }
         
-        int unanswered = total - answered;
-        double percentage = total > 0 ? (answered * 100.0 / total) : 0.0;
-        
-        // ✅ Bug 6 FIX: Get REAL-TIME remaining time from timer component
+        // Get REAL-TIME remaining time from timer component
         long remainingSeconds = timerComponent != null 
             ? timerComponent.getRemainingSeconds() 
             : examSession.getRemainingSeconds();
-        String timeRemaining = TimeFormatter.formatSeconds(remainingSeconds);
         
-        // Build ENHANCED confirmation message với better formatting
-        StringBuilder message = new StringBuilder();
-        message.append("╔════════════════════════════════════════════════════════╗\n");
-        message.append("║           📊  THỐNG KÊ BÀI LÀM CỦA BẠN                ║\n");
-        message.append("╚════════════════════════════════════════════════════════╝\n\n");
-        
-        message.append("  📋  TỔNG QUAN:\n");
-        message.append(String.format("     📝  Tổng số câu hỏi:        %d câu\n", total));
-        message.append(String.format("     ✅  Đã trả lời:             %d câu\n", answered));
-        message.append(String.format("     ❌  Chưa trả lời:           %d câu\n", unanswered));
-        message.append(String.format("     📈  Tỷ lệ hoàn thành:       %.1f%%\n", percentage));
-        message.append(String.format("     ⏰  Thời gian còn lại:      %s\n\n", timeRemaining));
-        
-        if (unanswered > 0) {
-            message.append("╔════════════════════════════════════════════════════════╗\n");
-            message.append("║                   ⚠️  CẢNH BÁO                        ║\n");
-            message.append("╚════════════════════════════════════════════════════════╝\n");
-            message.append(String.format("  • Bạn còn %d câu chưa trả lời!\n", unanswered));
-            message.append("  • Các câu này sẽ được tính là 0 điểm.\n");
-            message.append("  • Bạn có chắc muốn nộp bài với số câu chưa hoàn thành này?\n\n");
-        }
-        
-        message.append("╔════════════════════════════════════════════════════════╗\n");
-        message.append("║              🔒  LƯU Ý QUAN TRỌNG                     ║\n");
-        message.append("╚════════════════════════════════════════════════════════╝\n");
-        message.append("  ▪ Sau khi nộp bài, bạn KHÔNG THỂ chỉnh sửa câu trả lời\n");
-        message.append("  ▪ Tất cả câu trả lời sẽ được lưu vĩnh viễn vào hệ thống\n");
-        message.append("  ▪ Kết quả bài thi sẽ được hiển thị ngay sau khi nộp\n");
-        message.append("  ▪ Hành động này KHÔNG THỂ HOÀN TÁC\n\n");
-        
-        message.append("════════════════════════════════════════════════════════\n");
-        message.append("       💡 Bạn có CHẮC CHẮN muốn nộp bài không?       \n");
-        message.append("════════════════════════════════════════════════════════");
-        
-        // Create alert dialog with ENHANCED styling
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("🎓 Xác Nhận Nộp Bài Thi");
-        alert.setHeaderText("⚠️ BẠN SẮP NỘP BÀI THI!");
-        alert.setContentText(message.toString());
-        
-        // ✅ CRITICAL FIX: Set owner window để dialog KHÔNG làm ẩn full-screen exam window
-        if (stage != null) {
-            alert.initOwner(stage);
-        }
-        
-        // Set optimal size for better display
-        alert.getDialogPane().setMinWidth(650);
-        alert.getDialogPane().setMinHeight(500);
-        
-        // Apply CSS styling for professional look
-        alert.getDialogPane().setStyle(
-            "-fx-font-family: 'Consolas', 'Courier New', monospace; " +
-            "-fx-font-size: 13px; " +
-            "-fx-background-color: #FAFAFA;"
-        );
-        
-        // Style header with warning color
-        alert.getDialogPane().lookup(".header-panel").setStyle(
-            "-fx-background-color: #FFF3E0; " +
-            "-fx-border-color: #FF9800; " +
-            "-fx-border-width: 0 0 2 0; " +
-            "-fx-padding: 15px;"
-        );
-        
-        // Style content area
-        alert.getDialogPane().lookup(".content").setStyle(
-            "-fx-padding: 20px; " +
-            "-fx-background-color: white;"
-        );
-        
-        // Customize button text với icons
-        ButtonType submitButton = new ButtonType("✅ Xác Nhận Nộp Bài", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("↩️ Quay Lại Kiểm Tra", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(submitButton, cancelButton);
-        
-        // Style buttons
-        alert.getDialogPane().lookupButton(submitButton).setStyle(
-            "-fx-background-color: #4CAF50; " +
-            "-fx-text-fill: white; " +
-            "-fx-font-weight: bold; " +
-            "-fx-font-size: 13px; " +
-            "-fx-padding: 10px 20px; " +
-            "-fx-background-radius: 5px; " +
-            "-fx-cursor: hand;"
-        );
-        
-        alert.getDialogPane().lookupButton(cancelButton).setStyle(
-            "-fx-background-color: #FF9800; " +
-            "-fx-text-fill: white; " +
-            "-fx-font-weight: bold; " +
-            "-fx-font-size: 13px; " +
-            "-fx-padding: 10px 20px; " +
-            "-fx-background-radius: 5px; " +
-            "-fx-cursor: hand;"
-        );
-        
-        // ✅ Center dialog on screen
-        WindowCenterHelper.centerWindowOnShown(alert.getDialogPane().getScene().getWindow());
-        
-        // Show and wait for response
-        Optional<ButtonType> result = alert.showAndWait();
-        return result.isPresent() && result.get() == submitButton;
+        // Show custom confirmation dialog
+        return SubmitConfirmationDialogController.showConfirmationDialog(
+            stage, total, answered, remainingSeconds);
     }
 
     /* ---------------------------------------------------
