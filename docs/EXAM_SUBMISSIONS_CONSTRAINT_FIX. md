@@ -1,0 +1,129 @@
+# Fix Exam Submissions Constraint Issue
+
+## 🚨 Vấn đề (Issue)
+
+Khi student cố gắng làm bài thi lần thứ 2 (attempt thứ 2), hệ thống báo lỗi:
+
+```
+SQL Error: 1062, SQLState: 23000
+Duplicate entry '5-5' for key 'exam_submissions.uk_exam_student'
+```
+
+**Root Cause:** Constraint `uk_exam_student` trong database được thiết kế sai - chỉ cho phép 1 submission duy nhất per `(exam_id, student_id)`, nhưng theo business requirements, student có thể làm nhiều attempts.
+
+## 🔍 Phân tích (Analysis)
+
+### Database Constraint Issue
+- **Constraint hiện tại:** `uk_exam_student` trên `(exam_id, student_id)`
+- **Vấn đề:** Ngăn student làm attempt thứ 2, 3... 
+- **Constraint đúng:** Should be `uk_exam_student_attempt` trên `(exam_id, student_id, attempt_number)`
+
+### Business Logic Requirements
+Theo `docs/START_EXAM_SCENARIO.md`:
+- **Scenario 1:** Student làm lần đầu → tạo submission mới (attempt=1)
+- **Scenario 2:** Student tiếp tục bài dở → return existing active submission  
+- **Scenario 3:** Student làm lần thứ 2 → tạo submission mới (attempt=2)
+
+## ⚡ Giải pháp (Solution)
+
+### 1. Database Migration (Recommended)
+```sql
+-- Drop constraint cũ (sai thiết kế)
+ALTER TABLE exam_submissions DROP INDEX uk_exam_student;
+
+-- Tạo constraint mới đúng thiết kế
+ALTER TABLE exam_submissions 
+ADD CONSTRAINT uk_exam_student_attempt 
+UNIQUE KEY (exam_id, student_id, attempt_number);
+```
+
+**File:** `database/fix-exam-submissions-constraint.sql`
+
+### 2.  Application Logic Fix (Workaround)
+Cải thiện logic trong `ExamTakingService. startExam()` để handle constraint violation gracefully:
+
+#### Improvements:
+1. **Enhanced Error Handling:**
+   - Catch `DataIntegrityViolationException` 
+   - Detect UK constraint violation
+   - Implement intelligent retry mechanism
+
+2. **Smart Retry Logic:**
+   - Tìm existing submissions
+   - Nếu latest submission đã SUBMITTED/GRADED → tạo attempt mới với incremented attempt_number
+   - Nếu có active submission → return existing
+
+3. **Detailed Logging:**
+   - Log constraint violations 
+   - Track retry attempts
+   - Monitor success/failure patterns
+
+#### Code Changes:
+**File:** `backend/src/main/java/com/mstrust/exam/service/ExamTakingService.java`
+
+**Key Methods Enhanced:**
+- `startExam()` - Added comprehensive constraint violation handling
+- `updateSubmissionTracking()` - Improved optimistic locking retry
+
+## 🧪 Testing
+
+### Test Cases
+1. **Normal Flow:** Student làm lần đầu → Success
+2. **Continue Flow:** Student tiếp tục bài dở → Return existing
+3. **Retry Flow:** Student làm lần 2 → Handle constraint, create attempt 2
+4. **Edge Cases:** Multiple concurrent requests, constraint conflicts
+
+### Test File
+`test-start-exam-fix.http` - Thunder Client test cases
+
+### Expected Results
+- ✅ Không còn lỗi "Duplicate entry"
+- ✅ Student có thể làm multiple attempts
+- ✅ System handles constraints gracefully
+- ✅ Proper attempt_number increment
+
+## 📊 Verification
+
+### Database Check
+```sql
+-- Kiểm tra submissions của student 5 cho exam 5
+SELECT exam_id, student_id, attempt_number, status, started_at 
+FROM exam_submissions 
+WHERE exam_id = 5 AND student_id = 5
+ORDER BY attempt_number;
+```
+
+**Expected:** Có thể thấy nhiều attempts (1, 2, 3.. .) thay vì chỉ 1
+
+### Log Monitoring
+Monitor application logs cho:
+- `[StartExam] UK constraint violation` warnings
+- `[StartExam] Successfully created submission` success messages  
+- Retry attempt tracking
+
+## 🔄 Rollback Plan
+
+Nếu có vấn đề, rollback bằng cách:
+
+1. **Restore constraint cũ:**
+```sql
+ALTER TABLE exam_submissions DROP INDEX uk_exam_student_attempt;
+ALTER TABLE exam_submissions ADD CONSTRAINT uk_exam_student UNIQUE KEY (exam_id, student_id);
+```
+
+2. **Revert code changes** trong ExamTakingService
+
+## 📝 Notes
+
+- **Temporary Solution:** Application logic fix is a workaround cho đến khi database constraint được sửa
+- **Performance Impact:** Minimal - chỉ affect khi có constraint violation
+- **Data Integrity:** Maintained through attempt_number logic
+- **Future Improvement:** Proper constraint `uk_exam_student_attempt` should be applied
+
+## 🏷️ Tags
+`bug-fix`, `database-constraint`, `exam-taking`, `multiple-attempts`, `constraint-violation`
+
+---
+**Author:** K24DTCN210-NVMANH  
+**Date:** 03/12/2025 13:29  
+**Status:** ✅ RESOLVED

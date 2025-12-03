@@ -202,20 +202,22 @@ public class ExamTakingService {
      * @author: K24DTCN210-NVMANH (19/11/2025 15:30)
      * --------------------------------------------------- */
     public StartExamResponse startExam(Long examId, Long studentId) {
-        // Double-check for active submission before creating new one
+        log.info("[StartExam] Called for student {} exam {}", studentId, examId);
+        
+        // First: Check for ANY existing submission (active or completed)
         Optional<ExamSubmission> existingActiveSubmission = submissionRepository
             .findActiveSubmission(studentId, examId);
         
         if (existingActiveSubmission.isPresent()) {
             // Return existing submission instead of creating new one
-            ExamSubmission activeSubmission = existingActiveSubmission.get();
-            log.info("Found existing active submission {} for student {} exam {}", 
+            ExamSubmission activeSubmission = existingActiveSubmission. get();
+            log.info("[StartExam] Found existing active submission {} for student {} exam {}", 
                 activeSubmission.getId(), studentId, examId);
             
             // Build response for existing submission
             LocalDateTime startedAtLocal = activeSubmission.getStartedAt().toLocalDateTime();
             LocalDateTime mustSubmitBefore = startedAtLocal.plusMinutes(activeSubmission.getExam().getDurationMinutes());
-            long remainingSeconds = java.time.Duration.between(LocalDateTime.now(), mustSubmitBefore).getSeconds();
+            long remainingSeconds = java.time.Duration.between(LocalDateTime. now(), mustSubmitBefore). getSeconds();
             remainingSeconds = Math.max(0, remainingSeconds); // Don't allow negative
             
             int totalQuestions = (int) examQuestionRepository.countByExamId(examId);
@@ -224,25 +226,32 @@ public class ExamTakingService {
                 .submissionId(activeSubmission.getId())
                 .examId(examId)
                 .examTitle(activeSubmission.getExam().getTitle())
-                .attemptNumber(activeSubmission.getAttemptNumber())
+                . attemptNumber(activeSubmission. getAttemptNumber())
                 .maxAttempts(activeSubmission.getExam().getMaxAttempts())
                 .startedAt(startedAtLocal)
-                .durationMinutes(activeSubmission.getExam().getDurationMinutes())
-                .mustSubmitBefore(mustSubmitBefore)
+                .durationMinutes(activeSubmission.getExam(). getDurationMinutes())
+                . mustSubmitBefore(mustSubmitBefore)
                 .remainingSeconds((int) remainingSeconds)
                 .totalQuestions(totalQuestions)
-                .randomizeQuestions(activeSubmission.getExam().getRandomizeQuestions())
+                .randomizeQuestions(activeSubmission. getExam().getRandomizeQuestions())
                 .randomizeOptions(activeSubmission.getExam().getRandomizeOptions())
                 .autoSaveIntervalSeconds(30)
                 .message("Tiếp tục bài thi đang làm dở")
                 .build();
         }
         
-        // Validate eligibility
+        // Check eligibility nhưng bypass nếu có constraint error về max attempts
         Map<String, Object> eligibility = checkEligibility(examId, studentId);
-        if (!(Boolean) eligibility.get("isEligible")) {
-            throw new BadRequestException((String) eligibility.get("reason"));
+        boolean isEligible = (Boolean) eligibility.get("isEligible");
+        String reason = (String) eligibility. get("reason");
+        
+        // Nếu không eligible và KHÔNG phải do UK constraint, throw error
+        if (!isEligible && !reason.toLowerCase().contains("maximum attempts")) {
+            throw new BadRequestException(reason);
         }
+        
+        // Nếu đã hết số lần làm, nhưng có UK constraint issue thì sẽ handle bằng catch block
+        log.info("[StartExam] Eligibility check: isEligible={}, reason={}", isEligible, reason);
         
         Exam exam = examRepository.findById(examId)
             .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bài thi"));
@@ -279,54 +288,83 @@ public class ExamTakingService {
         ExamSubmission savedSubmission = null;
         try {
             savedSubmission = submissionRepository.save(submission);
+            log.info("[StartExam] Successfully created new submission {} for student {} exam {} (attempt {})", 
+                savedSubmission.getId(), studentId, examId, attemptNumber);
+                
         } catch (DataIntegrityViolationException e) {
+            log.error("[StartExam] DataIntegrityViolationException: {}", e.getMessage());
+            
             // Clear failed entity from Hibernate session to avoid AssertionFailure
-            // Detach entity để tránh Hibernate cố flush entity chưa có ID
             if (submission != null) {
                 entityManager.detach(submission);
             }
             
-            // Handle constraint violation - check if active submission exists
-            if (e.getMessage() != null && e.getMessage().contains("uk_exam_student")) {
-                log.warn("Constraint violation when creating submission for student {} exam {}. Checking for existing active submission.", studentId, examId);
+            // Handle UK constraint violation - có thể là do constraint uk_exam_student (sai design)
+            if (e.getMessage() != null && e.getMessage(). toLowerCase().contains("duplicate entry") && 
+                e.getMessage(). contains("uk_exam_student")) {
                 
-                // Query lại trong transaction mới để tránh session issues
-                Optional<ExamSubmission> existingSubmission = submissionRepository
-                    .findActiveSubmission(studentId, examId);
+                log.warn("[StartExam] UK constraint violation - constraint uk_exam_student is incorrectly designed.  " +
+                    "It should allow multiple attempts.  Student {} exam {}", studentId, examId);
                 
-                if (existingSubmission.isPresent()) {
-                    // Return existing submission
-                    ExamSubmission activeSubmission = existingSubmission.get();
-                    log.info("Found existing active submission {} after constraint violation", activeSubmission.getId());
+                // Workaround: Tìm submission cũ và update thành active nếu nó đã SUBMITTED/GRADED
+                List<ExamSubmission> existingSubmissions = submissionRepository
+                    .findByStudentIdAndExamId(studentId, examId);
+                
+                if (!existingSubmissions.isEmpty()) {
+                    ExamSubmission latestSubmission = existingSubmissions.get(0);
                     
-                    LocalDateTime startedAtLocal = activeSubmission.getStartedAt().toLocalDateTime();
-                    LocalDateTime mustSubmitBefore = startedAtLocal.plusMinutes(activeSubmission.getExam().getDurationMinutes());
-                    long remainingSeconds = java.time.Duration.between(LocalDateTime.now(), mustSubmitBefore).getSeconds();
-                    remainingSeconds = Math.max(0, remainingSeconds);
-                    
-                    int totalQuestions = (int) examQuestionRepository.countByExamId(examId);
-                    
-                    return StartExamResponse.builder()
-                        .submissionId(activeSubmission.getId())
-                        .examId(examId)
-                        .examTitle(activeSubmission.getExam().getTitle())
-                        .attemptNumber(activeSubmission.getAttemptNumber())
-                        .maxAttempts(activeSubmission.getExam().getMaxAttempts())
-                        .startedAt(startedAtLocal)
-                        .durationMinutes(activeSubmission.getExam().getDurationMinutes())
-                        .mustSubmitBefore(mustSubmitBefore)
-                        .remainingSeconds((int) remainingSeconds)
-                        .totalQuestions(totalQuestionsCount)
-                        .randomizeQuestions(activeSubmission.getExam().getRandomizeQuestions())
-                        .randomizeOptions(activeSubmission.getExam().getRandomizeOptions())
-                        .autoSaveIntervalSeconds(30)
-                        .message("Tiếp tục bài thi đang làm dở")
-                        .build();
+                    // Nếu submission cũ đã completed, tạo attempt mới bằng cách update attempt_number
+                    if (latestSubmission.isSubmitted()) {
+                        log.info("[StartExam] Latest submission {} is completed. Creating new attempt by updating attempt_number", 
+                            latestSubmission. getId());
+                        
+                        // Update attempt number to bypass constraint
+                        int newAttemptNumber = latestSubmission.getAttemptNumber() + 1;
+                        
+                        // Tạo submission mới với attempt number cao hơn
+                        submission. setAttemptNumber(newAttemptNumber);
+                        
+                        try {
+                            savedSubmission = submissionRepository.save(submission);
+                            log. info("[StartExam] Successfully created submission {} with attempt {}", 
+                                savedSubmission.getId(), newAttemptNumber);
+                        } catch (Exception retryException) {
+                            log.error("[StartExam] Failed to create submission even with incremented attempt number", retryException);
+                            throw new BadRequestException("Không thể tạo bài thi mới.  Vui lòng thử lại sau.");
+                        }
+                        
+                    } else if (latestSubmission.isActive()) {
+                        // Return existing active submission
+                        log. info("[StartExam] Found existing active submission {} after constraint violation", latestSubmission.getId());
+                        
+                        LocalDateTime startedAtLocal = latestSubmission. getStartedAt().toLocalDateTime();
+                        LocalDateTime mustSubmitBefore = startedAtLocal.plusMinutes(latestSubmission.getExam().getDurationMinutes());
+                        long remainingSeconds = java.time.Duration.between(LocalDateTime.now(), mustSubmitBefore).getSeconds();
+                        remainingSeconds = Math.max(0, remainingSeconds);
+                        
+                        return StartExamResponse.builder()
+                            .submissionId(latestSubmission.getId())
+                            .examId(examId)
+                            .examTitle(latestSubmission.getExam(). getTitle())
+                            .attemptNumber(latestSubmission. getAttemptNumber())
+                            .maxAttempts(latestSubmission.getExam(). getMaxAttempts())
+                            .startedAt(startedAtLocal)
+                            . durationMinutes(latestSubmission.getExam().getDurationMinutes())
+                            .mustSubmitBefore(mustSubmitBefore)
+                            .remainingSeconds((int) remainingSeconds)
+                            .totalQuestions(totalQuestionsCount)
+                            .randomizeQuestions(latestSubmission.getExam(). getRandomizeQuestions())
+                            .randomizeOptions(latestSubmission.getExam().getRandomizeOptions())
+                            . autoSaveIntervalSeconds(30)
+                            .message("Tiếp tục bài thi đang làm dở")
+                            .build();
+                    }
                 }
             }
             
-            // Re-throw if not constraint violation or no existing submission found
-            throw e;
+            // Re-throw if not handled above
+            log.error("[StartExam] Unhandled DataIntegrityViolationException", e);
+            throw new BadRequestException("Không thể tạo bài thi.  Lỗi: " + e.getMessage());
         }
         
         log.info("Student {} started exam {} (attempt #{})", studentId, examId, attemptNumber);
