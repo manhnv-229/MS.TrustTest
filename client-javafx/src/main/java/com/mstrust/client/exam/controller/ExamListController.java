@@ -6,6 +6,7 @@ import com.mstrust.client.exam.dto.StartExamResponse;
 import com.mstrust.client.exam.util.TimeFormatter;
 import com.mstrust.client.teacher.api.ExamManagementApiClient;
 import com.mstrust.client.teacher.dto.ExamDTO;
+import com.mstrust.client.util.DialogUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -890,15 +891,14 @@ public class ExamListController {
     private void handleDeleteExam(ExamInfoDTO exam) {
         logger.info("Delete exam: {}", exam.getId());
         
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác nhận xóa");
-        alert.setHeaderText("Bạn có chắc muốn xóa đề thi này?");
-        alert.setContentText(String.format(
-            "Đề thi: %s\n\nHành động này không thể hoàn tác.",
-            exam.getTitle()
-        ));
+        Optional<ButtonType> result = DialogUtils.showAlert(
+            Alert.AlertType.CONFIRMATION,
+            "Xác nhận xóa",
+            "Bạn có chắc muốn xóa đề thi này?",
+            String.format("Đề thi: %s\n\nHành động này không thể hoàn tác.", exam.getTitle()),
+            stage // Use current stage as owner
+        );
         
-        Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // TODO: Call API delete exam
             showInfo("Xóa đề thi", "Chức năng xóa đề thi sẽ được phát triển sau.");
@@ -1396,17 +1396,20 @@ public class ExamListController {
     private void handleStartExam(ExamInfoDTO exam) {
         logger.info("Starting exam: {}", exam.getExamId());
         
-        // Show confirmation dialog
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác nhận bắt đầu thi");
-        alert.setHeaderText("Bạn có chắc muốn bắt đầu làm bài?");
-        alert.setContentText(String.format(
-            "Đề thi: %s\nThời gian: %d phút\n\nSau khi bắt đầu, thời gian sẽ bắt đầu đếm ngược.",
-            exam.getTitle(),
-            exam.getDurationMinutes()
-        ));
+        // Show confirmation dialog with overlay
+        Stage currentStage = (Stage) examCardsContainer.getScene().getWindow();
         
-        alert.showAndWait().ifPresent(response -> {
+        DialogUtils.showAlert(
+            Alert.AlertType.CONFIRMATION,
+            "Xác nhận bắt đầu thi",
+            "Bạn có chắc muốn bắt đầu làm bài?",
+            String.format(
+                "Đề thi: %s\nThời gian: %d phút\n\nSau khi bắt đầu, thời gian sẽ bắt đầu đếm ngược.",
+                exam.getTitle(),
+                exam.getDurationMinutes()
+            ),
+            currentStage
+        ).ifPresent(response -> {
             if (response == ButtonType.OK) {
                 startExamSession(exam);
             }
@@ -1534,68 +1537,66 @@ public class ExamListController {
      * EditBy: K24DTCN210-NVMANH (24/11/2025 12:17) - Added max attempts error handling
      * --------------------------------------------------- */
     private void handleExamStartError(ExamApiClient.ExamStartException e, ExamInfoDTO exam) {
+        Stage currentStage = (Stage) examCardsContainer.getScene().getWindow();
+
         if (e.isActiveSubmissionError()) {
             // User có submission đang active
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Bài thi đang diễn ra");
-            alert.setHeaderText("Bạn đã có một bài thi đang làm dở");
-            alert.setContentText(
-                "Đề thi: " + exam.getTitle() + "\n\n" +
-                "Bạn đã bắt đầu làm bài thi này trước đó và chưa nộp bài.\n" +
-                "Vui lòng liên hệ giáo viên để được hỗ trợ hoặc reset bài thi."
-            );
-            
-            // Add custom buttons
             ButtonType contactTeacherBtn = new ButtonType("Liên hệ GV");
             ButtonType closeBtn = new ButtonType("Đóng", ButtonBar.ButtonData.CANCEL_CLOSE);
-            alert.getButtonTypes().setAll(contactTeacherBtn, closeBtn);
             
-            alert.showAndWait();
+            DialogUtils.showAlert(
+                Alert.AlertType.WARNING,
+                "Bài thi đang diễn ra",
+                "Bạn đã có một bài thi đang làm dở",
+                "Đề thi: " + exam.getTitle() + "\n\n" +
+                "Bạn đã bắt đầu làm bài thi này trước đó và chưa nộp bài.\n" +
+                "Vui lòng liên hệ giáo viên để được hỗ trợ hoặc reset bài thi.",
+                currentStage,
+                contactTeacherBtn, closeBtn
+            );
             
         } else if (e.isMaxAttemptsError()) {
             // User đã hết số lần thi
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Hết số lần thi");
-            alert.setHeaderText("Bạn đã hết số lần thi cho đề này");
-            
-            // Extract số lần thi từ message (VD: "Maximum attempts reached (1)")
             String message = e.getMessage();
-            alert.setContentText(
+            ButtonType contactTeacherBtn = new ButtonType("Liên hệ GV");
+            ButtonType closeBtn = new ButtonType("Đóng", ButtonBar.ButtonData.CANCEL_CLOSE);
+            
+            DialogUtils.showAlert(
+                Alert.AlertType.ERROR,
+                "Hết số lần thi",
+                "Bạn đã hết số lần thi cho đề này",
                 "Đề thi: " + exam.getTitle() + "\n\n" +
                 message + "\n\n" +
                 "Bạn đã sử dụng hết số lần thi được phép cho đề thi này.\n" +
-                "Vui lòng liên hệ giáo viên nếu cần được thi lại."
+                "Vui lòng liên hệ giáo viên nếu cần được thi lại.",
+                currentStage,
+                contactTeacherBtn, closeBtn
             );
-            
-            // Add custom buttons
-            ButtonType contactTeacherBtn = new ButtonType("Liên hệ GV");
-            ButtonType closeBtn = new ButtonType("Đóng", ButtonBar.ButtonData.CANCEL_CLOSE);
-            alert.getButtonTypes().setAll(contactTeacherBtn, closeBtn);
-            
-            alert.showAndWait();
             
         } else if (e.isTimeExpiredError()) {
             // Hết thời gian làm bài
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Hết Thời Gian");
-            alert.setHeaderText("Thời gian làm bài đã hết");
-            alert.setContentText(
+            DialogUtils.showAlert(
+                Alert.AlertType.WARNING,
+                "Hết Thời Gian",
+                "Thời gian làm bài đã hết",
                 "Đề thi: " + exam.getTitle() + "\n\n" +
                 "Bài thi đã kết thúc hoặc thời gian làm bài của bạn đã hết.\n" +
-                "Hệ thống sẽ cập nhật lại danh sách đề thi."
+                "Hệ thống sẽ cập nhật lại danh sách đề thi.",
+                currentStage
             );
-            alert.showAndWait();
             
             // Refresh list
             onRefresh();
             
         } else {
             // Other errors
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Không thể bắt đầu bài thi");
-            alert.setHeaderText(null);
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
+            DialogUtils.showAlert(
+                Alert.AlertType.ERROR,
+                "Không thể bắt đầu bài thi",
+                null,
+                e.getMessage(),
+                currentStage
+            );
         }
     }
 
@@ -1689,11 +1690,7 @@ public class ExamListController {
             
         } catch (IOException e) {
             logger.error("Failed to open exam creation wizard", e);
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Lỗi");
-            alert.setHeaderText("Không thể mở wizard tạo đề thi");
-            alert.setContentText("Lỗi: " + e.getMessage());
-            alert.showAndWait();
+            DialogUtils.showError("Không thể mở wizard tạo đề thi", "Lỗi: " + e.getMessage());
         }
     }
 
@@ -1744,11 +1741,8 @@ public class ExamListController {
      * @author: K24DTCN210-NVMANH (23/11/2025 12:05)
      * --------------------------------------------------- */
     private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Lỗi");
-        alert.setHeaderText(title);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Stage currentStage = (Stage) examCardsContainer.getScene().getWindow();
+        DialogUtils.showAlert(Alert.AlertType.ERROR, "Lỗi", title, message, currentStage);
     }
     
     /* ---------------------------------------------------
@@ -1758,11 +1752,8 @@ public class ExamListController {
      * @author: K24DTCN210-NVMANH (30/11/2025)
      * --------------------------------------------------- */
     private void showInfo(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thông tin");
-        alert.setHeaderText(title);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Stage currentStage = (Stage) examCardsContainer.getScene().getWindow();
+        DialogUtils.showAlert(Alert.AlertType.INFORMATION, "Thông tin", title, message, currentStage);
     }
     
     /* ---------------------------------------------------
@@ -1791,12 +1782,15 @@ public class ExamListController {
      * --------------------------------------------------- */
     @FXML
     private void handleLogout() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Xác nhận Đăng xuất");
-        confirm.setHeaderText("Bạn có chắc muốn đăng xuất?");
-        confirm.setContentText("Phiên làm việc hiện tại sẽ kết thúc.");
+        Stage currentStage = (Stage) examCardsContainer.getScene().getWindow();
+        Optional<ButtonType> result = DialogUtils.showAlert(
+            Alert.AlertType.CONFIRMATION,
+            "Xác nhận Đăng xuất",
+            "Bạn có chắc muốn đăng xuất?",
+            "Phiên làm việc hiện tại sẽ kết thúc.",
+            currentStage
+        );
         
-        Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             backToLogin();
         }

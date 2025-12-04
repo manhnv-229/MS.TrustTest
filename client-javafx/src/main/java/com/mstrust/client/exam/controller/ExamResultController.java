@@ -3,6 +3,7 @@ package com.mstrust.client.exam.controller;
 import com.mstrust.client.exam.api.ExamApiClient;
 import com.mstrust.client.exam.dto.ExamResultDTO;
 import com.mstrust.client.exam.util.TimeFormatter;
+import com.mstrust.client.util.DialogUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -421,10 +422,6 @@ public class ExamResultController {
      * @author: K24DTCN210-NVMANH (23/11/2025 18:55)
      * --------------------------------------------------- */
     private void showError(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        DialogUtils.showError(title, content);
     }
 }

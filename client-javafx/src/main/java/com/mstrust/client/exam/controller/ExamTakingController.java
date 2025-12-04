@@ -15,6 +15,7 @@ import com.mstrust.client.exam.service.ConnectionRecoveryService;
 import com.mstrust.client.exam.service.FullScreenLockService;
 import com.mstrust.client.exam.util.TimeFormatter;
 import com.mstrust.client.exam.util.WindowCenterHelper;
+import com.mstrust.client.util.DialogUtils;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -278,32 +279,25 @@ public class ExamTakingController {
      * EditBy: K24DTCN210-NVMANH (25/11/2025 15:03) - Fixed dialog owner & centering
      * --------------------------------------------------- */
     private void handleExitAttempt() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Xác Nhận Thoát");
-        alert.setHeaderText("⚠️ Bạn đang trong quá trình làm bài thi!");
-        
-        // ✅ CRITICAL FIX: Set owner window để dialog không làm ẩn full-screen window
-        if (stage != null) {
-            alert.initOwner(stage);
-        }
-        
         StringBuilder message = new StringBuilder();
         message.append("Nếu thoát bây giờ:\n\n");
         message.append("▪ Các câu trả lời chưa lưu sẽ BỊ MẤT\n");
         message.append("▪ Bài thi có thể KHÔNG ĐƯỢC NỘP\n");
         message.append("▪ Bạn có thể bị coi là VI PHẠM quy định\n\n");
         message.append("Bạn có CHẮC CHẮN muốn thoát không?");
-        
-        alert.setContentText(message.toString());
-        
+
         ButtonType continueExam = new ButtonType("Tiếp Tục Thi", ButtonBar.ButtonData.CANCEL_CLOSE);
         ButtonType exitAnyway = new ButtonType("Thoát Ngay", ButtonBar.ButtonData.OK_DONE);
-        alert.getButtonTypes().setAll(continueExam, exitAnyway);
+
+        Optional<ButtonType> result = DialogUtils.showAlert(
+            Alert.AlertType.CONFIRMATION,
+            "Xác Nhận Thoát",
+            "⚠️ Bạn đang trong quá trình làm bài thi!",
+            message.toString(),
+            stage,
+            continueExam, exitAnyway
+        );
         
-        // ✅ Center dialog on screen
-        WindowCenterHelper.centerWindowOnShown(alert.getDialogPane().getScene().getWindow());
-        
-        Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == exitAnyway) {
             performExitCleanup();
             Platform.exit();
@@ -650,7 +644,7 @@ public class ExamTakingController {
         } catch (Exception e) {
             System.err.println("[Phase 8.6] Failed to initialize full-screen security: " + e.getMessage());
             // Don't throw - allow exam to continue without full-screen if it fails
-            showAlert("Cảnh báo", "Không thể bật chế độ full-screen. " +
+            DialogUtils.showWarning("Cảnh báo", "Không thể bật chế độ full-screen. " +
                      "Bạn vẫn có thể làm bài nhưng nên tránh chuyển cửa sổ.");
         }
     }
@@ -692,29 +686,6 @@ public class ExamTakingController {
         monitorThread.start();
     }
     
-    /* ---------------------------------------------------
-     * Show simple alert dialog
-     * @param title Alert title
-     * @param message Alert message
-     * @author: K24DTCN210-NVMANH (24/11/2025 09:12)
-     * EditBy: K24DTCN210-NVMANH (25/11/2025 15:03) - Fixed dialog owner & centering
-     * --------------------------------------------------- */
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        
-        // ✅ Set owner window
-        if (stage != null) {
-            alert.initOwner(stage);
-        }
-        
-        // ✅ Center dialog
-        WindowCenterHelper.centerWindowOnShown(alert.getDialogPane().getScene().getWindow());
-        
-        alert.showAndWait();
-    }
 
     /* ---------------------------------------------------
      * Hiển thị câu hỏi hiện tại
@@ -797,7 +768,7 @@ public class ExamTakingController {
     private void onJumpToQuestion() {
         String input = jumpToQuestionField.getText();
         if (input == null || input.trim().isEmpty()) {
-            showAlert("Lỗi", "Vui lòng nhập số câu hỏi!");
+            DialogUtils.showError("Lỗi", "Vui lòng nhập số câu hỏi!");
             return;
         }
         
@@ -807,7 +778,7 @@ public class ExamTakingController {
             
             // Validate range
             if (questionIndex < 0 || questionIndex >= examSession.getQuestions().size()) {
-                showAlert("Lỗi", 
+                DialogUtils.showError("Lỗi", 
                     String.format("Số câu hỏi phải từ 1 đến %d!", examSession.getQuestions().size()));
                 return;
             }
@@ -821,7 +792,7 @@ public class ExamTakingController {
             jumpToQuestionField.clear();
             
         } catch (NumberFormatException e) {
-            showAlert("Lỗi", "Vui lòng nhập số hợp lệ!");
+            DialogUtils.showError("Lỗi", "Vui lòng nhập số hợp lệ!");
         }
     }
 
@@ -1118,17 +1089,13 @@ public class ExamTakingController {
         // Stop services
         shutdown();
         
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Thông Báo");
-        alert.setHeaderText("Hết thời gian làm bài");
-        alert.setContentText("Bài thi đã được tự động nộp.\n" + message);
-        
-        if (stage != null) {
-            alert.initOwner(stage);
-        }
-        WindowCenterHelper.centerWindowOnShown(alert.getDialogPane().getScene().getWindow());
-        
-        alert.showAndWait();
+        DialogUtils.showAlert(
+            Alert.AlertType.INFORMATION,
+            "Thông Báo",
+            "Hết thời gian làm bài",
+            "Bài thi đã được tự động nộp.\n" + message,
+            stage
+        );
         
         // Navigate to results
         navigateToResults(examSession.getSubmissionId());
@@ -1193,20 +1160,7 @@ public class ExamTakingController {
      * EditBy: K24DTCN210-NVMANH (25/11/2025 15:03) - Fixed dialog owner & centering
      * --------------------------------------------------- */
     private void showError(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        
-        // ✅ Set owner window
-        if (stage != null) {
-            alert.initOwner(stage);
-        }
-        
-        // ✅ Center dialog
-        WindowCenterHelper.centerWindowOnShown(alert.getDialogPane().getScene().getWindow());
-        
-        alert.showAndWait();
+        DialogUtils.showError(title, content);
     }
 
     /* ---------------------------------------------------
