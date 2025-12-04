@@ -2,11 +2,27 @@
 
 ## Current Work Focus
 
-**Status**: ✅ **Phase 13 COMPLETED** - Admin Dashboard & System Config Complete  
-**Phase**: Phase 13 - Admin Dashboard (All Features Complete)  
-**Current Step**: ✅ ALL PHASES COMPLETE  
+**Status**: ✅ **Client App Build Configuration Complete** - Maven Profiles & Installer Setup  
+**Phase**: Post-Phase 13 - Build & Deployment Configuration  
+**Current Step**: ✅ Client app build configuration với Maven profiles (dev/prod)  
 **Last Update**: 02/12/2025  
-**Duration**: Phase 13 completed in 1 day
+**Duration**: 1 day
+
+### Recent Work (02/12/2025)
+
+**Client App Build Configuration:**
+- ✅ Maven profiles setup (dev/prod) với resource filtering
+- ✅ Build scripts cho development và production
+- ✅ Installer build script (.exe) với jpackage
+- ✅ PowerShell script cho installer build (auto-detect JDK)
+- ✅ Documentation: BUILD_GUIDE.md và INSTALLER_GUIDE.md
+- ✅ Config verification scripts
+
+**Key Features:**
+- Development profile: `http://localhost:8080`
+- Production profile: `https://ttapi.manhhao.com`
+- Resource filtering tự động thay thế `${api.base.url}` khi build
+- Installer .exe với embedded JRE (standalone)
 
 ## Phase 6 Final Summary
 
@@ -291,6 +307,64 @@ if (wizardStage != null) {
 ```
 
 ## Important Technical Notes
+
+### Client App Build Configuration
+
+**Maven Profiles:**
+```xml
+<profiles>
+    <profile>
+        <id>dev</id>
+        <activation>
+            <activeByDefault>true</activeByDefault>
+        </activation>
+        <properties>
+            <api.base.url>http://localhost:8080</api.base.url>
+        </properties>
+    </profile>
+    <profile>
+        <id>prod</id>
+        <properties>
+            <api.base.url>https://ttapi.manhhao.com</api.base.url>
+        </properties>
+    </profile>
+</profiles>
+```
+
+**Resource Filtering:**
+- Enabled trong `<build><resources>` section
+- `config.properties` sử dụng placeholder: `api.base.url=${api.base.url}`
+- Maven tự động thay thế khi build với profile tương ứng
+
+**Build Commands:**
+```bash
+# Development
+mvn clean package -Pdev
+# hoặc
+mvn clean package  # (dev là mặc định)
+
+# Production
+mvn clean package -Pprod
+
+# Build installer (Production)
+build-installer.bat  # Windows batch
+# hoặc
+.\build-installer.ps1  # PowerShell (auto-detect JDK)
+```
+
+**Scripts Available:**
+- `build-dev.bat` - Build JAR cho development
+- `build-prod.bat` - Build JAR cho production
+- `build-installer.bat` - Build installer .exe (production)
+- `build-installer.ps1` - PowerShell version (auto-detect JDK)
+- `run-dev.bat` - Run app với dev profile
+- `run-prod.bat` - Run app với prod profile
+- `verify-config.bat` - Verify config trong JAR
+
+**Known Issues & Solutions:**
+- ✅ Batch file lỗi ". was unexpected at this time": Đã fix bằng cách bỏ dấu chấm trong echo statements và dùng `[Step X/6]` thay vì `[Step X of 6]`
+- ✅ PowerShell không nhận jpackage: Dùng PowerShell script tự động tìm JDK
+- ⚠️ jpackage requires JDK 17+ (not JRE): User cần cài JDK
 
 ### FTP Storage Configuration
 ```yaml

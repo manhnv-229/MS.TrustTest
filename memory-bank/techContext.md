@@ -83,12 +83,49 @@ logging:
 
 ### Client application.properties
 
+**Location**: `client-javafx/src/main/resources/config.properties`
+
+**Template (với Maven resource filtering):**
 ```properties
-api.base.url=http://localhost:8080/api
-websocket.url=ws://localhost:8080/ws
-monitoring.enabled=true
-monitoring.screenshot.interval=60000
+# Backend API Configuration
+# Sử dụng Maven resource filtering - giá trị sẽ được thay thế khi build
+# Development: mvn clean package (mặc định)
+# Production: mvn clean package -Pprod
+api.base.url=${api.base.url}
+api.timeout.seconds=30
+
+# Monitoring Configuration
+monitoring.screenshot.interval.seconds=30
+monitoring.activity.batch.interval.seconds=60
+monitoring.screenshot.max.width=1920
+monitoring.screenshot.max.height=1080
+monitoring.screenshot.jpeg.quality=0.7
+
+# Alert Thresholds
+alert.window.switch.threshold=10
+alert.window.switch.timeframe.minutes=5
+alert.clipboard.threshold=20
+alert.clipboard.timeframe.minutes=10
+
+# Blacklisted Processes
+blacklist.processes=teamviewer,anydesk,chrome,firefox,safari,edge,discord,telegram,skype,zoom,slack
+
+# Network Queue Configuration
+queue.max.size=1000
+queue.retry.max.attempts=3
+queue.retry.delay.seconds=5
+
+# Logging
+logging.level=INFO
+logging.file.enabled=true
+logging.file.path=./logs/client.log
 ```
+
+**Maven Resource Filtering:**
+- Enabled trong `pom.xml`: `<filtering>true</filtering>`
+- Placeholder `${api.base.url}` được thay thế khi build
+- Development build: `http://localhost:8080`
+- Production build: `https://ttapi.manhhao.com`
 
 ## Development Commands
 
@@ -113,17 +150,51 @@ mvn package
 
 ### Client
 
+**Build Commands:**
 ```bash
-# Build client
-cd client
-mvn clean install
+# Development build (mặc định)
+cd client-javafx
+mvn clean package -Pdev
+# hoặc
+mvn clean package  # (dev là mặc định)
 
-# Run client
-mvn javafx:run
+# Production build
+mvn clean package -Pprod
 
-# Package native installer (Windows)
-mvn javafx:jlink
-jpackage --type msi --input target --name MS.TrustTest --main-jar client.jar
+# Run với JavaFX Maven plugin
+mvn javafx:run -Pdev   # Development
+mvn javafx:run -Pprod  # Production
+
+# Hoặc dùng scripts
+build-dev.bat      # Build development
+build-prod.bat     # Build production
+run-dev.bat        # Run development
+run-prod.bat       # Run production
+```
+
+**Installer Build:**
+```bash
+# Build installer .exe (Production)
+cd client-javafx
+build-installer.bat      # Windows batch (cần JDK 17+)
+# hoặc
+.\build-installer.ps1    # PowerShell (auto-detect JDK)
+
+# Yêu cầu:
+# - JDK 17+ (không phải JRE)
+# - WiX Toolset (cho .exe) hoặc dùng --type msi
+# - Output: target\installer\MSTrustTestClient-1.0.0.exe
+```
+
+**Verify Config:**
+```bash
+# Verify config trong JAR sau khi build
+verify-config.bat
+
+# Hoặc thủ công
+jar xf target\exam-client-javafx-1.0.0.jar config.properties
+type config.properties | findstr api.base.url
+del config.properties
 ```
 
 ## Database Setup
@@ -355,6 +426,69 @@ viewButton.getStyleClass().add("icon-button");
 
 ---
 
+## Build & Deployment
+
+### Maven Profiles
+
+**Development Profile (default):**
+- Profile ID: `dev`
+- API Base URL: `http://localhost:8080`
+- Active by default: `true`
+- Usage: `mvn clean package` hoặc `mvn clean package -Pdev`
+
+**Production Profile:**
+- Profile ID: `prod`
+- API Base URL: `https://ttapi.manhhao.com`
+- Usage: `mvn clean package -Pprod`
+
+### Resource Filtering
+
+**Configuration trong pom.xml:**
+```xml
+<build>
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <filtering>true</filtering>
+        </resource>
+    </resources>
+</build>
+```
+
+**Placeholder trong config.properties:**
+```properties
+api.base.url=${api.base.url}
+```
+
+**Kết quả sau khi build:**
+- Development: `api.base.url=http://localhost:8080`
+- Production: `api.base.url=https://ttapi.manhhao.com`
+
+### Installer Build Process
+
+**Requirements:**
+- JDK 17+ (not JRE) - jpackage chỉ có trong JDK
+- WiX Toolset (cho .exe installer) hoặc dùng `--type msi`
+- Maven đã build JAR với profile `prod`
+
+**Process:**
+1. Build JAR với profile prod: `mvn clean package -Pprod`
+2. Verify config trong JAR
+3. Create runtime image với jpackage
+4. Package installer (.exe hoặc .msi)
+
+**Output:**
+- Installer: `target\installer\MSTrustTestClient-1.0.0.exe`
+- JAR: `target\exam-client-javafx-1.0.0.jar`
+- Installer bao gồm JRE (standalone, không cần cài Java riêng)
+
+**Troubleshooting:**
+- "jpackage not found": Cần JDK 17+, không phải JRE
+- "WiX Toolset not found": Cài WiX hoặc dùng `--type msi`
+- Config vẫn localhost: Đảm bảo build với `-Pprod` và verify config
+
+---
+
 **Author**: K24DTCN210-NVMANH  
 **Created**: 13/11/2025 14:00  
-**Last Updated**: 30/11/2025
+**Last Updated**: 02/12/2025

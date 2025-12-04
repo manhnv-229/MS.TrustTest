@@ -409,6 +409,52 @@
 **Duration**: 1 ngày  
 **Dependencies**: Phase 12 ✅
 
+### ✅ Post-Phase 13: Client App Build Configuration (COMPLETE)
+**Status**: ✅ COMPLETED  
+**Started**: 02/12/2025  
+**Completed**: 02/12/2025  
+**Duration**: 1 ngày  
+**Dependencies**: Phase 13 ✅
+
+**Deliverables:**
+- ✅ Maven profiles setup (dev/prod) với resource filtering
+- ✅ Build scripts (build-dev.bat, build-prod.bat, build-installer.bat)
+- ✅ Run scripts (run-dev.bat, run-prod.bat)
+- ✅ PowerShell installer script (build-installer.ps1) với auto-detect JDK
+- ✅ Config verification script (verify-config.bat)
+- ✅ Documentation (BUILD_GUIDE.md, INSTALLER_GUIDE.md)
+
+**Key Features:**
+- Development profile: `http://localhost:8080` (mặc định)
+- Production profile: `https://ttapi.manhhao.com`
+- Resource filtering tự động thay thế `${api.base.url}` khi build
+- Installer .exe với embedded JRE (standalone, không cần cài Java)
+
+**Files Created/Modified:**
+- `client-javafx/pom.xml` - Thêm Maven profiles và resource filtering
+- `client-javafx/src/main/resources/config.properties` - Sử dụng placeholder
+- `client-javafx/build-dev.bat` - Build script cho development
+- `client-javafx/build-prod.bat` - Build script cho production
+- `client-javafx/build-installer.bat` - Installer build script
+- `client-javafx/build-installer.ps1` - PowerShell installer script
+- `client-javafx/run-dev.bat` - Run script cho development
+- `client-javafx/run-prod.bat` - Run script cho production
+- `client-javafx/verify-config.bat` - Config verification script
+- `client-javafx/BUILD_GUIDE.md` - Build documentation
+- `client-javafx/INSTALLER_GUIDE.md` - Installer documentation
+
+**Technical Improvements:**
+- ✅ Maven resource filtering để thay thế config theo profile
+- ✅ Batch scripts với error handling
+- ✅ PowerShell script tự động tìm JDK
+- ✅ Config verification trước khi tạo installer
+- ✅ Fix batch file issues với dấu chấm (". was unexpected at this time")
+
+**Known Issues Resolved:**
+- ✅ Batch file lỗi với dấu chấm: Đã fix bằng cách bỏ dấu chấm trong echo và dùng `[Step X/6]`
+- ✅ PowerShell không nhận jpackage: Tạo PowerShell script tự động tìm JDK
+- ✅ Config không được thay thế: Đảm bảo build với đúng profile và verify config
+
 **Deliverables:**
 - ✅ Admin Dashboard Overview (statistics cards, charts, system health)
 - ✅ User Management UI (CRUD, pagination, search/filter)
@@ -806,7 +852,7 @@
 
 **Last Updated**: 02/12/2025  
 **Updated By**: K24DTCN210-NVMANH  
-**Status**: ✅ ALL PHASES COMPLETE (100%)
+**Status**: ✅ ALL PHASES COMPLETE (100%) + Build Configuration Complete
 
 ---
 
