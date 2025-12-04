@@ -157,6 +157,12 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <!-- Maven Compiler Plugin (Phase 8.4): Add add-reads for unnamed modules -->
             <plugin>
@@ -222,13 +228,35 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.mstrust.client.ExamClientApplication</mainClass>
+                                    <mainClass>com.mstrust.client.exam.ExamClientApplication</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Development Profile (mặc định) -->
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <api.base.url>http://localhost:8080</api.base.url>
+            </properties>
+        </profile>
+
+        <!-- Production Profile -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <api.base.url>https://ttapi.manhhao.com</api.base.url>
+            </properties>
+        </profile>
+    </profiles>
 </project>

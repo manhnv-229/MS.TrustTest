@@ -7,6 +7,12 @@
   <version>1.0.0</version>
   <description>JavaFX Client với Monitoring cho hệ thống thi trực tuyến</description>
   <build>
+    <resources>
+      <resource>
+        <filtering>true</filtering>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -31,8 +37,24 @@
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-maven-plugin</artifactId>
         <version>0.0.8</version>
+        <executions>
+          <execution>
+            <id>test-monitors</id>
+            <configuration>
+              <mainClass>com.mstrust.client.monitoring.test.MonitorTestApplication</mainClass>
+              <options>
+                <option>--add-reads=com.mstrust.client=ALL-UNNAMED</option>
+              </options>
+            </configuration>
+          </execution>
+        </executions>
         <configuration>
           <mainClass>com.mstrust.client.exam.ExamClientApplication</mainClass>
+          <options>
+            <option>--add-reads=com.mstrust.client=ALL-UNNAMED</option>
+            <option>--add-opens=com.mstrust.client/com.mstrust.client.teacher.api=ALL-UNNAMED</option>
+            <option>--add-opens=com.mstrust.client/com.mstrust.client.teacher.dto=ALL-UNNAMED</option>
+          </options>
         </configuration>
       </plugin>
       <plugin>
@@ -47,7 +69,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>com.mstrust.client.ExamClientApplication</mainClass>
+                  <mainClass>com.mstrust.client.exam.ExamClientApplication</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -56,6 +78,20 @@
       </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>dev</id>
+      <properties>
+        <api.base.url>http://localhost:8080</api.base.url>
+      </properties>
+    </profile>
+    <profile>
+      <id>prod</id>
+      <properties>
+        <api.base.url>https://ttapi.manhhao.com</api.base.url>
+      </properties>
+    </profile>
+  </profiles>
   <dependencies>
     <dependency>
       <groupId>org.projectlombok</groupId>

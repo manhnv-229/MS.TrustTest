@@ -26,7 +26,8 @@ USER spring:spring
 COPY --from=build /app/target/*.jar app.jar
 
 # Expose the port the app runs on
-EXPOSE 8080
+EXPOSE 80
+EXPOSE 443
 
 # Define environment variables (can be overridden by docker-compose)
 # Note: We don't hardcode sensitive data here, defaults are for safety or reference

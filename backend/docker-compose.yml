@@ -3,12 +3,14 @@ version: '3.8'
 services:
   backend:
     build: 
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: ms-trust-backend
     ports:
-      - "8080:8080"
+      - "8181:80"
     environment:
+      # Cấu hình Server Port (override port 8080 thành 80 trong container)
+      - SERVER_PORT=80
       # Cấu hình kết nối Database trỏ về MySQL server hiện tại
       - SPRING_DATASOURCE_URL=jdbc:mysql://104.199.231.104:3306/MS.TrustTest?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
       - SPRING_DATASOURCE_USERNAME=nvmanh
