@@ -7,17 +7,23 @@ package com.mstrust.client.exam.dto;
  * --------------------------------------------------- */
 public class LoginResponse {
     private String token;
-    private String userName;
+    private String userName; // Full name
     private String email;
+    private String studentCode; // Student code
     private String role;
 
     public LoginResponse() {
     }
 
     public LoginResponse(String token, String userName, String email, String role) {
+        this(token, userName, email, null, role);
+    }
+
+    public LoginResponse(String token, String userName, String email, String studentCode, String role) {
         this.token = token;
         this.userName = userName;
         this.email = email;
+        this.studentCode = studentCode;
         this.role = role;
     }
 
@@ -43,6 +49,14 @@ public class LoginResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+    
+    public String getStudentCode() {
+        return studentCode;
+    }
+
+    public void setStudentCode(String studentCode) {
+        this.studentCode = studentCode;
     }
 
     public String getRole() {

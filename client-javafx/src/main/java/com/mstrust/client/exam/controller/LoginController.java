@@ -348,7 +348,12 @@ public class LoginController {
             
             // Pass dependencies to controller
             ExamListController controller = loader.getController();
-            controller.initialize(apiClient, loginResponse.getUserName(), loginResponse.getRole());
+            // Use studentCode if available, otherwise fallback to email
+            String code = loginResponse.getStudentCode() != null && !loginResponse.getStudentCode().isEmpty() 
+                ? loginResponse.getStudentCode() 
+                : loginResponse.getEmail();
+                
+            controller.initialize(apiClient, loginResponse.getUserName(), code, loginResponse.getRole());
             
             Scene scene = new Scene(root, 1200, 800);
             

@@ -45,10 +45,13 @@
         <ScrollPane fitToWidth="true" 
                     fitToHeight="true" 
                     styleClass="result-scroll">
-            <VBox spacing="20" styleClass="result-content">
+            <!-- Use StackPane to center content horizontally -->
+            <StackPane styleClass="result-content-wrapper">
                 <padding>
                     <Insets top="20" right="30" bottom="20" left="30"/>
                 </padding>
+            
+                <VBox spacing="20" maxWidth="900" styleClass="result-content" alignment="TOP_LEFT">
                 
                 <!-- Submission Status Card -->
                 <VBox styleClass="result-card" spacing="15">
@@ -126,7 +129,9 @@
                     </VBox>
                 </VBox>
                 
-            </VBox>
+                </VBox>
+                
+            </StackPane>
         </ScrollPane>
     </center>
     

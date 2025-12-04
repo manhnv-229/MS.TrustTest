@@ -51,6 +51,10 @@ public class ExamListController {
     private List<ExamInfoDTO> filteredExams;
     private Stage stage; // Stage reference để mở wizard modal (teacher mode)
     
+    // User info
+    private String currentUserName;
+    private String currentUserEmail;
+    
     // FXML Components
     @FXML private Label pageTitleLabel;
     @FXML private ComboBox<String> subjectFilterCombo;
@@ -109,6 +113,20 @@ public class ExamListController {
      * @author: K24DTCN210-NVMANH (01/12/2025 00:30)
      * --------------------------------------------------- */
     public void initialize(ExamApiClient apiClient, String userName, String role) {
+        initialize(apiClient, userName, null, role);
+    }
+
+    /* ---------------------------------------------------
+     * Initialize với user info đầy đủ (cho student)
+     * @param apiClient ExamApiClient với auth token
+     * @param userName Tên người dùng
+     * @param email Email người dùng
+     * @param role Vai trò
+     * @author: K24DTCN210-NVMANH (04/12/2025)
+     * --------------------------------------------------- */
+    public void initialize(ExamApiClient apiClient, String userName, String email, String role) {
+        this.currentUserName = userName;
+        this.currentUserEmail = email;
         initialize(apiClient);
         setupUserInfo(userName, role);
     }
@@ -1476,11 +1494,18 @@ public class ExamListController {
             // 4. Set stage to controller for full-screen support
             controller.setStage(stage);
             
-            // 5. Initialize exam với response ĐÃ CÓ (không call API lần nữa!)
+            // 5. Pass user info to controller
+            if (currentUserName != null) {
+                // Use email as student code if available, otherwise fallback to generic code
+                String code = currentUserEmail != null ? currentUserEmail : "STUDENT";
+                controller.setUserInfo(currentUserName, code);
+            }
+
+            // 6. Initialize exam với response ĐÃ CÓ (không call API lần nữa!)
             String authToken = examApiClient.getAuthToken();
             controller.initializeExamWithResponse(response, authToken);
             
-            // 6. Create new scene
+            // 7. Create new scene
             Scene scene = new Scene(root, 1400, 900);
             
             // 7. Load CSS
@@ -1548,6 +1573,21 @@ public class ExamListController {
             alert.getButtonTypes().setAll(contactTeacherBtn, closeBtn);
             
             alert.showAndWait();
+            
+        } else if (e.isTimeExpiredError()) {
+            // Hết thời gian làm bài
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Hết Thời Gian");
+            alert.setHeaderText("Thời gian làm bài đã hết");
+            alert.setContentText(
+                "Đề thi: " + exam.getTitle() + "\n\n" +
+                "Bài thi đã kết thúc hoặc thời gian làm bài của bạn đã hết.\n" +
+                "Hệ thống sẽ cập nhật lại danh sách đề thi."
+            );
+            alert.showAndWait();
+            
+            // Refresh list
+            onRefresh();
             
         } else {
             // Other errors

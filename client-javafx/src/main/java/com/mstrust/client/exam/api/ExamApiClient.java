@@ -10,6 +10,7 @@ import com.mstrust.client.exam.dto.LoginResponse;
 import com.mstrust.client.exam.dto.QuestionDTO;
 import com.mstrust.client.exam.dto.SaveAnswerRequest;
 import com.mstrust.client.exam.dto.StartExamResponse;
+import com.mstrust.client.exam.exception.ExamTimeExpiredException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,11 +170,35 @@ public class ExamApiClient {
             
             // Decode JWT to get role
             String role = decodeJwtRole(token);
-            String userName = email.split("@")[0]; // Simple extraction
             
-            logger.info("Login successful for email: {} with role: {}", email, role);
+            // Extract user info
+            String userName = email.split("@")[0]; // Default fallback
+            String studentCode = "";
             
-            return new LoginResponse(token, userName, email, role);
+            try {
+                if (responseMap.containsKey("user")) {
+                    Object userObj = responseMap.get("user");
+                    if (userObj instanceof Map) {
+                        Map<?, ?> userMap = (Map<?, ?>) userObj;
+                        if (userMap.containsKey("fullName")) {
+                            userName = (String) userMap.get("fullName");
+                        }
+                        if (userMap.containsKey("studentCode")) {
+                            studentCode = (String) userMap.get("studentCode");
+                        }
+                        // Override email if available
+                        if (userMap.containsKey("email")) {
+                            email = (String) userMap.get("email");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("Failed to extract user details from login response", e);
+            }
+            
+            logger.info("Login successful for email: {} with role: {}, name: {}", email, role, userName);
+            
+            return new LoginResponse(token, userName, email, studentCode, role);
         } else {
             logger.error("Login failed. Status: {}, Body: {}", 
                     response.statusCode(), response.body());
@@ -417,7 +442,7 @@ public class ExamApiClient {
      * EditBy: K24DTCN210-NVMANH (24/11/2025 15:26) - Added detailed logging
      * --------------------------------------------------- */
     public void saveAnswer(Long submissionId, SaveAnswerRequest request) 
-                          throws IOException, InterruptedException {
+                          throws IOException, InterruptedException, ExamTimeExpiredException {
         String jsonBody = gson.toJson(request);
         
         logger.info("[API] Saving answer - SubmissionId: {}, QuestionId: {}, AutoSave: {}", 
@@ -441,6 +466,25 @@ public class ExamApiClient {
         } else {
             logger.error("[API] Save answer FAILED - Status: {}, QuestionId: {}, Body: {}", 
                     response.statusCode(), request.getQuestionId(), response.body());
+            
+            // Check for time expired error (400 + message)
+            if (response.statusCode() == 400) {
+                try {
+                    Map<String, Object> errorBody = gson.fromJson(response.body(), 
+                            new TypeToken<Map<String, Object>>(){}.getType());
+                    if (errorBody != null && errorBody.containsKey("message")) {
+                        String message = (String) errorBody.get("message");
+                        if (message != null && (message.contains("Hết thời gian") || message.contains("already submitted"))) {
+                            throw new ExamTimeExpiredException(message);
+                        }
+                    }
+                } catch (ExamTimeExpiredException e) {
+                    throw e;
+                } catch (Exception e) {
+                    // Ignore parse error
+                }
+            }
+            
             throw new IOException("Failed to save answer: " + response.statusCode());
         }
     }
@@ -526,9 +570,33 @@ public class ExamApiClient {
             logger.info("Retrieved exam result. Score: {}", result.getTotalScore());
             return result;
         } else {
-            logger.error("Failed to get exam result. Status: {}, Body: {}", 
+            String errorMessage = "Failed to get exam result: " + response.statusCode();
+            boolean isResultNotAvailable = false;
+            
+            if (response.statusCode() == 400) {
+                try {
+                    Map<String, Object> errorBody = gson.fromJson(response.body(), 
+                            new TypeToken<Map<String, Object>>(){}.getType());
+                    if (errorBody != null && errorBody.containsKey("message")) {
+                        String message = (String) errorBody.get("message");
+                        if (message != null && message.contains("Results are not available yet")) {
+                             isResultNotAvailable = true;
+                             errorMessage = "Results are not available yet";
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore parse error
+                }
+            }
+            
+            if (isResultNotAvailable) {
+                 logger.warn("Exam result not available yet for submission {}", submissionId);
+            } else {
+                 logger.error("Failed to get exam result. Status: {}, Body: {}", 
                     response.statusCode(), response.body());
-            throw new IOException("Failed to get exam result: " + response.statusCode());
+            }
+            
+            throw new IOException(errorMessage);
         }
     }
 
@@ -650,6 +718,12 @@ public class ExamApiClient {
         
         public boolean isMaxAttemptsError() {
             return statusCode == 400 && getMessage().toLowerCase().contains("maximum attempts");
+        }
+        
+        public boolean isTimeExpiredError() {
+            return statusCode == 400 && (getMessage().contains("Hết thời gian") || 
+                   getMessage().contains("Time expired") || 
+                   getMessage().contains("already submitted"));
         }
     }
 

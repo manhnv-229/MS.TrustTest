@@ -2,6 +2,7 @@ package com.mstrust.client.exam.service;
 
 import com.mstrust.client.exam.api.ExamApiClient;
 import com.mstrust.client.exam.dto.SaveAnswerRequest;
+import com.mstrust.client.exam.exception.ExamTimeExpiredException;
 import com.mstrust.client.exam.model.ExamSession;
 import javafx.application.Platform;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 
@@ -35,6 +37,7 @@ public class AutoSaveService {
     
     // Dependencies
     private final ExamApiClient apiClient;
+    private final ClientLogService logService;
     private final AnswerQueue answerQueue;
     private ExamSession session;
     
@@ -49,14 +52,18 @@ public class AutoSaveService {
     
     // Callbacks for UI updates
     private Consumer<SaveStatus> onSaveStatusChanged;
+    private Consumer<String> onTimeExpired;
     
     /* ---------------------------------------------------
      * Constructor
      * @param apiClient API client để gọi save answer
+     * @param logService Client log service
      * @author: K24DTCN210-NVMANH (23/11/2025 17:35)
+     * EditBy: K24DTCN210-NVMANH (04/12/2025) - Add logService dependency injection
      * --------------------------------------------------- */
-    public AutoSaveService(ExamApiClient apiClient) {
+    public AutoSaveService(ExamApiClient apiClient, ClientLogService logService) {
         this.apiClient = apiClient;
+        this.logService = logService;
         this.answerQueue = new AnswerQueue();
         this.periodicScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
             Thread t = new Thread(r, "AutoSave-Periodic");
@@ -126,6 +133,7 @@ public class AutoSaveService {
         shutdownScheduler(periodicScheduler, "Periodic");
         shutdownScheduler(debounceScheduler, "Debounce");
         
+        logService.shutdown();
         logger.info("AutoSaveService stopped");
     }
 
@@ -182,7 +190,7 @@ public class AutoSaveService {
         notifyStatus(SaveStatus.SAVING);
         
         // Dequeue tối đa 10 answers mỗi lần
-        var queuedAnswers = answerQueue.dequeue(10);
+        List<AnswerQueue.QueuedAnswer> queuedAnswers = answerQueue.dequeue(10);
         
         int successCount = 0;
         int failCount = 0;
@@ -205,6 +213,15 @@ public class AutoSaveService {
                 } else {
                     logger.error("Save failed for question {} after {} attempts, DROPPED", 
                         qa.getQuestionId(), MAX_RETRY_ATTEMPTS);
+                    
+                    // Log to backend
+                    logService.logError(
+                        "AutoSaveService",
+                        "Save failed after " + MAX_RETRY_ATTEMPTS + " attempts for question " + qa.getQuestionId(),
+                        null,
+                        session.getSubmissionId(),
+                        qa.getAnswer()
+                    );
                 }
             }
         }
@@ -226,7 +243,7 @@ public class AutoSaveService {
      * @author: K24DTCN210-NVMANH (23/11/2025 17:35)
      * --------------------------------------------------- */
     private void saveAnswerImmediate(Long questionId) {
-        var qa = answerQueue.getAnswer(questionId);
+        AnswerQueue.QueuedAnswer qa = answerQueue.getAnswer(questionId);
         if (qa == null) {
             logger.warn("Question {} not in queue", questionId);
             return;
@@ -270,12 +287,37 @@ public class AutoSaveService {
             apiClient.saveAnswer(session.getSubmissionId(), request);
             return true;
             
+        } catch (ExamTimeExpiredException e) {
+            logger.error("Save failed - Exam time expired: {}", e.getMessage());
+            if (onTimeExpired != null) {
+                Platform.runLater(() -> onTimeExpired.accept(e.getMessage()));
+            }
+            // Don't retry if time expired
+            return false;
         } catch (IOException e) {
             logger.error("Save failed for question {}: {}", questionId, e.getMessage());
+            
+            // Nếu không phải lỗi mạng thông thường, có thể log warning
+            // Nhưng để tránh spam log, ta chỉ log error khi drop answer (ở trên)
+            
             return false;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("Save interrupted for question {}", questionId);
+        } catch (Exception e) {
+            logger.error("Unexpected error saving question {}: {}", questionId, e.getMessage());
+            
+            // Log unexpected errors immediately
+            if (session != null) {
+                 logService.logError(
+                    "AutoSaveService",
+                    "Unexpected error saving question " + questionId,
+                    e,
+                    session.getSubmissionId(),
+                    answer
+                );
+            }
+            
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             return false;
         }
     }
@@ -318,6 +360,15 @@ public class AutoSaveService {
      * --------------------------------------------------- */
     public void setOnSaveStatusChanged(Consumer<SaveStatus> callback) {
         this.onSaveStatusChanged = callback;
+    }
+
+    /* ---------------------------------------------------
+     * Set callback khi hết giờ làm bài (từ server)
+     * @param callback Consumer nhận message lỗi
+     * @author: K24DTCN210-NVMANH (04/12/2025)
+     * --------------------------------------------------- */
+    public void setOnTimeExpired(Consumer<String> callback) {
+        this.onTimeExpired = callback;
     }
 
     /* ---------------------------------------------------

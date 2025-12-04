@@ -9,6 +9,7 @@ import com.mstrust.client.exam.dto.SaveAnswerRequest;
 import com.mstrust.client.exam.dto.StartExamResponse;
 import com.mstrust.client.exam.model.ExamSession;
 import com.mstrust.client.exam.service.AutoSaveService;
+import com.mstrust.client.exam.service.ClientLogService;
 import com.mstrust.client.exam.service.NetworkMonitor;
 import com.mstrust.client.exam.service.ConnectionRecoveryService;
 import com.mstrust.client.exam.service.FullScreenLockService;
@@ -89,6 +90,7 @@ public class ExamTakingController {
     
     // Phase 8.4: Auto-Save Services
     private AutoSaveService autoSaveService;
+    private ClientLogService logService;
     private NetworkMonitor networkMonitor;
     private ConnectionRecoveryService recoveryService;
     
@@ -103,6 +105,10 @@ public class ExamTakingController {
     private Map<Long, String> answersCache; // questionId -> answer
     private Map<Long, Boolean> markedForReview; // questionId -> marked
     private boolean isExamActive = false; // Track if exam is in progress (Phase 8.6)
+    
+    // User info
+    private String studentName = "Sinh viên";
+    private String studentCode = "MSV";
 
     /* ---------------------------------------------------
      * Constructor
@@ -123,6 +129,27 @@ public class ExamTakingController {
         this.stage = stage;
         setupExitConfirmation();
         setupKeyboardShortcuts();
+    }
+    
+    /* ---------------------------------------------------
+     * Set user info
+     * @param name Student name
+     * @param code Student code/email
+     * @author: K24DTCN210-NVMANH (04/12/2025)
+     * --------------------------------------------------- */
+    public void setUserInfo(String name, String code) {
+        this.studentName = name;
+        this.studentCode = code;
+        
+        // Update labels if initialized
+        Platform.runLater(() -> {
+            if (studentNameLabel != null) {
+                studentNameLabel.setText(name);
+            }
+            if (studentCodeLabel != null) {
+                studentCodeLabel.setText(code);
+            }
+        });
     }
     
     /* ---------------------------------------------------
@@ -351,6 +378,7 @@ public class ExamTakingController {
      * --------------------------------------------------- */
     public void initializeExamWithResponse(StartExamResponse response, String authToken) {
         this.apiClient = new ExamApiClient(authToken);
+        this.logService = new ClientLogService(this.apiClient);
         
         // Show loading
         showLoading("Đang tải câu hỏi...");
@@ -385,14 +413,18 @@ public class ExamTakingController {
                 });
                 
             } catch (IOException e) {
+                logService.logError("ExamTakingController", "Load questions failed", e, response.getSubmissionId(), null);
                 Platform.runLater(() -> {
                     showError("Lỗi tải câu hỏi", e.getMessage());
                     hideLoading();
                 });
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                logService.logError("ExamTakingController", "Unexpected error during init", e, response.getSubmissionId(), null);
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
                 Platform.runLater(() -> {
-                    showError("Lỗi tải câu hỏi", "Bị gián đoạn: " + e.getMessage());
+                    showError("Lỗi tải câu hỏi", "Lỗi: " + e.getMessage());
                     hideLoading();
                 });
             }
@@ -520,7 +552,7 @@ public class ExamTakingController {
      * --------------------------------------------------- */
     private void initializeAutoSaveServices() {
         // 1. Initialize AutoSaveService
-        autoSaveService = new AutoSaveService(apiClient);
+        autoSaveService = new AutoSaveService(apiClient, logService);
         
         // 2. Setup save status callback to update UI (Question component + Status bar)
         autoSaveService.setOnSaveStatusChanged(status -> {
@@ -569,6 +601,16 @@ public class ExamTakingController {
                     }
                 }
             });
+        });
+
+        // Setup time expired callback
+        autoSaveService.setOnTimeExpired(message -> {
+             Platform.runLater(() -> {
+                 // Avoid multiple dialogs
+                 if (!isExamActive) return;
+                 
+                 handleServerTimeExpired(message);
+             });
         });
         
         autoSaveService.start(examSession);
@@ -931,6 +973,8 @@ public class ExamTakingController {
                 if (autoSaveService != null) {
                     System.out.println("[Phase 8.5] Flushing pending answers before submit...");
                     // AutoSaveService will auto-flush pending items when stopped
+                    // Also try to save pending answers explicitly
+                    autoSaveService.saveAllPendingAnswers();
                 }
                 
                 // Call submit API
@@ -967,16 +1011,20 @@ public class ExamTakingController {
                 });
                 
             } catch (IOException e) {
+                logService.logError("ExamTakingController", "Submit exam failed", e, examSession.getSubmissionId(), null);
                 Platform.runLater(() -> {
                     submitButton.setDisable(false);
                     showError("Lỗi nộp bài", e.getMessage());
                     hideLoading();
                 });
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                logService.logError("ExamTakingController", "Unexpected error during submit", e, examSession.getSubmissionId(), null);
+                if (e instanceof InterruptedException) {
+                     Thread.currentThread().interrupt();
+                }
                 Platform.runLater(() -> {
                     submitButton.setDisable(false);
-                    showError("Lỗi nộp bài", "Bị gián đoạn");
+                    showError("Lỗi nộp bài", "Lỗi: " + e.getMessage());
                     hideLoading();
                 });
             }
@@ -998,11 +1046,28 @@ public class ExamTakingController {
             controller.initialize(submissionId, apiClient.getAuthToken());
             
             Scene scene = new Scene(root, 1200, 800);
-            Stage stage = (Stage) submitButton.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Kết Quả Bài Thi - MS.TrustTest");
             
-            System.out.println("[Phase 8.5] Navigated to results screen for submission: " + submissionId);
+            // Use class level stage if available, otherwise try to get from component
+            Stage targetStage = this.stage;
+            if (targetStage == null && submitButton != null && submitButton.getScene() != null) {
+                targetStage = (Stage) submitButton.getScene().getWindow();
+            }
+            
+            if (targetStage != null) {
+                targetStage.setScene(scene);
+                targetStage.setTitle("Kết Quả Bài Thi - MS.TrustTest");
+                // Ensure stage is shown (in case it was hidden)
+                targetStage.show();
+                // Center window on screen
+                targetStage.centerOnScreen();
+                
+                System.out.println("[Phase 8.5] Navigated to results screen for submission: " + submissionId);
+            } else {
+                System.err.println("Cannot navigate to results: Stage is null");
+                if (logService != null) {
+                    logService.logError("ExamTakingController", "Navigate failed: Stage is null", null, submissionId, null);
+                }
+            }
             
         } catch (IOException e) {
             showError("Lỗi điều hướng", 
@@ -1011,7 +1076,7 @@ public class ExamTakingController {
     }
 
     /* ---------------------------------------------------
-     * Handle khi hết giờ (auto-submit)
+     * Handle khi hết giờ (auto-submit) - Client timer
      * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
      * EditBy: K24DTCN210-NVMANH (23/11/2025 18:57) - Phase 8.5: Improved time expired handling
      * --------------------------------------------------- */
@@ -1042,24 +1107,51 @@ public class ExamTakingController {
     }
 
     /* ---------------------------------------------------
-     * Get current student name (mock - replace with actual logic)
+     * Handle khi server báo hết giờ (qua AutoSave)
+     * @param message Thông báo từ server
+     * @author: K24DTCN210-NVMANH (04/12/2025)
+     * --------------------------------------------------- */
+    private void handleServerTimeExpired(String message) {
+        // Mark exam inactive immediately
+        isExamActive = false;
+        
+        // Stop services
+        shutdown();
+        
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Thông Báo");
+        alert.setHeaderText("Hết thời gian làm bài");
+        alert.setContentText("Bài thi đã được tự động nộp.\n" + message);
+        
+        if (stage != null) {
+            alert.initOwner(stage);
+        }
+        WindowCenterHelper.centerWindowOnShown(alert.getDialogPane().getScene().getWindow());
+        
+        alert.showAndWait();
+        
+        // Navigate to results
+        navigateToResults(examSession.getSubmissionId());
+    }
+
+    /* ---------------------------------------------------
+     * Get current student name
      * @returns Student name
      * @author: K24DTCN210-NVMANH (23/11/2025 13:49)
-     * EditBy: K24DTCN210-NVMANH (24/11/2025 11:40) - Added getCurrentStudentCode()
+     * EditBy: K24DTCN210-NVMANH (04/12/2025) - Use stored user info
      * --------------------------------------------------- */
     private String getCurrentStudentName() {
-        // TODO: Get from authentication context
-        return "Nguyễn Văn A";
+        return studentName;
     }
     
     /* ---------------------------------------------------
-     * Get current student code (mock - replace with actual logic)
+     * Get current student code
      * @returns Student code
      * @author: K24DTCN210-NVMANH (24/11/2025 11:40)
+     * EditBy: K24DTCN210-NVMANH (04/12/2025) - Use stored user info
      * --------------------------------------------------- */
     private String getCurrentStudentCode() {
-        // TODO: Get from authentication context
-        return "SV001";
+        return studentCode;
     }
 
     /* ---------------------------------------------------
@@ -1206,6 +1298,10 @@ public class ExamTakingController {
         }
         if (timerComponent != null) {
             timerComponent.stop();
+        }
+        
+        if (logService != null) {
+            logService.shutdown();
         }
     }
 }

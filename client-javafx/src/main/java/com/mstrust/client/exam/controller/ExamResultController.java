@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
  * - Display grading status (in progress / graded)
  * - Display score và chi tiết nếu đã chấm
  * @author: K24DTCN210-NVMANH (23/11/2025 18:55)
+ * EditBy: K24DTCN210-NVMANH (04/12/2025 22:45) - Handle "Results not available" gracefully
  * --------------------------------------------------- */
 public class ExamResultController {
 
@@ -76,6 +77,7 @@ public class ExamResultController {
     /* ---------------------------------------------------
      * Load exam result từ backend
      * @author: K24DTCN210-NVMANH (23/11/2025 18:55)
+     * EditBy: K24DTCN210-NVMANH (04/12/2025) - Handle "Results not available" error
      * --------------------------------------------------- */
     private void loadExamResult() {
         new Thread(() -> {
@@ -91,10 +93,15 @@ public class ExamResultController {
                 Platform.runLater(this::displayResult);
                 
             } catch (IOException e) {
-                Platform.runLater(() -> {
-                    showError("Lỗi tải kết quả", 
-                            "Không thể tải kết quả bài thi: " + e.getMessage());
-                });
+                // Check for "Results are not available yet" error
+                if (e.getMessage() != null && e.getMessage().contains("Results are not available yet")) {
+                    Platform.runLater(this::displaySubmissionSuccessOnly);
+                } else {
+                    Platform.runLater(() -> {
+                        showError("Lỗi tải kết quả", 
+                                "Không thể tải kết quả bài thi: " + e.getMessage());
+                    });
+                }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 Platform.runLater(() -> {
@@ -171,6 +178,35 @@ public class ExamResultController {
         } else {
             displayGradingInProgress();
         }
+    }
+
+    /* ---------------------------------------------------
+     * Display submission success only (when result not available)
+     * @author: K24DTCN210-NVMANH (04/12/2025)
+     * --------------------------------------------------- */
+    private void displaySubmissionSuccessOnly() {
+        // Hide graded container
+        gradedContainer.setVisible(false);
+        gradedContainer.setManaged(false);
+        
+        // Show grading in progress container (reused for message)
+        gradingInProgressContainer.setVisible(true);
+        gradingInProgressContainer.setManaged(true);
+        
+        // Hide question results
+        questionResultsCard.setVisible(false);
+        questionResultsCard.setManaged(false);
+        
+        // Update status label
+        statusLabel.setText("Nộp bài thành công! Kết quả chưa được công bố.");
+        statusLabel.getStyleClass().removeAll("status-submitted", "status-graded");
+        statusLabel.getStyleClass().add("status-grading");
+        
+        // Update other labels if possible (we don't have resultData, so clear them or set defaults)
+        examTitleLabel.setText("Kết Quả Bài Thi");
+        submissionTimeLabel.setText("");
+        submissionIdLabel.setText(String.valueOf(submissionId));
+        submitTimeDetailLabel.setText("");
     }
 
     /* ---------------------------------------------------
