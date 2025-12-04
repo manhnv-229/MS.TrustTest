@@ -93,7 +93,7 @@ echo.
 REM Build jpackage command
 REM Added --icon for application icon
 REM Changed Main-Class to Launcher to fix JavaFX Runtime missing error in fat-jar
-jpackage --input target --name MSTrustTestClient --main-jar exam-client-javafx-1.0.0.jar --main-class com.mstrust.client.Launcher --type exe --dest target\installer --app-version 1.0.0 --vendor MS.TrustTest --description "MS.TrustTest Exam Client Application" --icon "favicon.ico" --win-dir-chooser --win-menu --win-menu-group "MS.TrustTest" --win-shortcut --java-options "--add-reads=com.mstrust.client=ALL-UNNAMED" --java-options "--add-opens=com.mstrust.client/com.mstrust.client.teacher.api=ALL-UNNAMED" --java-options "--add-opens=com.mstrust.client/com.mstrust.client.teacher.dto=ALL-UNNAMED"
+jpackage --input target --name MSTrustTestClient --main-jar exam-client-javafx-1.0.0.jar --main-class com.mstrust.client.Launcher --type exe --dest target\installer --app-version 1.0.0 --vendor MS.TrustTest --description "MS.TrustTest Exam Client Application" --icon "favicon.ico" --win-dir-chooser --win-menu --win-menu-group "MS.TrustTest" --win-shortcut --java-options "--add-reads=com.mstrust.client=ALL-UNNAMED" --java-options "--add-opens=com.mstrust.client/com.mstrust.client.teacher.api=ALL-UNNAMED" --java-options "--add-opens=com.mstrust.client/com.mstrust.client.teacher.dto=ALL-UNNAMED" --java-options "--add-opens=java.base/java.lang=ALL-UNNAMED" --java-options "--add-opens=java.desktop/java.awt=ALL-UNNAMED" --java-options "--add-exports=java.desktop/sun.awt=ALL-UNNAMED" --java-options "--add-opens=javafx.graphics/javafx.stage=ALL-UNNAMED" --java-options "--add-opens=com.sun.jna/com.sun.jna=ALL-UNNAMED"
 
 if errorlevel 1 (
     echo.

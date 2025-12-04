@@ -618,26 +618,36 @@ public class ExamTakingController {
      * @param submissionId ID của submission
      * @param authToken JWT token
      * @author: K24DTCN210-NVMANH (01/12/2025 22:55)
+     * EditBy: K24DTCN210-NVMANH (04/12/2025 21:30) - Fix UI freeze by moving to background thread
      * --------------------------------------------------- */
     private void startMonitoringSystem(Long submissionId, String authToken) {
-        try {
-            // Initialize MonitoringApiClient
-            com.mstrust.client.api.MonitoringApiClient apiClient = 
-                new com.mstrust.client.api.MonitoringApiClient();
-            apiClient.setAuthToken(authToken);
-            
-            // Create MonitoringCoordinator
-            monitoringCoordinator = new com.mstrust.client.monitoring.MonitoringCoordinator(apiClient);
-            
-            // Start monitoring với 5 monitors
-            monitoringCoordinator.startMonitoring(submissionId, authToken);
-            
-            System.out.println("[Phase 11] Monitoring system started for submission: " + submissionId);
-        } catch (Exception e) {
-            System.err.println("[Phase 11] Failed to start monitoring: " + e.getMessage());
-            e.printStackTrace();
-            // Don't throw - allow exam to continue even if monitoring fails
-        }
+        // Run in background thread to prevent UI freeze during JNativeHook initialization
+        Thread monitorThread = new Thread(() -> {
+            try {
+                System.out.println("[Phase 11] Initializing monitoring system in background thread...");
+                
+                // Initialize MonitoringApiClient
+                com.mstrust.client.api.MonitoringApiClient apiClient = 
+                    new com.mstrust.client.api.MonitoringApiClient();
+                apiClient.setAuthToken(authToken);
+                
+                // Create MonitoringCoordinator
+                // This might take time due to native library loading (JNA, JNativeHook)
+                monitoringCoordinator = new com.mstrust.client.monitoring.MonitoringCoordinator(apiClient);
+                
+                // Start monitoring với 5 monitors
+                monitoringCoordinator.startMonitoring(submissionId, authToken);
+                
+                System.out.println("[Phase 11] Monitoring system started successfully for submission: " + submissionId);
+            } catch (Throwable e) {
+                System.err.println("[Phase 11] Failed to start monitoring: " + e.getMessage());
+                e.printStackTrace();
+                // Don't throw - allow exam to continue even if monitoring fails
+            }
+        }, "Monitoring-Init-Thread");
+        
+        monitorThread.setDaemon(true); // Allow app to exit even if this thread is running
+        monitorThread.start();
     }
     
     /* ---------------------------------------------------
@@ -889,7 +899,7 @@ public class ExamTakingController {
         // Count answered questions from cache
         for (Long questionId : answersCache.keySet()) {
             String answer = answersCache.get(questionId);
-            if (answer != null && !answer.trim(). isEmpty()) {
+            if (answer != null && !answer.trim().isEmpty()) {
                 answered++;
             }
         }
