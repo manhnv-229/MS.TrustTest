@@ -7,6 +7,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
@@ -90,11 +91,22 @@ public class ExamClientApplication extends Application {
      * Cấu hình các thuộc tính của primary stage
      * @author: K24DTCN210-NVMANH (24/11/2025 07:57)
      * EditBy: K24DTCN210-NVMANH (27/11/2025 15:33) - Store application instance in stage userData
+     * EditBy: K24DTCN210-NVMANH (04/12/2025 12:22) - Set application icon
      * --------------------------------------------------- */
     private void configureStage() {
         primaryStage.setTitle("MS.TrustTest - Hệ Thống Thi Trực Tuyến");
         primaryStage.setMinWidth(900);
         primaryStage.setMinHeight(750);
+        
+        // Set application icon
+        try {
+            InputStream iconStream = getClass().getResourceAsStream("/favicon.ico");
+            if (iconStream != null) {
+                primaryStage.getIcons().add(new Image(iconStream));
+            }
+        } catch (Exception e) {
+            logger.warn("Could not load application icon", e);
+        }
         
         // Store application instance in stage userData để các controller có thể access
         primaryStage.setUserData(this);

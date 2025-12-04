@@ -68,8 +68,9 @@
             </goals>
             <configuration>
               <transformers>
+                <transformer />
                 <transformer>
-                  <mainClass>com.mstrust.client.exam.ExamClientApplication</mainClass>
+                  <mainClass>com.mstrust.client.Launcher</mainClass>
                 </transformer>
               </transformers>
             </configuration>
