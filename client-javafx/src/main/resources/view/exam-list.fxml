@@ -160,6 +160,11 @@
                 </HBox>
                 
                 <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- Author Info -->
+                <Label text="PTIT - K24DTCN210 - Nguyễn Văn Mạnh - 0933.365.999" styleClass="footer-info" style="-fx-font-weight: bold;"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
                 
                 <HBox alignment="CENTER_LEFT" spacing="5">
                     <FontIcon iconLiteral="fas-clock" iconSize="12" iconColor="#757575"/>

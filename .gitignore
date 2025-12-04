@@ -420,5 +420,5 @@ NUL
 # Maven target directories
 backend/target/
 client-javafx/target/
-
+build
 # IDE files, OS files, log files, temporary files, etc.

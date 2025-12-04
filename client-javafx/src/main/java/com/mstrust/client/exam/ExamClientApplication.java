@@ -100,9 +100,16 @@ public class ExamClientApplication extends Application {
         
         // Set application icon
         try {
-            InputStream iconStream = getClass().getResourceAsStream("/favicon.ico");
+            // Use PNG format for better compatibility
+            InputStream iconStream = getClass().getResourceAsStream("/app-icon.png");
             if (iconStream != null) {
                 primaryStage.getIcons().add(new Image(iconStream));
+            } else {
+                // Fallback to favicon.ico if png not found
+                iconStream = getClass().getResourceAsStream("/favicon.ico");
+                if (iconStream != null) {
+                    primaryStage.getIcons().add(new Image(iconStream));
+                }
             }
         } catch (Exception e) {
             logger.warn("Could not load application icon", e);

@@ -115,6 +115,11 @@
                 <Font size="11"/>
             </font>
         </Text>
+        <Text text="PTIT - K24DTCN210 - Nguyễn Văn Mạnh - 0933.365.999" styleClass="login-footer">
+            <font>
+                <Font size="11" name="System Bold"/>
+            </font>
+        </Text>
         <Text text="© 2025 MS.TrustTest" styleClass="login-footer">
             <font>
                 <Font size="11"/>
